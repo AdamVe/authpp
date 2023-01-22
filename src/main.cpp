@@ -1,10 +1,12 @@
 #include <vector>
 
-#include <Byte.h>
+#include <ByteArray.h>
 #include <CcidConnection.h>
 #include <Logger.h>
+#include <Message.h>
 #include <UsbDevice.h>
 #include <UsbDeviceHandle.h>
+#include <Util.h>
 
 #include <libusb-1.0/libusb.h>
 
@@ -56,8 +58,10 @@ int main()
             UsbDeviceHandle handle(yubikey);
             CcidConnection conn(handle);
 
-            unsigned char data[1] = { (unsigned char)0x62 };
-            conn.transcieve(data, 1);
+            auto m = Message((std::byte)0x62, nullptr, 0);
+            int transferred { 0 };
+            auto atr = conn.transcieve(std::forward<Message>(m), &transferred);
+            log.d("Received {} bytes: {}", transferred, util::byteDataToString(atr.get(), transferred));
         }
     }
 

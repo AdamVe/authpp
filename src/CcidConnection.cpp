@@ -1,5 +1,6 @@
 #include <CcidConnection.h>
 
+#include <ByteArray.h>
 #include <Message.h>
 #include <UsbDeviceHandle.h>
 #include <Util.h>
@@ -14,16 +15,17 @@ CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
     : log("CcidConnection")
     , handle(handle)
 {
+    int len = 0;
+    auto atr = transcieve(Message((std::byte)0x62, nullptr, 0), &len);
+    Log.v("ATR: {}", util::byteDataToString(atr.get(), len));
 }
 
 CcidConnection::~CcidConnection() = default;
 
-std::vector<byte> CcidConnection::transcieve(byte* data, std::size_t dataLength) const
+template <typename T>
+ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
 {
-    log.d("Transcieve");
-
-    auto m = Message(0x62, nullptr, 0);
-    log.d("Message: {}", m.toString());
+    log.d("Message: {}", message.toString());
 
     // setup
     int currentConfiguration = 0;
@@ -50,30 +52,36 @@ std::vector<byte> CcidConnection::transcieve(byte* data, std::size_t dataLength)
     }
 
     // send
-    int transferred = 0;
-    if (int err = libusb_bulk_transfer(*handle, endpoint_out, m.get(),
-            m.size(), &transferred, TIMEOUT);
+    int really_written = 0;
+    if (int err = libusb_bulk_transfer(*handle, endpoint_out, (unsigned char*)message.get(),
+            message.size(), &really_written, TIMEOUT);
         err != 0) {
         log.e("Failed to send data: {} {}", libusb_error_name(err),
             err);
 
         return {};
     };
-    log.d("Sent {} bytes", dataLength);
+    log.d("Sent {} bytes", message.size());
 
     // receive
-    std::size_t buffer_size = 64;
-    byte buffer[buffer_size];
-    if (int err = libusb_bulk_transfer(*handle, endpoint_in, buffer,
-            buffer_size, &transferred, TIMEOUT);
+    int really_recieved = 0;
+    std::size_t array_len = 64;
+    ByteArray byteArray(64);
+    if (int err = libusb_bulk_transfer(*handle, endpoint_in, (unsigned char*)byteArray.get(),
+            array_len, &really_recieved, TIMEOUT);
         err != 0) {
         log.e("Failed to receive data: {} {}", libusb_error_name(err),
             err);
         return {};
     };
-    log.d("Received {} bytes: {}", transferred, util::byteDataToString(buffer, transferred));
 
-    return {};
+    log.v("After read: array_len={} byteArray.len={} transferred={}", array_len, byteArray.getSize(), really_recieved);
+
+    if (transferred != nullptr) {
+        *transferred = really_recieved;
+    }
+
+    return byteArray;
 }
 
 } // namespace authpp

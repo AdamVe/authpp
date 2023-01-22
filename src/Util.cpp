@@ -4,7 +4,7 @@
 
 namespace authpp::util {
 
-std::string byteDataToString(byte* data, std::size_t dataLength)
+std::string byteDataToString(std::byte* data, std::size_t dataLength)
 {
     std::string retval = "[";
     for (std::size_t i = 0; i < dataLength; ++i) {

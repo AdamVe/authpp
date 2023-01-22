@@ -18,7 +18,8 @@ class Logger {
         verbose = 4
     };
 
-    Logger(std::string &&name) : name(name) {}
+
+    explicit Logger(std::string &&name = "") : name(name) {}
 
     static void setLevel(Level level) {
         Logger::level = level;
@@ -58,14 +59,21 @@ class Logger {
     template <typename ...Args>
     void log(Level messageLevel, fmt::format_string<Args...> fmt, Args&&... args) const {
         if (messageLevel <= Logger::level) {
+            if (name.length() > 0) {
             fmt::print("[{}] {} {}\n",
                        enumNames[std::to_underlying(messageLevel)],
                        name,
                        fmt::vformat(fmt, fmt::make_format_args(args...)));
+            } else {
+            fmt::print("[{}] {}\n",
+                       enumNames[std::to_underlying(messageLevel)],
+                       fmt::vformat(fmt, fmt::make_format_args(args...)));
+            }
         }
     }
 
 };
 
+static Logger Log("");
 
 } // namespace authpp

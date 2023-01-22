@@ -1,27 +1,27 @@
 #pragma once
 
-#include <Byte.h>
 #include <Logger.h>
-
-#include <vector>
+#include <ByteArray.h>
 
 namespace authpp {
 
 class UsbDeviceHandle;
+class Message;
 
 class CcidConnection {
   public:
     CcidConnection(const UsbDeviceHandle& handle);
     virtual ~CcidConnection();
 
-    std::vector<byte> transcieve(byte *data, std::size_t dataLength) const;
+    template<typename T>
+    ByteArray transcieve(T&&, int* transferred) const;
 
   private:
     Logger log;
     const UsbDeviceHandle& handle;
 
-    byte slot {1};
-    byte sequence {1};
+    std::byte slot {1};
+    std::byte sequence {1};
 
     const int configuration{1};
     const int interface_ccid{1};
