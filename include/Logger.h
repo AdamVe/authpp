@@ -1,16 +1,15 @@
 #pragma once
 
-#include <iostream>
 #include <utility>
-#include <map>
-
+#include <string>
+#include <vector>
 
 #include <fmt/core.h>
-#include <fmt/format.h>
+
+namespace authpp {
 
 class Logger {
   public:
-
     enum class Level : unsigned {
         info = 0,
         warning = 1,
@@ -19,73 +18,54 @@ class Logger {
         verbose = 4
     };
 
-    Logger(std::string&& name) : name(name) {
-    }
+    Logger(std::string &&name) : name(name) {}
 
     static void setLevel(Level level) {
         Logger::level = level;
     }
 
-    template <typename T>
-    void i(T && message) {
-        log(Level::info, std::forward<T>(message));
+    template <typename ...Args>
+    void i(fmt::format_string<Args...> fmt, Args&&... args) const {
+        log(Level::warning, fmt, std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    void w(T && message) {
-        log(Level::warning, std::forward<T>(message));
+    template <typename ...Args>
+    void w(fmt::format_string<Args...> fmt, Args&&... args) const {
+        log(Level::warning, fmt, std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    void e(T && message) {
-        log(Level::error, std::forward<T>(message));
+    template <typename ...Args>
+    void e(fmt::format_string<Args...> fmt, Args&&... args) const {
+        log(Level::error, fmt, std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    void d(T && message) {
-        log(Level::debug, std::forward<T>(message));
+    template <typename ...Args>
+    void v(fmt::format_string<Args...> fmt, Args&&... args) const {
+        log(Level::verbose, fmt, std::forward<Args>(args)...);
     }
 
-    template <typename T>
-    void v(T && message) {
-        log(Level::verbose, std::forward<T>(message));
+    template <typename ...Args>
+    void d(fmt::format_string<Args...> fmt, Args&&... args) const {
+        log(Level::debug, fmt, std::forward<Args>(args)...);
     }
 
   private:
-    static Level level;
+    inline static Level level{Level::error};
     std::string name;
 
-	std::map<Logger::Level, const char*> enumNames {
-    	{Logger::Level::info, "I"},
-    	{Logger::Level::warning, "W"},
-    	{Logger::Level::error, "E"},
-    	{Logger::Level::debug, "D"},
-    	{Logger::Level::verbose, "V"},
-	};
+    inline static std::vector<std::string> enumNames{"I", "W", "E", "D", "V"};
 
-    template <typename T>
-    void log(Level messageLevel, T && message) {
+    template <typename ...Args>
+    void log(Level messageLevel, fmt::format_string<Args...> fmt, Args&&... args) const {
         if (messageLevel <= Logger::level) {
-            fmt::print("[{}] {} {}\n", enumNames[messageLevel], name, message);
+            fmt::print("[{}] {} {}\n",
+                       enumNames[std::to_underlying(messageLevel)],
+                       name,
+                       fmt::vformat(fmt, fmt::make_format_args(args...)));
         }
     }
+
 };
 
 
-template <> struct fmt::formatter<Logger::Level> {
-    char presentation = 'f';
-
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-        auto it = ctx.begin(), end = ctx.end();
-        if (it != end && (*it == 'f' || *it == 'e')) presentation = *it++;
-        if (it != end && *it != '}') throw format_error("invalid format");
-        return it;
-    }
-
-    template <typename FormatContext>
-    auto format(const Logger::Level& level, FormatContext& ctx) const -> decltype(ctx.out()) {
-        return fmt::format_to(ctx.out(), "{}", std::to_underlying(level));
-    }
-};
-
-
+} // namespace authpp
