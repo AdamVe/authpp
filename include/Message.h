@@ -7,16 +7,16 @@ namespace authpp {
 
 class Message {
 public:
-  Message(std::byte type, std::byte *data, std::size_t dataSize);
-  ~Message();
+    Message(std::byte type, std::byte* data, std::size_t dataSize);
+    ~Message();
 
-  std::string toString() const;
-  std::byte *get() const;
-  std::size_t size() const;
+    std::string toString() const;
+    std::byte* get() const;
+    std::size_t size() const;
 
 private:
-  std::size_t messageSize;
-  std::byte *messageData;
+    std::size_t messageSize;
+    std::byte* messageData;
 };
 
 } // namespace authpp

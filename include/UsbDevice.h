@@ -10,7 +10,7 @@
 namespace authpp {
 
 class UsbDevice {
-  public:
+public:
     explicit UsbDevice(libusb_device* device);
     ~UsbDevice();
 
@@ -18,7 +18,7 @@ class UsbDevice {
     std::string getProduct() const;
     std::string toString() const;
 
-  private:
+private:
     std::string getStringDescriptor(std::size_t index) const;
 
     libusb_device* device;
@@ -27,10 +27,10 @@ class UsbDevice {
     std::vector<libusb_config_descriptor*> config_descriptors;
 
     mutable std::string manufacturer;
-    mutable bool read_manufacturer {false};
+    mutable bool read_manufacturer { false };
 
     mutable std::string product;
-    mutable bool read_product {false};
+    mutable bool read_product { false };
 
     Logger log;
 };

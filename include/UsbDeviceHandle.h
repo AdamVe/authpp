@@ -5,16 +5,15 @@
 namespace authpp {
 
 class UsbDeviceHandle {
-  public:
+public:
     explicit UsbDeviceHandle(libusb_device* device);
 
     ~UsbDeviceHandle();
 
     libusb_device_handle* operator*() const;
 
-  private:
+private:
     libusb_device_handle* handle;
 };
-
 
 } // namespace authpp

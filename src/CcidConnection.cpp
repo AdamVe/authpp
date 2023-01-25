@@ -16,52 +16,27 @@ CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
     , handle(handle)
 {
     int len = 0;
+    Log.v("CCID connection opened");
+    setup();
     auto atr = transcieve(Message((std::byte)0x62, nullptr, 0), &len);
     Log.v("ATR: {}", util::byteDataToString(atr.get(), len));
 }
 
-CcidConnection::~CcidConnection() = default;
+CcidConnection::~CcidConnection()
+{
+    Log.v("CCID connection closed");
+}
 
 template <typename T>
 ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
 {
-    log.d("Message: {}", message.toString());
-
-    // setup
-    int currentConfiguration = 0;
-    if (int err = libusb_get_configuration(*handle, &currentConfiguration); err != 0) {
-        log.e("Failed to receive configuration {}", err);
-    } else {
-        log.d("Current configuration {}", currentConfiguration);
-    }
-
-    if (libusb_kernel_driver_active(*handle, interface_ccid) == 1) {
-        log.d("Kernel driver was active for interface {}", interface_ccid);
-        if (libusb_detach_kernel_driver(*handle, interface_ccid) == 0) {
-            log.d("Kernel Driver Detached!");
-        }
-    } else {
-        log.d("Kernel driver was not active for interface {}", interface_ccid);
-    }
-
-    if (libusb_claim_interface(*handle, interface_ccid) != 0) {
-        log.d("Cannot Claim Interface");
-        return {};
-    } else {
-        log.d("Claimed Interface {}", interface_ccid);
-    }
-
-    // send
     int really_written = 0;
     if (int err = libusb_bulk_transfer(*handle, endpoint_out, (unsigned char*)message.get(),
             message.size(), &really_written, TIMEOUT);
         err != 0) {
-        log.e("Failed to send data: {} {}", libusb_error_name(err),
-            err);
-
-        return {};
+        throw new std::runtime_error(fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
     };
-    log.d("Sent {} bytes", message.size());
+    log.v("send {:02}b {}", message.size(), message.toString());
 
     // receive
     int really_recieved = 0;
@@ -70,18 +45,30 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
     if (int err = libusb_bulk_transfer(*handle, endpoint_in, (unsigned char*)byteArray.get(),
             array_len, &really_recieved, TIMEOUT);
         err != 0) {
-        log.e("Failed to receive data: {} {}", libusb_error_name(err),
-            err);
-        return {};
+        throw new std::runtime_error(fmt::format("Failed to receive data: {} {}", libusb_error_name(err),
+            err));
     };
 
-    log.v("After read: array_len={} byteArray.len={} transferred={}", array_len, byteArray.getSize(), really_recieved);
+    log.v("recv {:02}b {}", really_recieved, util::byteDataToString(byteArray.get(), really_recieved));
 
     if (transferred != nullptr) {
         *transferred = really_recieved;
     }
 
     return byteArray;
+}
+
+void CcidConnection::setup() const
+{
+    if (libusb_kernel_driver_active(*handle, interface_ccid) == 1) {
+        if (libusb_detach_kernel_driver(*handle, interface_ccid) == 0) {
+            log.v("detached kernel driver");
+        }
+    }
+
+    if (libusb_claim_interface(*handle, interface_ccid) != 0) {
+        throw new std::runtime_error("Failure claiming CCID interface");
+    }
 }
 
 } // namespace authpp
