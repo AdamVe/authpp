@@ -7,14 +7,14 @@ namespace authpp {
 
 class ByteArray {
 public:
-    ByteArray(std::size_t n)
+    explicit ByteArray(std::size_t n)
         : n(n)
         , buf((std::byte*)::operator new(n))
     {
     }
 
     template <std::size_t N>
-    ByteArray(const unsigned char (&a)[N])
+    explicit ByteArray(const unsigned char (&a)[N])
         : n(N)
         , buf((std::byte*)::operator new(N))
     {

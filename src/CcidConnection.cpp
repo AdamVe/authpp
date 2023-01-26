@@ -21,7 +21,7 @@ CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
     int len = 0;
     Log.v("CCID connection opened");
     setup();
-    auto atr = transcieve(Message((std::byte)0x62, nullptr, 0), &len);
+    auto atr = transcieve(Message((std::byte)0x62, ByteArray(0)), &len);
     Log.v("ATR: {}", util::byteDataToString(atr.get(), len));
 
     // test select OATH app

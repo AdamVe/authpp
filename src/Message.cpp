@@ -1,19 +1,22 @@
 #include "Message.h"
 
+
+#include "ByteArray.h"
 #include "Util.h"
 
 namespace authpp {
 
 #define HEADER_SIZE 10
 
-Message::Message(std::byte type, std::byte* data, std::size_t dataSize)
-    : messageSize(dataSize + HEADER_SIZE)
-    , messageData(new std::byte[messageSize] {
+Message::Message(std::byte type, ByteArray&& data)
+    : data_size(data.getSize())
+    , message_size(data_size + HEADER_SIZE)
+    , message_buffer(new std::byte[message_size] {
           type,
-          (std::byte)((dataSize >> 24) & 0xFF),
-          (std::byte)((dataSize >> 16) & 0xFF),
-          (std::byte)((dataSize >> 8) & 0xFF),
-          (std::byte)((dataSize >> 0) & 0xFF),
+          (std::byte)((data_size >> 24) & 0xFF),
+          (std::byte)((data_size >> 16) & 0xFF),
+          (std::byte)((data_size >> 8) & 0xFF),
+          (std::byte)((data_size >> 0) & 0xFF),
           (std::byte)0x00, (std::byte)0x00,
           (std::byte)0x00, (std::byte)0x00,
           (std::byte)0x00 })
@@ -22,22 +25,22 @@ Message::Message(std::byte type, std::byte* data, std::size_t dataSize)
 
 Message::~Message()
 {
-    delete[] messageData;
+    delete[] message_buffer;
 }
 
 std::string Message::toString() const
 {
-    return util::byteDataToString(messageData, messageSize);
+    return util::byteDataToString(message_buffer, message_size);
 }
 
 std::byte* Message::get() const
 {
-    return messageData;
+    return message_buffer;
 }
 
 std::size_t Message::size() const
 {
-    return messageSize;
+    return message_size;
 }
 
 } // namespace authpp

@@ -5,9 +5,11 @@
 
 namespace authpp {
 
+class ByteArray;
+
 class Message {
 public:
-    Message(std::byte type, std::byte* data, std::size_t dataSize);
+    Message(std::byte type, ByteArray&& data);
     ~Message();
 
     std::string toString() const;
@@ -15,8 +17,9 @@ public:
     std::size_t size() const;
 
 private:
-    std::size_t messageSize;
-    std::byte* messageData;
+    const std::size_t data_size;
+    const std::size_t message_size;
+    std::byte* message_buffer;
 };
 
 } // namespace authpp

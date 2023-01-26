@@ -10,7 +10,7 @@ class Message;
 
 class CcidConnection {
 public:
-    CcidConnection(const UsbDeviceHandle& handle);
+    explicit CcidConnection(const UsbDeviceHandle& handle);
     virtual ~CcidConnection();
 
     template <typename T>
