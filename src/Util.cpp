@@ -11,6 +11,7 @@ std::string byteDataToString(std::byte* data, std::size_t dataLength)
         retval += fmt::format("{:02x} ", data[i]);
     }
     retval += "]";
+    retval += fmt::format("({})", dataLength);
     return retval;
 }
 

@@ -39,7 +39,8 @@
 			<Add library="../../../../../usr/lib/x86_64-linux-gnu/libusb-1.0.so" />
 			<Add library="../../../../../usr/lib/x86_64-linux-gnu/libfmt.so" />
 		</Linker>
-		<Unit filename="include/Byte.h" />
+		<Unit filename="include/Apdu.h" />
+		<Unit filename="include/ByteArray.h" />
 		<Unit filename="include/CcidConnection.h" />
 		<Unit filename="include/Formatters.h" />
 		<Unit filename="include/Logger.h" />

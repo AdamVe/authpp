@@ -1,53 +1,59 @@
 #pragma once
 
-#include <Logger.h>
-
 #include <cstddef>
+#include <cstring>
 
 namespace authpp {
 
 class ByteArray {
 public:
-    ByteArray(std::size_t len = 0)
-        : len(len)
-        , data(new std::byte[len])
+    ByteArray(std::size_t n)
+        : n(n)
+        , buf((std::byte*)::operator new(n))
     {
+    }
+
+    template <std::size_t N>
+    ByteArray(const unsigned char (&a)[N])
+        : n(N)
+        , buf((std::byte*)::operator new(N))
+    {
+        std::memcpy(buf, a, N);
     }
 
     ByteArray(const ByteArray& other)
-        : data(new std::byte[other.len])
+        : n(other.n)
+        , buf((std::byte*)::operator new(n))
     {
-        std::memcpy(data, other.data, other.len);
+        std::memcpy(buf, other.buf, n);
     }
 
     ByteArray(ByteArray&& other)
-        : len(other.len)
-        , data(other.data)
+        : n(other.n)
+        , buf(other.buf)
     {
-        other.data = nullptr;
-        other.len = 0;
+        other.buf = nullptr;
+        other.n = 0;
     }
 
     ~ByteArray()
     {
-        if (data != nullptr) {
-            delete[] data;
-        }
+        ::operator delete(buf);
     }
 
     std::byte* get() const
     {
-        return data;
+        return buf;
     }
 
     std::size_t getSize() const
     {
-        return len;
+        return n;
     }
 
 private:
-    std::size_t len;
-    std::byte* data;
+    std::size_t n;
+    std::byte* buf;
 };
 
 } // namespace authpp
