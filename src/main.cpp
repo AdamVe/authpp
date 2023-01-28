@@ -4,6 +4,7 @@
 #include <CcidConnection.h>
 #include <Logger.h>
 #include <Message.h>
+#include <OathSession.h>
 #include <UsbDevice.h>
 #include <UsbDeviceHandle.h>
 #include <Util.h>
@@ -58,10 +59,11 @@ int main()
             UsbDeviceHandle handle(yubikey);
             CcidConnection conn(handle);
 
-            auto m = Message((std::byte)0x62, ByteArray(0));
-            int transferred { 0 };
-            auto atr = conn.transcieve(std::forward<Message>(m), &transferred);
-            log.d("Received {} bytes: {}", transferred, util::byteDataToString(atr.get(), transferred));
+            OathSession oathSession(conn);
+            //            auto m = Message((std::byte)0x62, ByteArray(0));
+            //            int transferred { 0 };
+            //            auto atr = conn.transcieve(std::forward<Message>(m), &transferred);
+            //            log.d("Received {} bytes: {}", transferred, util::byteDataToString(atr.get(), transferred));
         }
     }
 

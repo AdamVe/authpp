@@ -12,8 +12,6 @@ namespace authpp {
 
 #define TIMEOUT 10000
 
-using bytes = unsigned char[];
-
 CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
     : log("CcidConnection")
     , handle(handle)
@@ -23,10 +21,6 @@ CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
     setup();
     auto atr = transcieve(Message((std::byte)0x62, ByteArray(0)), &len);
     Log.v("ATR: {}", util::byteDataToString(atr.get(), len));
-
-    // test select OATH app
-    // appid oath = 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01
-    Apdu selectOath(0x00, 0xa4, 0x04, 0x00, ByteArray(bytes { 0xa0, 0xff, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 }));
 }
 
 CcidConnection::~CcidConnection()

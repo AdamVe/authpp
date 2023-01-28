@@ -1,6 +1,5 @@
 #include "Message.h"
 
-
 #include "ByteArray.h"
 #include "Util.h"
 
@@ -13,14 +12,15 @@ Message::Message(std::byte type, ByteArray&& data)
     , message_size(data_size + HEADER_SIZE)
     , message_buffer(new std::byte[message_size] {
           type,
-          (std::byte)((data_size >> 24) & 0xFF),
-          (std::byte)((data_size >> 16) & 0xFF),
-          (std::byte)((data_size >> 8) & 0xFF),
           (std::byte)((data_size >> 0) & 0xFF),
+          (std::byte)((data_size >> 8) & 0xFF),
+          (std::byte)((data_size >> 16) & 0xFF),
+          (std::byte)((data_size >> 24) & 0xFF),
           (std::byte)0x00, (std::byte)0x00,
           (std::byte)0x00, (std::byte)0x00,
           (std::byte)0x00 })
 {
+    std::memcpy((void*)message_buffer + HEADER_SIZE, data.get(), data_size);
 }
 
 Message::~Message()
