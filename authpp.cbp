@@ -45,11 +45,13 @@
 		<Unit filename="include/Formatters.h" />
 		<Unit filename="include/Logger.h" />
 		<Unit filename="include/Message.h" />
+		<Unit filename="include/OathSession.h" />
 		<Unit filename="include/UsbDevice.h" />
 		<Unit filename="include/UsbDeviceHandle.h" />
 		<Unit filename="include/Util.h" />
 		<Unit filename="src/CcidConnection.cpp" />
 		<Unit filename="src/Message.cpp" />
+		<Unit filename="src/OathSession.cpp" />
 		<Unit filename="src/UsbDevice.cpp" />
 		<Unit filename="src/UsbDeviceHandle.cpp" />
 		<Unit filename="src/Util.cpp" />
