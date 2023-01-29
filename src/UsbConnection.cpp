@@ -1,4 +1,4 @@
-#include "UsbDeviceHandle.h"
+#include "UsbConnection.h"
 
 #include <stdexcept>
 

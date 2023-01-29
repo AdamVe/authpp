@@ -1,5 +1,5 @@
 #include "UsbDevice.h"
-#include "UsbDeviceHandle.h"
+#include "UsbConnection.h"
 
 #include "Logger.h"
 

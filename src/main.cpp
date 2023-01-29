@@ -3,8 +3,8 @@
 #include "Logger.h"
 #include "Message.h"
 #include "OathSession.h"
+#include "UsbConnection.h"
 #include "UsbDevice.h"
-#include "UsbDeviceHandle.h"
 #include "Util.h"
 
 #include <vector>

@@ -4,7 +4,7 @@
 #include "ByteArray.h"
 #include "Formatters.h"
 #include "Message.h"
-#include "UsbDeviceHandle.h"
+#include "UsbConnection.h"
 #include "Util.h"
 
 #include <libusb-1.0/libusb.h>
