@@ -30,9 +30,6 @@ add_executable(authpp
   include/Util.h
 )
 
-
-
-
 find_path(LIBUSB_INCLUDE_DIR
   NAMES libusb.h
   PATH_SUFFIXES "include" "libusb" "libusb-1.0")
