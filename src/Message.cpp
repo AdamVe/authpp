@@ -8,7 +8,7 @@ namespace authpp {
 #define HEADER_SIZE 10
 
 Message::Message(std::byte type, ByteArray&& data)
-    : data_size(data.getSize())
+    : data_size(data.getDataSize())
     , message_size(data_size + HEADER_SIZE)
     , message_buffer(new std::byte[message_size] {
           type,
@@ -26,11 +26,6 @@ Message::Message(std::byte type, ByteArray&& data)
 Message::~Message()
 {
     delete[] message_buffer;
-}
-
-std::string Message::toString() const
-{
-    return util::byteDataToString(message_buffer, message_size);
 }
 
 std::byte* Message::get() const

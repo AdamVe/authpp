@@ -2,6 +2,7 @@
 
 #include <Apdu.h>
 #include <ByteArray.h>
+#include <Formatters.h>
 #include <Message.h>
 #include <UsbDeviceHandle.h>
 #include <Util.h>
@@ -16,11 +17,10 @@ CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
     : log("CcidConnection")
     , handle(handle)
 {
-    int len = 0;
     Log.v("CCID connection opened");
     setup();
-    auto atr = transcieve(Message((std::byte)0x62, ByteArray(0)), &len);
-    Log.v("ATR: {}", util::byteDataToString(atr.get(), len));
+    auto atr { transcieve(Message((std::byte)0x62, ByteArray(0)), nullptr) };
+    Log.v("ATR: {}", atr);
 }
 
 CcidConnection::~CcidConnection()
@@ -37,7 +37,7 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
     };
-    log.v("send {}", message.toString());
+    log.v("send {}", message);
 
     // receive
     int really_recieved = 0;
@@ -50,7 +50,9 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
             err));
     };
 
-    log.v("recv {}", util::byteDataToString(byteArray.get(), really_recieved));
+    byteArray.setDataSize(really_recieved);
+
+    log.v("recv {}", byteArray);
 
     if (transferred != nullptr) {
         *transferred = really_recieved;

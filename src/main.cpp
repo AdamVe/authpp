@@ -60,10 +60,7 @@ int main()
             CcidConnection conn(handle);
 
             OathSession oathSession(conn);
-            //            auto m = Message((std::byte)0x62, ByteArray(0));
-            //            int transferred { 0 };
-            //            auto atr = conn.transcieve(std::forward<Message>(m), &transferred);
-            //            log.d("Received {} bytes: {}", transferred, util::byteDataToString(atr.get(), transferred));
+            oathSession.list_credentials();
         }
     }
 

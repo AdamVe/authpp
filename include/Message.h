@@ -12,7 +12,6 @@ public:
     Message(std::byte type, ByteArray&& data);
     ~Message();
 
-    std::string toString() const;
     std::byte* get() const;
     std::size_t size() const;
 
