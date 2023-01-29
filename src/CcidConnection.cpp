@@ -4,7 +4,7 @@
 #include "ByteArray.h"
 #include "Formatters.h"
 #include "Message.h"
-#include "UsbConnection.h"
+#include "UsbDevice.h"
 #include "Util.h"
 
 #include <libusb-1.0/libusb.h>
@@ -13,8 +13,9 @@ namespace authpp {
 
 #define TIMEOUT 10000
 
-CcidConnection::CcidConnection(const UsbConnection& handle)
+CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
     : handle(handle)
+    , usbInterface()
 {
     Log.v("CCID connection opened");
     setup();
@@ -31,7 +32,7 @@ template <typename T>
 ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
 {
     int really_written = 0;
-    if (int err = libusb_bulk_transfer(*handle, endpoint_out, (unsigned char*)message.get(),
+    if (int err = libusb_bulk_transfer(*handle, usbInterface.endpoint_out, (unsigned char*)message.get(),
             message.size(), &really_written, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
@@ -40,9 +41,9 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
 
     // receive
     int really_recieved = 0;
-    std::size_t array_len = 64;
-    ByteArray byteArray(64);
-    if (int err = libusb_bulk_transfer(*handle, endpoint_in, (unsigned char*)byteArray.get(),
+    std::size_t array_len = usbInterface.max_packet_size_in;
+    ByteArray byteArray(array_len);
+    if (int err = libusb_bulk_transfer(*handle, usbInterface.endpoint_in, (unsigned char*)byteArray.get(),
             array_len, &really_recieved, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to receive data: {} {}", libusb_error_name(err),
@@ -60,15 +61,20 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
     return byteArray;
 }
 
-void CcidConnection::setup() const
+void CcidConnection::setup()
 {
-    if (libusb_kernel_driver_active(*handle, interface_ccid) == 1) {
-        if (libusb_detach_kernel_driver(*handle, interface_ccid) == 0) {
+    usbInterface = handle.claimInterface(USB_CLASS_CSCID, 0);
+    if (usbInterface.number == -1) {
+        throw new std::runtime_error("Failure finding correct CCID interface");
+    }
+
+    if (libusb_kernel_driver_active(*handle, usbInterface.number) == 1) {
+        if (libusb_detach_kernel_driver(*handle, usbInterface.number) == 0) {
             Log.v("detached kernel driver");
         }
     }
 
-    if (libusb_claim_interface(*handle, interface_ccid) != 0) {
+    if (libusb_claim_interface(*handle, usbInterface.number) != 0) {
         throw new std::runtime_error("Failure claiming CCID interface");
     }
 }

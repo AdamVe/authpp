@@ -3,7 +3,6 @@
 #include "Logger.h"
 #include "Message.h"
 #include "OathSession.h"
-#include "UsbConnection.h"
 #include "UsbDevice.h"
 #include "Util.h"
 
@@ -52,12 +51,12 @@ int main()
         log.e("No connected YubiKey detected. Please connect a test YubiKey");
     } else {
 
-        for (auto&& yubikey : yubiKeyUsbDevices) {
-            UsbDevice yubiKey(yubikey);
+        for (auto&& yubiKeyUsbDevice : yubiKeyUsbDevices) {
+            UsbDevice yubiKey(yubiKeyUsbDevice);
             log.d("Yubikey: {}", yubiKey.toString());
 
-            UsbConnection handle(yubikey);
-            CcidConnection conn(handle);
+            UsbDevice::Connection usbConnection(yubiKey);
+            CcidConnection conn(usbConnection);
 
             OathSession oathSession(conn);
             oathSession.list_credentials();

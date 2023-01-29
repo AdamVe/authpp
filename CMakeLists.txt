@@ -15,7 +15,6 @@ add_executable(authpp
   src/Message.cpp
   src/OathSession.cpp
   src/UsbDevice.cpp
-  src/UsbConnection.cpp
   src/Util.cpp
 
   include/Apdu.h
@@ -26,7 +25,6 @@ add_executable(authpp
   include/Message.h
   include/OathSession.h
   include/UsbDevice.h
-  include/UsbConnection.h
   include/Util.h
 )
 

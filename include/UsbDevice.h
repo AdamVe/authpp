@@ -9,6 +9,28 @@ namespace authpp {
 
 class UsbDevice {
 public:
+    struct Interface {
+        int number { -1 };
+        int altsetting;
+        unsigned char endpoint_in;
+        unsigned char endpoint_out;
+        uint16_t max_packet_size_in;
+        uint16_t max_packet_size_out;
+    };
+
+    class Connection {
+    public:
+        explicit Connection(const UsbDevice& usbDevice);
+        ~Connection();
+
+        libusb_device_handle* operator*() const;
+
+        Interface claimInterface(int usbClass, int usbSubclass) const;
+
+    private:
+        const UsbDevice& usbDevice;
+        libusb_device_handle* handle;
+    };
     explicit UsbDevice(libusb_device* device);
     ~UsbDevice();
 
@@ -18,6 +40,9 @@ public:
 
 private:
     std::string getStringDescriptor(std::size_t index) const;
+
+    void openConnection(libusb_device_handle**) const;
+    void closeConnection(libusb_device_handle**) const;
 
     libusb_device* device;
 

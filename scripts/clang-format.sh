@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-find . -regex '.*\.\(cpp\|hpp\|cc\|cxx\|h\)' -exec clang-format -style=file -i {} \;
+find . -not -path "./build/*" -regex '.*\.\(cpp\|hpp\|cc\|cxx\|h\)' -exec clang-format -verbose -style=file -i {} \;

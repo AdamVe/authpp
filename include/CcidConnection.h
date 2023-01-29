@@ -1,32 +1,30 @@
 #pragma once
 
 #include "ByteArray.h"
+#include "UsbDevice.h"
 
 namespace authpp {
 
-class UsbConnection;
 class Message;
 
 class CcidConnection {
 public:
-    explicit CcidConnection(const UsbConnection& handle);
+    explicit CcidConnection(const UsbDevice::Connection& handle);
     virtual ~CcidConnection();
 
     template <typename T>
     ByteArray transcieve(T&&, int* transferred) const;
 
 private:
-    void setup() const;
+    void setup();
 
-    const UsbConnection& handle;
+    const UsbDevice::Connection& handle;
+    UsbDevice::Interface usbInterface;
 
     std::byte slot { 1 };
     std::byte sequence { 1 };
 
-    const int configuration { 1 };
-    const int interface_ccid { 1 };
-    const unsigned char endpoint_out { 0x02 };
-    const unsigned char endpoint_in { 0x82 };
+    const int USB_CLASS_CSCID { 0x0b };
 };
 
 } // namespace authpp
