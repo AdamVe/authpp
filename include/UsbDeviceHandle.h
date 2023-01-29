@@ -4,11 +4,11 @@
 
 namespace authpp {
 
-class UsbDeviceHandle {
+class UsbConnection {
 public:
-    explicit UsbDeviceHandle(libusb_device* device);
+    explicit UsbConnection(libusb_device* device);
 
-    ~UsbDeviceHandle();
+    ~UsbConnection();
 
     libusb_device_handle* operator*() const;
 

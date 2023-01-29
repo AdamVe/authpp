@@ -71,7 +71,7 @@ std::string UsbDevice::toString() const
 std::string UsbDevice::getStringDescriptor(std::size_t index) const
 {
 
-    UsbDeviceHandle deviceHandle(device);
+    UsbConnection deviceHandle(device);
 
     constexpr std::size_t length { 128 };
     unsigned char serial[length];

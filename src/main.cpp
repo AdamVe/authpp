@@ -56,7 +56,7 @@ int main()
             UsbDevice yubiKey(yubikey);
             log.d("Yubikey: {}", yubiKey.toString());
 
-            UsbDeviceHandle handle(yubikey);
+            UsbConnection handle(yubikey);
             CcidConnection conn(handle);
 
             OathSession oathSession(conn);

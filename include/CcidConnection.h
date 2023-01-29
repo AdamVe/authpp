@@ -4,12 +4,12 @@
 
 namespace authpp {
 
-class UsbDeviceHandle;
+class UsbConnection;
 class Message;
 
 class CcidConnection {
 public:
-    explicit CcidConnection(const UsbDeviceHandle& handle);
+    explicit CcidConnection(const UsbConnection& handle);
     virtual ~CcidConnection();
 
     template <typename T>
@@ -18,7 +18,7 @@ public:
 private:
     void setup() const;
 
-    const UsbDeviceHandle& handle;
+    const UsbConnection& handle;
 
     std::byte slot { 1 };
     std::byte sequence { 1 };

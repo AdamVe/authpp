@@ -13,7 +13,7 @@ namespace authpp {
 
 #define TIMEOUT 10000
 
-CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
+CcidConnection::CcidConnection(const UsbConnection& handle)
     : handle(handle)
 {
     Log.v("CCID connection opened");
