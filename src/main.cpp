@@ -1,13 +1,13 @@
-#include <vector>
+#include "ByteArray.h"
+#include "CcidConnection.h"
+#include "Logger.h"
+#include "Message.h"
+#include "OathSession.h"
+#include "UsbDevice.h"
+#include "UsbDeviceHandle.h"
+#include "Util.h"
 
-#include <ByteArray.h>
-#include <CcidConnection.h>
-#include <Logger.h>
-#include <Message.h>
-#include <OathSession.h>
-#include <UsbDevice.h>
-#include <UsbDeviceHandle.h>
-#include <Util.h>
+#include <vector>
 
 #include <libusb-1.0/libusb.h>
 

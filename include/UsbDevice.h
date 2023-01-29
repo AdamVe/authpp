@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Logger.h>
-
 #include <libusb-1.0/libusb.h>
 
 #include <string>
@@ -31,8 +29,6 @@ private:
 
     mutable std::string product;
     mutable bool read_product { false };
-
-    Logger log;
 };
 
 } // namespace authpp

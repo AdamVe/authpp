@@ -1,11 +1,11 @@
-#include <CcidConnection.h>
+#include "CcidConnection.h"
 
-#include <Apdu.h>
-#include <ByteArray.h>
-#include <Formatters.h>
-#include <Message.h>
-#include <UsbDeviceHandle.h>
-#include <Util.h>
+#include "Apdu.h"
+#include "ByteArray.h"
+#include "Formatters.h"
+#include "Message.h"
+#include "UsbDeviceHandle.h"
+#include "Util.h"
 
 #include <libusb-1.0/libusb.h>
 
@@ -14,8 +14,7 @@ namespace authpp {
 #define TIMEOUT 10000
 
 CcidConnection::CcidConnection(const UsbDeviceHandle& handle)
-    : log("CcidConnection")
-    , handle(handle)
+    : handle(handle)
 {
     Log.v("CCID connection opened");
     setup();
@@ -37,7 +36,7 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
     };
-    log.v("send {}", message);
+    Log.v("send {}", message);
 
     // receive
     int really_recieved = 0;
@@ -52,7 +51,7 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
 
     byteArray.setDataSize(really_recieved);
 
-    log.v("recv {}", byteArray);
+    Log.v("recv {}", byteArray);
 
     if (transferred != nullptr) {
         *transferred = really_recieved;
@@ -65,7 +64,7 @@ void CcidConnection::setup() const
 {
     if (libusb_kernel_driver_active(*handle, interface_ccid) == 1) {
         if (libusb_detach_kernel_driver(*handle, interface_ccid) == 0) {
-            log.v("detached kernel driver");
+            Log.v("detached kernel driver");
         }
     }
 

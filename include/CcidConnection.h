@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ByteArray.h>
-#include <Logger.h>
+#include "ByteArray.h"
 
 namespace authpp {
 
@@ -19,7 +18,6 @@ public:
 private:
     void setup() const;
 
-    Logger log;
     const UsbDeviceHandle& handle;
 
     std::byte slot { 1 };

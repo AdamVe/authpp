@@ -1,7 +1,7 @@
-#include <UsbDevice.h>
-#include <UsbDeviceHandle.h>
+#include "UsbDevice.h"
+#include "UsbDeviceHandle.h"
 
-#include <Logger.h>
+#include "Logger.h"
 
 #include <libusb-1.0/libusb.h>
 
@@ -11,7 +11,6 @@ namespace authpp {
 
 UsbDevice::UsbDevice(libusb_device* device)
     : device(libusb_ref_device(device))
-    , log("UsbDevice")
 {
 
     if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
@@ -37,7 +36,7 @@ std::string UsbDevice::getManufacturer() const
         try {
             manufacturer = getStringDescriptor(device_descriptor.iManufacturer);
         } catch (const std::runtime_error& error) {
-            log.e("Failed to get manufacturer: {}", error.what());
+            Log.e("Failed to get manufacturer: {}", error.what());
         }
 
         read_manufacturer = true;
@@ -52,7 +51,7 @@ std::string UsbDevice::getProduct() const
         try {
             product = getStringDescriptor(device_descriptor.iProduct);
         } catch (const std::runtime_error& error) {
-            log.e("Failed to get product: {}", error.what());
+            Log.e("Failed to get product: {}", error.what());
         }
         read_product = true;
     }
