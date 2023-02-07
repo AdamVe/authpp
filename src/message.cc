@@ -1,7 +1,7 @@
-#include "Message.h"
+#include "message.h"
 
-#include "ByteArray.h"
-#include "Util.h"
+#include "byte_array.h"
+#include "util.h"
 
 namespace authpp {
 

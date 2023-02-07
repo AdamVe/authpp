@@ -1,11 +1,11 @@
-#include "OathSession.h"
+#include "oath_session.h"
 
-#include "Apdu.inc"
-#include "ByteArray.h"
-#include "CcidConnection.h"
-#include "Formatters.h"
-#include "Message.h"
-#include "Util.h"
+#include "apdu.h"
+#include "byte_array.h"
+#include "ccid_connection.h"
+#include "formatters.h"
+#include "message.h"
+#include "util.h"
 
 namespace authpp {
 

@@ -18,7 +18,6 @@ add_executable(authpp
   src/util.cc
 
   include/apdu.h
-  include/apdu.inc
   include/byte_array.h
   include/ccid_connection.h
   include/formatters.h

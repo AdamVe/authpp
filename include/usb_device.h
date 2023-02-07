@@ -1,9 +1,11 @@
 #pragma once
 
-#include <libusb-1.0/libusb.h>
-
 #include <string>
 #include <vector>
+
+
+#include <libusb-1.0/libusb.h>
+
 
 namespace authpp {
 

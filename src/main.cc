@@ -1,10 +1,10 @@
-#include "ByteArray.h"
-#include "CcidConnection.h"
-#include "Logger.h"
-#include "Message.h"
-#include "OathSession.h"
-#include "UsbDevice.h"
-#include "Util.h"
+#include "byte_array.h"
+#include "ccid_connection.h"
+#include "logger.h"
+#include "message.h"
+#include "oath_session.h"
+#include "usb_device.h"
+#include "util.h"
 
 #include <vector>
 

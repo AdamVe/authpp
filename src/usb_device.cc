@@ -1,9 +1,10 @@
-#include "UsbDevice.h"
+#include "usb_device.h"
 
-#include "Logger.h"
+#include "logger.h"
+
+#include <string>
 
 #include <libusb-1.0/libusb.h>
-#include <string>
 
 namespace authpp {
 

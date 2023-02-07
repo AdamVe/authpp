@@ -1,8 +1,11 @@
 #pragma once
 
-#include "Logger.h"
-#include "Message.h"
-#include "Util.h"
+#include "byte_array.h"
+#include "message.h"
+#include "logger.h"
+#include "util.h"
+
+#include <fmt/format.h>
 
 template <>
 struct fmt::formatter<authpp::Logger::Level> {

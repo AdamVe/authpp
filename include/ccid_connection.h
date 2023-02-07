@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ByteArray.h"
-#include "UsbDevice.h"
+#include "byte_array.h"
+#include "usb_device.h"
 
 namespace authpp {
 

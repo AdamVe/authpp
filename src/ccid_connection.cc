@@ -1,11 +1,11 @@
-#include "CcidConnection.h"
+#include "ccid_connection.h"
 
-#include "Apdu.h"
-#include "ByteArray.h"
-#include "Formatters.h"
-#include "Message.h"
-#include "UsbDevice.h"
-#include "Util.h"
+#include "apdu.inc"
+#include "byte_array.h"
+#include "formatters.h"
+#include "message.h"
+#include "usb_device.h"
+#include "util.h"
 
 #include <libusb-1.0/libusb.h>
 

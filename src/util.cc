@@ -1,6 +1,7 @@
-#include "Util.h"
+#include "util.h"
 
 #include <cstddef>
+
 #include <fmt/format.h>
 
 namespace authpp::util {
