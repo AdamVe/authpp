@@ -1,6 +1,6 @@
 #include "OathSession.h"
 
-#include "Apdu.hpp"
+#include "Apdu.inc"
 #include "ByteArray.h"
 #include "CcidConnection.h"
 #include "Formatters.h"

@@ -10,15 +10,15 @@ if(AUTHPP_BUILD_TESTING)
 endif()
 
 add_executable(authpp
-  src/Apdu.hpp
-  src/CcidConnection.cpp
-  src/main.cpp
-  src/Message.cpp
-  src/OathSession.cpp
-  src/UsbDevice.cpp
-  src/Util.cpp
+  src/CcidConnection.cc
+  src/main.cc
+  src/Message.cc
+  src/OathSession.cc
+  src/UsbDevice.cc
+  src/Util.cc
 
   include/Apdu.h
+  include/Apdu.inc
   include/ByteArray.h
   include/CcidConnection.h
   include/Formatters.h
