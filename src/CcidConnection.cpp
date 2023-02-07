@@ -13,19 +13,23 @@ namespace authpp {
 
 #define TIMEOUT 10000
 
+namespace {
+    Logger log("CcidConnection");
+}
+
 CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
     : handle(handle)
     , usbInterface()
 {
-    Log.v("CCID connection opened");
+    log.v("CCID connection opened");
     setup();
     auto atr { transcieve(Message((std::byte)0x62, ByteArray(0)), nullptr) };
-    Log.v("ATR: {}", atr);
+    log.v("ATR: {}", atr);
 }
 
 CcidConnection::~CcidConnection()
 {
-    Log.v("CCID connection closed");
+    log.v("CCID connection closed");
 }
 
 template <typename T>
@@ -37,7 +41,7 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
     };
-    Log.v("send {}", message);
+    log.v("send {}", message);
 
     // receive
     int really_recieved = 0;
@@ -52,13 +56,34 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
 
     byteArray.setDataSize(really_recieved);
 
-    Log.v("recv {}", byteArray);
+    // size of data
+    int expectedDataSize;
+    expectedDataSize = (unsigned)byteArray.get()[1] | (unsigned)byteArray.get()[2] << 8 | (unsigned)byteArray.get()[3] << 16 | (unsigned)byteArray.get()[4] << 24;
+
+    ByteArray responseBuffer(expectedDataSize);
+    int currentLength = really_recieved - 10;
+
+    memcpy(responseBuffer.get(), byteArray.get() + 10, currentLength);
+    responseBuffer.setDataSize(really_recieved - 10);
+
+    while (currentLength < expectedDataSize) {
+        // receive again
+        if (int err = libusb_bulk_transfer(*handle, usbInterface.endpoint_in, (unsigned char*)byteArray.get(), array_len, &really_recieved, TIMEOUT);
+            err != 0) {
+            throw new std::runtime_error(fmt::format("Failed to receive data: {} {}", libusb_error_name(err), err));
+        }
+
+        byteArray.setDataSize(really_recieved);
+        memcpy(responseBuffer.get() + currentLength, byteArray.get(), really_recieved);
+        currentLength += really_recieved;
+        responseBuffer.setDataSize(currentLength);
+    }
 
     if (transferred != nullptr) {
         *transferred = really_recieved;
     }
 
-    return byteArray;
+    return responseBuffer;
 }
 
 void CcidConnection::setup()
@@ -70,7 +95,7 @@ void CcidConnection::setup()
 
     if (libusb_kernel_driver_active(*handle, usbInterface.number) == 1) {
         if (libusb_detach_kernel_driver(*handle, usbInterface.number) == 0) {
-            Log.v("detached kernel driver");
+            log.v("detached kernel driver");
         }
     }
 

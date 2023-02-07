@@ -10,6 +10,7 @@ if(AUTHPP_BUILD_TESTING)
 endif()
 
 add_executable(authpp
+  src/Apdu.hpp
   src/CcidConnection.cpp
   src/main.cpp
   src/Message.cpp

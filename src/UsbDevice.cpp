@@ -7,6 +7,10 @@
 
 namespace authpp {
 
+namespace {
+    Logger log("UsbDevice");
+}
+
 UsbDevice::UsbDevice(libusb_device* device)
     : device(libusb_ref_device(device))
 {
@@ -34,7 +38,7 @@ std::string UsbDevice::getManufacturer() const
         try {
             manufacturer = getStringDescriptor(device_descriptor.iManufacturer);
         } catch (const std::runtime_error& error) {
-            Log.e("Failed to get manufacturer: {}", error.what());
+            log.e("Failed to get manufacturer: {}", error.what());
         }
 
         read_manufacturer = true;
@@ -49,7 +53,7 @@ std::string UsbDevice::getProduct() const
         try {
             product = getStringDescriptor(device_descriptor.iProduct);
         } catch (const std::runtime_error& error) {
-            Log.e("Failed to get product: {}", error.what());
+            log.e("Failed to get product: {}", error.what());
         }
         read_product = true;
     }
@@ -111,14 +115,14 @@ libusb_device_handle* UsbDevice::Connection::operator*() const
 
 UsbDevice::Interface UsbDevice::Connection::claimInterface(int usbClass, int usbSubClass) const
 {
-    Log.v("Searching config for {:02x}:{:02x}", usbClass, usbSubClass);
+    log.v("Searching config for {:02x}:{:02x}", usbClass, usbSubClass);
     for (auto&& config : usbDevice.config_descriptors) {
-        Log.v("  Config has {} interfaces", config->bNumInterfaces);
+        log.v("  Config has {} interfaces", config->bNumInterfaces);
         for (int interfaceNum = 0; interfaceNum < config->bNumInterfaces; ++interfaceNum) {
-            Log.v("  Interface {} of {}", interfaceNum, config->bNumInterfaces);
+            log.v("  Interface {} of {}", interfaceNum, config->bNumInterfaces);
             auto usbInterface { config->interface[interfaceNum] };
             for (int altsettingNum = 0; altsettingNum < usbInterface.num_altsetting; ++altsettingNum) {
-                Log.v("    altsetting {} of {}", altsettingNum, usbInterface.num_altsetting);
+                log.v("    altsetting {} of {}", altsettingNum, usbInterface.num_altsetting);
                 auto altsetting { usbInterface.altsetting[altsettingNum] };
                 auto iClass = altsetting.bInterfaceClass;
                 auto iSubClass = altsetting.bInterfaceSubClass;
@@ -130,15 +134,15 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(int usbClass, int usb
 
                     for (int endpointNum = 0; endpointNum < altsetting.bNumEndpoints; ++endpointNum) {
                         auto endpoint = altsetting.endpoint[endpointNum];
-                        Log.v("      Endpoint {} bmAttributtes: {:02x} bEndpointAddress: {:02x}", endpointNum, endpoint.bmAttributes, endpoint.bEndpointAddress);
+                        log.v("      Endpoint {} bmAttributtes: {:02x} bEndpointAddress: {:02x}", endpointNum, endpoint.bmAttributes, endpoint.bEndpointAddress);
                         if ((endpoint.bmAttributes & 0x03) == libusb_endpoint_transfer_type::LIBUSB_ENDPOINT_TRANSFER_TYPE_BULK) {
-                            Log.v("        searching endpoints (addr={}, dir={}, eaddr={})", endpoint.bEndpointAddress, endpoint.bEndpointAddress & 0x80, endpoint.bEndpointAddress & 0x0f);
+                            log.v("        searching endpoints (addr={}, dir={}, eaddr={})", endpoint.bEndpointAddress, endpoint.bEndpointAddress & 0x80, endpoint.bEndpointAddress & 0x0f);
                             if ((endpoint.bEndpointAddress & 0x80) == libusb_endpoint_direction::LIBUSB_ENDPOINT_OUT) {
-                                Log.v("          found LIBUSB_ENDPOINT_OUT");
+                                log.v("          found LIBUSB_ENDPOINT_OUT");
                                 eout = endpoint.bEndpointAddress;
                                 max_out = endpoint.wMaxPacketSize;
                             } else {
-                                Log.v("          found LIBUSB_ENDPOINT_IN");
+                                log.v("          found LIBUSB_ENDPOINT_IN");
                                 ein = endpoint.bEndpointAddress;
                                 max_in = endpoint.wMaxPacketSize;
                             }
@@ -146,7 +150,7 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(int usbClass, int usb
                     }
 
                     if (ein > -1 && eout > -1) {
-                        Log.v("Found {:02x}:{:02x} with on interface {} with altsetting {} and endpoints IN={:02x}({}) OUT={:02x}({})", iClass, iSubClass, interfaceNum, altsettingNum, ein, max_in, eout, max_out);
+                        log.v("Found {:02x}:{:02x} with on interface {} with altsetting {} and endpoints IN={:02x}({}) OUT={:02x}({})", iClass, iSubClass, interfaceNum, altsettingNum, ein, max_in, eout, max_out);
                         return UsbDevice::Interface { interfaceNum, altsettingNum, (unsigned char)ein, (unsigned char)eout, max_in, max_out };
                     }
                 }
@@ -154,7 +158,7 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(int usbClass, int usb
         }
     }
 
-    Log.v("Failed to find required interface with endpoints for {:02x}:{:02x}", usbClass, usbSubClass);
+    log.v("Failed to find required interface with endpoints for {:02x}:{:02x}", usbClass, usbSubClass);
     return {};
 }
 

@@ -18,7 +18,7 @@ public:
         verbose = 4
     };
 
-    explicit Logger(std::string&& name = "")
+    explicit Logger(std::string_view name = "")
         : name(name)
     {
     }
@@ -31,7 +31,7 @@ public:
     template <typename... Args>
     void i(fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        log(Level::warning, fmt, std::forward<Args>(args)...);
+        log(Level::info, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
@@ -62,14 +62,14 @@ private:
     inline static Level level { Level::error };
     std::string name;
 
-    inline static std::vector<std::string> enumNames { "I", "W", "E", "D", "V" };
+    inline static std::vector<std::string_view> enumNames { "I", "W", "E", "D", "V" };
 
     template <typename... Args>
     void log(Level messageLevel, fmt::format_string<Args...> fmt, Args&&... args) const
     {
         if (messageLevel <= Logger::level) {
             if (name.length() > 0) {
-                fmt::print("[{}] {} {}\n",
+                fmt::print("[{}] <{}> {}\n",
                     enumNames[std::to_underlying(messageLevel)],
                     name,
                     fmt::vformat(fmt, fmt::make_format_args(args...)));
@@ -81,7 +81,5 @@ private:
         }
     }
 };
-
-static Logger Log("");
 
 } // namespace authpp

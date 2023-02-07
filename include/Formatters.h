@@ -2,6 +2,7 @@
 
 #include "Logger.h"
 #include "Message.h"
+#include "Util.h"
 
 template <>
 struct fmt::formatter<authpp::Logger::Level> {
@@ -15,16 +16,23 @@ struct fmt::formatter<authpp::Logger::Level> {
 
 template <>
 struct fmt::formatter<authpp::ByteArray> {
+
+    char presentation = 'm'; // default presentation
+
     template <typename FormatContext>
     auto format(const authpp::ByteArray& byteArray, FormatContext& ctx) const
         -> decltype(ctx.out())
     {
-        return fmt::format_to(ctx.out(), "{}", authpp::util::byteDataToString(byteArray.get(), byteArray.getDataSize()));
+        return presentation == 'm'
+            ? fmt::format_to(ctx.out(), "{}", authpp::util::byteDataToString(byteArray.get(), byteArray.getDataSize()))
+            : fmt::format_to(ctx.out(), "{}", authpp::util::byteDataToStringH(byteArray.get(), byteArray.getDataSize()));
     }
 
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
     {
-        auto it = ctx.begin();
+        auto it = ctx.begin(), end = ctx.end();
+        if (it != end && (*it == 'm' || *it == 'h'))
+            presentation = *it++;
         return it;
     }
 };
