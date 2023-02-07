@@ -11,11 +11,11 @@ namespace authpp {
 class Logger {
 public:
     enum class Level : unsigned {
-        info = 0,
-        warning = 1,
-        error = 2,
-        debug = 3,
-        verbose = 4
+        kInfo = 0,
+        kWarning = 1,
+        kError = 2,
+        kDebug = 3,
+        kVerbose = 4
     };
 
     explicit Logger(std::string_view name = "")
@@ -31,35 +31,35 @@ public:
     template <typename... Args>
     void i(fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        log(Level::info, fmt, std::forward<Args>(args)...);
+        log(Level::kInfo, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void w(fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        log(Level::warning, fmt, std::forward<Args>(args)...);
+        log(Level::kWarning, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void e(fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        log(Level::error, fmt, std::forward<Args>(args)...);
+        log(Level::kError, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void v(fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        log(Level::verbose, fmt, std::forward<Args>(args)...);
+        log(Level::kVerbose, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void d(fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        log(Level::debug, fmt, std::forward<Args>(args)...);
+        log(Level::kDebug, fmt, std::forward<Args>(args)...);
     }
 
 private:
-    inline static Level level { Level::error };
+    inline static Level level { Level::kError };
     std::string name;
 
     inline static std::vector<std::string_view> enumNames { "I", "W", "E", "D", "V" };

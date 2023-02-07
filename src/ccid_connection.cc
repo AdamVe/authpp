@@ -22,8 +22,8 @@ CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
     , usb_interface()
 {
     log.v("CCID connection opened");
-    setup();
-    auto atr { transcieve(Message((std::byte)0x62, ByteArray(0))) };
+    Setup();
+    auto atr { Transcieve(Message((std::byte)0x62, ByteArray(0))) };
     log.v("ATR: {}", atr);
 }
 
@@ -33,7 +33,7 @@ CcidConnection::~CcidConnection()
 }
 
 template <typename T>
-ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
+ByteArray CcidConnection::Transcieve(T&& message, int* transferred) const
 {
     int really_written = 0;
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out, (unsigned char*)message.get(),
@@ -46,48 +46,48 @@ ByteArray CcidConnection::transcieve(T&& message, int* transferred) const
     // receive
     int really_recieved = 0;
     std::size_t array_len = usb_interface.max_packet_size_in;
-    ByteArray byteArray(array_len);
-    if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in, (unsigned char*)byteArray.get(),
+    ByteArray byte_array(array_len);
+    if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in, (unsigned char*)byte_array.Get(),
             array_len, &really_recieved, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to receive data: {} {}", libusb_error_name(err),
             err));
     };
 
-    byteArray.setDataSize(really_recieved);
-    log.v("recv {}", byteArray);
+    byte_array.SetDataSize(really_recieved);
+    log.v("recv {}", byte_array);
 
     // size of data
-    int expectedDataSize;
-    expectedDataSize = (unsigned)byteArray.get()[1] | (unsigned)byteArray.get()[2] << 8 | (unsigned)byteArray.get()[3] << 16 | (unsigned)byteArray.get()[4] << 24;
+    int expected_data_size;
+    expected_data_size = (unsigned)byte_array.Get()[1] | (unsigned)byte_array.Get()[2] << 8 | (unsigned)byte_array.Get()[3] << 16 | (unsigned)byte_array.Get()[4] << 24;
 
-    ByteArray responseBuffer(expectedDataSize);
+    ByteArray response_buffer(expected_data_size);
     int currentLength = really_recieved - 10;
 
-    memcpy(responseBuffer.get(), byteArray.get() + 10, currentLength);
-    responseBuffer.setDataSize(really_recieved - 10);
+    memcpy(response_buffer.Get(), byte_array.Get() + 10, currentLength);
+    response_buffer.SetDataSize(really_recieved - 10);
 
-    while (currentLength < expectedDataSize) {
+    while (currentLength < expected_data_size) {
         // receive again
-        if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in, (unsigned char*)byteArray.get(), array_len, &really_recieved, TIMEOUT);
+        if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in, (unsigned char*)byte_array.Get(), array_len, &really_recieved, TIMEOUT);
             err != 0) {
             throw new std::runtime_error(fmt::format("Failed to receive data: {} {}", libusb_error_name(err), err));
         }
 
-        byteArray.setDataSize(really_recieved);
-        memcpy(responseBuffer.get() + currentLength, byteArray.get(), really_recieved);
+        byte_array.SetDataSize(really_recieved);
+        memcpy(response_buffer.Get() + currentLength, byte_array.Get(), really_recieved);
         currentLength += really_recieved;
-        responseBuffer.setDataSize(currentLength);
+        response_buffer.SetDataSize(currentLength);
     }
 
     if (transferred != nullptr) {
         *transferred = really_recieved;
     }
 
-    return responseBuffer;
+    return response_buffer;
 }
 
-void CcidConnection::setup()
+void CcidConnection::Setup()
 {
     usb_interface = handle.claimInterface(USB_CLASS_CSCID, 0);
     if (usb_interface.number == -1) {

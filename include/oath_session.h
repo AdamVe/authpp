@@ -8,8 +8,8 @@ class OathSession {
 public:
     OathSession(const CcidConnection& connection);
 
-    void list_credentials() const;
-    void calculate_all() const;
+    void ListCredentials() const;
+    void CalculateAll() const;
 
 private:
     const CcidConnection& connection;

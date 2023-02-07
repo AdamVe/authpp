@@ -46,17 +46,17 @@ public:
         ::operator delete(buf);
     }
 
-    std::byte* get() const
+    std::byte* Get() const
     {
         return buf;
     }
 
-    std::size_t getDataSize() const
+    std::size_t GetDataSize() const
     {
         return dn;
     }
 
-    void setDataSize(std::size_t n)
+    void SetDataSize(std::size_t n)
     {
         dn = n;
     }
