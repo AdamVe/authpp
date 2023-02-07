@@ -10,23 +10,23 @@ if(AUTHPP_BUILD_TESTING)
 endif()
 
 add_executable(authpp
-  src/CcidConnection.cc
+  src/ccid_connection.cc
   src/main.cc
-  src/Message.cc
-  src/OathSession.cc
-  src/UsbDevice.cc
-  src/Util.cc
+  src/message.cc
+  src/oath_session.cc
+  src/usb_device.cc
+  src/util.cc
 
-  include/Apdu.h
-  include/Apdu.inc
-  include/ByteArray.h
-  include/CcidConnection.h
-  include/Formatters.h
-  include/Logger.h
-  include/Message.h
-  include/OathSession.h
-  include/UsbDevice.h
-  include/Util.h
+  include/apdu.h
+  include/apdu.inc
+  include/byte_array.h
+  include/ccid_connection.h
+  include/formatters.h
+  include/logger.h
+  include/message.h
+  include/oath_session.h
+  include/usb_device.h
+  include/util.h
 )
 
 find_path(LIBUSB_INCLUDE_DIR
