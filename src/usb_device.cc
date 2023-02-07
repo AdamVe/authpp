@@ -98,15 +98,15 @@ void UsbDevice::closeConnection(libusb_device_handle** handle) const
     libusb_close(*handle);
 }
 
-UsbDevice::Connection::Connection(const UsbDevice& usbDevice)
-    : usbDevice(usbDevice)
+UsbDevice::Connection::Connection(const UsbDevice& usb_device)
+    : usb_device(usb_device)
 {
-    usbDevice.openConnection(&handle);
+    usb_device.openConnection(&handle);
 }
 
 UsbDevice::Connection::~Connection()
 {
-    usbDevice.closeConnection(&handle);
+    usb_device.closeConnection(&handle);
 }
 
 libusb_device_handle* UsbDevice::Connection::operator*() const
@@ -117,7 +117,7 @@ libusb_device_handle* UsbDevice::Connection::operator*() const
 UsbDevice::Interface UsbDevice::Connection::claimInterface(int usbClass, int usbSubClass) const
 {
     log.v("Searching config for {:02x}:{:02x}", usbClass, usbSubClass);
-    for (auto&& config : usbDevice.config_descriptors) {
+    for (auto&& config : usb_device.config_descriptors) {
         log.v("  Config has {} interfaces", config->bNumInterfaces);
         for (int interfaceNum = 0; interfaceNum < config->bNumInterfaces; ++interfaceNum) {
             log.v("  Interface {} of {}", interfaceNum, config->bNumInterfaces);

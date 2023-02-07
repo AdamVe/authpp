@@ -13,13 +13,13 @@ public:
     virtual ~CcidConnection();
 
     template <typename T>
-    ByteArray transcieve(T&&, int* transferred) const;
+    ByteArray transcieve(T&&, int* transferred = nullptr) const;
 
 private:
     void setup();
 
     const UsbDevice::Connection& handle;
-    UsbDevice::Interface usbInterface;
+    UsbDevice::Interface usb_interface;
 
     std::byte slot { 1 };
     std::byte sequence { 1 };

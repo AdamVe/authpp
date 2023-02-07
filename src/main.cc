@@ -60,6 +60,7 @@ int main()
 
             OathSession oathSession(conn);
             oathSession.list_credentials();
+            oathSession.calculate_all();
         }
     }
 

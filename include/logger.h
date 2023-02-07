@@ -65,17 +65,17 @@ private:
     inline static std::vector<std::string_view> enumNames { "I", "W", "E", "D", "V" };
 
     template <typename... Args>
-    void log(Level messageLevel, fmt::format_string<Args...> fmt, Args&&... args) const
+    void log(Level level, fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        if (messageLevel <= Logger::level) {
+        if (level <= Logger::level) {
             if (name.length() > 0) {
                 fmt::print("[{}] <{}> {}\n",
-                    enumNames[std::to_underlying(messageLevel)],
+                    enumNames[std::to_underlying(level)],
                     name,
                     fmt::vformat(fmt, fmt::make_format_args(args...)));
             } else {
                 fmt::print("[{}] {}\n",
-                    enumNames[std::to_underlying(messageLevel)],
+                    enumNames[std::to_underlying(level)],
                     fmt::vformat(fmt, fmt::make_format_args(args...)));
             }
         }

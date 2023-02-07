@@ -9,6 +9,7 @@ public:
     OathSession(const CcidConnection& connection);
 
     void list_credentials() const;
+    void calculate_all() const;
 
 private:
     const CcidConnection& connection;

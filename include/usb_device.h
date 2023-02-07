@@ -20,7 +20,7 @@ public:
 
     class Connection {
     public:
-        explicit Connection(const UsbDevice& usbDevice);
+        explicit Connection(const UsbDevice& usb_device);
         ~Connection();
 
         libusb_device_handle* operator*() const;
@@ -28,7 +28,7 @@ public:
         Interface claimInterface(int usbClass, int usbSubclass) const;
 
     private:
-        const UsbDevice& usbDevice;
+        const UsbDevice& usb_device;
         libusb_device_handle* handle;
     };
     explicit UsbDevice(libusb_device* device);
