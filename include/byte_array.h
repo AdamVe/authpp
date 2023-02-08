@@ -6,65 +6,39 @@
 namespace authpp {
 
 class ByteArray {
-public:
-    explicit ByteArray(std::size_t n)
-        : n(n)
-        , dn(n)
-        , buf((std::byte*)::operator new(n))
-    {
-    }
+ public:
+  explicit ByteArray(std::size_t n)
+      : n(n), dn(n), buf((std::byte*)::operator new(n)) {}
 
-    template <std::size_t N>
-    explicit ByteArray(const unsigned char (&a)[N])
-        : n(N)
-        , dn(N)
-        , buf((std::byte*)::operator new(N))
-    {
-        std::memcpy(buf, a, N);
-    }
+  template <std::size_t N>
+  explicit ByteArray(const unsigned char (&a)[N])
+      : n(N), dn(N), buf((std::byte*)::operator new(N)) {
+    std::memcpy(buf, a, N);
+  }
 
-    ByteArray(const ByteArray& other)
-        : n(other.n)
-        , dn(other.dn)
-        , buf((std::byte*)::operator new(n))
-    {
-        std::memcpy(buf, other.buf, n);
-    }
+  ByteArray(const ByteArray& other)
+      : n(other.n), dn(other.dn), buf((std::byte*)::operator new(n)) {
+    std::memcpy(buf, other.buf, n);
+  }
 
-    ByteArray(ByteArray&& other)
-        : n(other.n)
-        , dn(other.dn)
-        , buf(other.buf)
-    {
-        other.buf = nullptr;
-        other.dn = 0;
-        other.n = 0;
-    }
+  ByteArray(ByteArray&& other) : n(other.n), dn(other.dn), buf(other.buf) {
+    other.buf = nullptr;
+    other.dn = 0;
+    other.n = 0;
+  }
 
-    ~ByteArray()
-    {
-        ::operator delete(buf);
-    }
+  ~ByteArray() { ::operator delete(buf); }
 
-    std::byte* Get() const
-    {
-        return buf;
-    }
+  std::byte* Get() const { return buf; }
 
-    std::size_t GetDataSize() const
-    {
-        return dn;
-    }
+  std::size_t GetDataSize() const { return dn; }
 
-    void SetDataSize(std::size_t n)
-    {
-        dn = n;
-    }
+  void SetDataSize(std::size_t n) { dn = n; }
 
-private:
-    std::size_t n;
-    std::size_t dn;
-    std::byte* buf;
+ private:
+  std::size_t n;
+  std::size_t dn;
+  std::byte* buf;
 };
 
-} // namespace authpp
+}  // namespace authpp

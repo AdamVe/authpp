@@ -5,14 +5,14 @@ namespace authpp {
 class CcidConnection;
 
 class OathSession {
-public:
-    OathSession(const CcidConnection& connection);
+ public:
+  OathSession(const CcidConnection& connection);
 
-    void ListCredentials() const;
-    void CalculateAll() const;
+  void ListCredentials() const;
+  void CalculateAll() const;
 
-private:
-    const CcidConnection& connection;
+ private:
+  const CcidConnection& connection;
 };
 
-} // namespace authpp
+}  // namespace authpp
