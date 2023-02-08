@@ -27,8 +27,8 @@ struct fmt::formatter<authpp::ByteArray> {
         -> decltype(ctx.out())
     {
         return presentation == 'm'
-            ? fmt::format_to(ctx.out(), "{}", authpp::util::byteDataToString(byteArray.Get(), byteArray.GetDataSize()))
-            : fmt::format_to(ctx.out(), "{}", authpp::util::byteDataToStringH(byteArray.Get(), byteArray.GetDataSize()));
+            ? fmt::format_to(ctx.out(), "{}", authpp::util::ByteDataToString(byteArray.Get(), byteArray.GetDataSize()))
+            : fmt::format_to(ctx.out(), "{}", authpp::util::ByteDataToStringH(byteArray.Get(), byteArray.GetDataSize()));
     }
 
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
@@ -46,7 +46,7 @@ struct fmt::formatter<authpp::Message> {
     auto format(const authpp::Message& message, FormatContext& ctx) const
         -> decltype(ctx.out())
     {
-        return fmt::format_to(ctx.out(), "{}", authpp::util::byteDataToString(message.get(), message.size()));
+        return fmt::format_to(ctx.out(), "{}", authpp::util::ByteDataToString(message.Get(), message.Size()));
     }
 
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())

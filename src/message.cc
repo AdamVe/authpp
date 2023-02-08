@@ -28,12 +28,12 @@ Message::~Message()
     delete[] message_buffer;
 }
 
-std::byte* Message::get() const
+std::byte* Message::Get() const
 {
     return message_buffer;
 }
 
-std::size_t Message::size() const
+std::size_t Message::Size() const
 {
     return message_size;
 }

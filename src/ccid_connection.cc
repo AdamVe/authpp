@@ -36,8 +36,8 @@ template <typename T>
 ByteArray CcidConnection::Transcieve(T&& message, int* transferred) const
 {
     int really_written = 0;
-    if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out, (unsigned char*)message.get(),
-            message.size(), &really_written, TIMEOUT);
+    if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out, (unsigned char*)message.Get(),
+            message.Size(), &really_written, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
     };

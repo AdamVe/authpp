@@ -12,8 +12,8 @@ public:
     Message(std::byte type, ByteArray&& data);
     ~Message();
 
-    std::byte* get() const;
-    std::size_t size() const;
+    std::byte* Get() const;
+    std::size_t Size() const;
 
 private:
     const std::size_t data_size;

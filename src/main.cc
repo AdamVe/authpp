@@ -53,7 +53,7 @@ int main()
 
         for (auto&& yubiKeyUsbDevice : yubiKeyUsbDevices) {
             UsbDevice yubiKey(yubiKeyUsbDevice);
-            log.d("Yubikey: {}", yubiKey.toString());
+            log.d("Yubikey: {}", yubiKey.ToString());
 
             UsbDevice::Connection usbConnection(yubiKey);
             CcidConnection conn(usbConnection);

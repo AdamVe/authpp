@@ -29,17 +29,17 @@ sw_t GetSw(const ByteArray& byte_array)
     return std::to_integer<std::uint16_t>(data[data_size - 2]) << 8 | std::to_integer<std::uint8_t>(data[data_size - 1]);
 }
 
-ByteArray send_instruction(const CcidConnection& connection, const Apdu& instruction)
+ByteArray SendInstruction(const CcidConnection& connection, const Apdu& instruction)
 {
-    Message ccidMessage((std::byte)0x6f, instruction.getApduData());
-    auto const response = connection.Transcieve(std::forward<Message>(ccidMessage));
+    Message ccid_message((std::byte)0x6f, instruction.getApduData());
+    auto const response = connection.Transcieve(std::forward<Message>(ccid_message));
     return response;
 }
 
 void Select(const CcidConnection& connection, const ByteArray& app_id)
 {
     Apdu select_oath(0x00, 0xa4, 0x04, 0x00, app_id);
-    auto select_response = send_instruction(connection, select_oath);
+    auto select_response = SendInstruction(connection, select_oath);
     if (GetSw(select_response) != APDU_SUCCESS) {
         log.e("Failure executing select");
         return;
@@ -57,7 +57,7 @@ OathSession::OathSession(const CcidConnection& connection)
 void OathSession::ListCredentials() const
 {
     Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
-    auto list_response = send_instruction(connection, list_apdu);
+    auto list_response = SendInstruction(connection, list_apdu);
     if (GetSw(list_response) != APDU_SUCCESS) {
         log.e("Failed to get list response");
     }
@@ -66,7 +66,7 @@ void OathSession::ListCredentials() const
 void OathSession::CalculateAll() const
 {
     Apdu apdu(0x00, 0xa4, 0x00, 0x00);
-    auto calculate_all_response = send_instruction(connection, apdu);
+    auto calculate_all_response = SendInstruction(connection, apdu);
     if (GetSw(calculate_all_response) != APDU_SUCCESS) {
         log.e("Failed to get calculate_all response");
     }
