@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(authpp
   VERSION 0.1.0
-  DESCRIPTION "Test"
+  DESCRIPTION "Auth++"
   LANGUAGES CXX
 )
 
@@ -20,12 +20,16 @@ add_executable(authpp
   include/apdu.h
   include/byte_array.h
   include/ccid_connection.h
-  include/formatters.h
   include/logger.h
   include/message.h
   include/oath_session.h
   include/usb_device.h
   include/util.h
+
+  include/fmt/fmt_byte_array.h
+  include/fmt/fmt_logger.h
+  include/fmt/fmt_message.h
+  include/fmt/fmt_oath_version.h
 )
 
 find_path(LIBUSB_INCLUDE_DIR

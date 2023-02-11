@@ -2,19 +2,8 @@
 
 #include <fmt/format.h>
 
-#include "byte_array.h"
-#include "logger.h"
-#include "message.h"
-#include "util.h"
-
-template <>
-struct fmt::formatter<authpp::Logger::Level> {
-  template <typename FormatContext>
-  auto format(const authpp::Logger::Level& level, FormatContext& ctx) const
-      -> decltype(ctx.out()) {
-    return fmt::format_to(ctx.out(), "{}", std::to_underlying(level));
-  }
-};
+#include "../byte_array.h"
+#include "../util.h"
 
 template <>
 struct fmt::formatter<authpp::ByteArray> {
@@ -35,22 +24,6 @@ struct fmt::formatter<authpp::ByteArray> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
     if (it != end && (*it == 'm' || *it == 'h')) presentation = *it++;
-    return it;
-  }
-};
-
-template <>
-struct fmt::formatter<authpp::Message> {
-  template <typename FormatContext>
-  auto format(const authpp::Message& message, FormatContext& ctx) const
-      -> decltype(ctx.out()) {
-    return fmt::format_to(
-        ctx.out(), "{}",
-        authpp::util::ByteDataToString(message.Get(), message.Size()));
-  }
-
-  constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-    auto it = ctx.begin();
     return it;
   }
 };

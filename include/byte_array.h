@@ -7,6 +7,8 @@ namespace authpp {
 
 class ByteArray {
  public:
+  ByteArray() {}
+
   explicit ByteArray(std::size_t n)
       : n(n), dn(n), buf((std::byte*)::operator new(n)) {}
 
@@ -21,6 +23,12 @@ class ByteArray {
     std::memcpy(buf, other.buf, n);
   }
 
+  ByteArray(const ByteArray& other, const std::size_t& offset,
+            const std::size_t& length)
+      : n(length), dn(length), buf((std::byte*)::operator new(n)) {
+    std::memcpy(buf, other.buf + offset, length);
+  }
+
   ByteArray(ByteArray&& other) : n(other.n), dn(other.dn), buf(other.buf) {
     other.buf = nullptr;
     other.dn = 0;
@@ -29,16 +37,27 @@ class ByteArray {
 
   ~ByteArray() { ::operator delete(buf); }
 
+  ByteArray& operator=(const ByteArray& other) {
+    n = other.n;
+    dn = other.dn;
+    delete[] buf;
+    buf = (std::byte*)::operator new(n);
+    std::memcpy(buf, other.buf, n);
+    return *this;
+  }
+
   std::byte* Get() const { return buf; }
+
+  std::byte Get(const std::size_t& i) const { return buf[i]; }
 
   std::size_t GetDataSize() const { return dn; }
 
   void SetDataSize(std::size_t n) { dn = n; }
 
  private:
-  std::size_t n;
-  std::size_t dn;
-  std::byte* buf;
+  std::size_t n = 0;
+  std::size_t dn = 0;
+  std::byte* buf = nullptr;
 };
 
 }  // namespace authpp

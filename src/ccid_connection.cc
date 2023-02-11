@@ -2,9 +2,10 @@
 
 #include <libusb-1.0/libusb.h>
 
-#include "apdu.inc"
 #include "byte_array.h"
-#include "formatters.h"
+#include "fmt/fmt_byte_array.h"
+#include "fmt/fmt_message.h"
+#include "logger.h"
 #include "message.h"
 #include "usb_device.h"
 #include "util.h"

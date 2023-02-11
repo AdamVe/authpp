@@ -5,18 +5,20 @@
 
 namespace authpp {
 
-#define HEADER_SIZE 10
+namespace {
+constexpr std::size_t kHeaderSize{10};
+}
 
 Message::Message(std::byte type, ByteArray&& data)
     : data_size(data.GetDataSize()),
-      message_size(data_size + HEADER_SIZE),
+      message_size(data_size + kHeaderSize),
       message_buffer(new std::byte[message_size]{
           type, (std::byte)((data_size >> 0) & 0xFF),
           (std::byte)((data_size >> 8) & 0xFF),
           (std::byte)((data_size >> 16) & 0xFF),
           (std::byte)((data_size >> 24) & 0xFF), (std::byte)0x00,
           (std::byte)0x00, (std::byte)0x00, (std::byte)0x00, (std::byte)0x00}) {
-  std::memcpy((uint8_t*)message_buffer + HEADER_SIZE, data.Get(), data_size);
+  std::memcpy((uint8_t*)message_buffer + kHeaderSize, data.Get(), data_size);
 }
 
 Message::~Message() { delete[] message_buffer; }
