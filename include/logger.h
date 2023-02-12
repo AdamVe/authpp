@@ -9,63 +9,72 @@
 namespace authpp {
 
 class Logger {
- public:
-  enum class Level : unsigned {
-    kInfo = 0,
-    kWarning = 1,
-    kError = 2,
-    kDebug = 3,
-    kVerbose = 4
-  };
+public:
+    enum class Level : unsigned {
+        kInfo = 0,
+        kWarning = 1,
+        kError = 2,
+        kDebug = 3,
+        kVerbose = 4
+    };
 
-  explicit Logger(std::string_view name = "") : name(name) {}
-
-  static void setLevel(Level level) { Logger::level = level; }
-
-  template <typename... Args>
-  void i(fmt::format_string<Args...> fmt, Args&&... args) const {
-    log(Level::kInfo, fmt, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void w(fmt::format_string<Args...> fmt, Args&&... args) const {
-    log(Level::kWarning, fmt, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void e(fmt::format_string<Args...> fmt, Args&&... args) const {
-    log(Level::kError, fmt, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void v(fmt::format_string<Args...> fmt, Args&&... args) const {
-    log(Level::kVerbose, fmt, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void d(fmt::format_string<Args...> fmt, Args&&... args) const {
-    log(Level::kDebug, fmt, std::forward<Args>(args)...);
-  }
-
- private:
-  inline static Level level{Level::kError};
-  std::string name;
-
-  inline static std::vector<std::string_view> enumNames{"I", "W", "E", "D",
-                                                        "V"};
-
-  template <typename... Args>
-  void log(Level level, fmt::format_string<Args...> fmt, Args&&... args) const {
-    if (level <= Logger::level) {
-      if (name.length() > 0) {
-        fmt::print("[{}] <{}> {}\n", enumNames[std::to_underlying(level)], name,
-                   fmt::vformat(fmt, fmt::make_format_args(args...)));
-      } else {
-        fmt::print("[{}] {}\n", enumNames[std::to_underlying(level)],
-                   fmt::vformat(fmt, fmt::make_format_args(args...)));
-      }
+    explicit Logger(std::string_view name = "")
+        : name(name)
+    {
     }
-  }
+
+    static void setLevel(Level level) { Logger::level = level; }
+
+    template <typename... Args>
+    void i(fmt::format_string<Args...> fmt, Args&&... args) const
+    {
+        log(Level::kInfo, fmt, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void w(fmt::format_string<Args...> fmt, Args&&... args) const
+    {
+        log(Level::kWarning, fmt, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void e(fmt::format_string<Args...> fmt, Args&&... args) const
+    {
+        log(Level::kError, fmt, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void v(fmt::format_string<Args...> fmt, Args&&... args) const
+    {
+        log(Level::kVerbose, fmt, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void d(fmt::format_string<Args...> fmt, Args&&... args) const
+    {
+        log(Level::kDebug, fmt, std::forward<Args>(args)...);
+    }
+
+private:
+    inline static Level level { Level::kError };
+    std::string name;
+
+    inline static std::vector<std::string_view> enumNames { "I", "W", "E", "D",
+        "V" };
+
+    template <typename... Args>
+    void log(Level level, fmt::format_string<Args...> fmt, Args&&... args) const
+    {
+        if (level <= Logger::level) {
+            if (name.length() > 0) {
+                fmt::print("[{}] <{}> {}\n", enumNames[std::to_underlying(level)], name,
+                    fmt::vformat(fmt, fmt::make_format_args(args...)));
+            } else {
+                fmt::print("[{}] {}\n", enumNames[std::to_underlying(level)],
+                    fmt::vformat(fmt, fmt::make_format_args(args...)));
+            }
+        }
+    }
 };
 
-}  // namespace authpp
+} // namespace authpp
