@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include <string>
+#include <vector>
 
 #include "byte_array.h"
 
@@ -11,7 +11,12 @@ class CcidConnection;
 
 class OathSession {
 public:
-    using MessageData = std::map<std::byte, ByteArray>;
+    struct DataPair {
+        std::byte tag;
+        ByteArray byte_array;
+    };
+
+    using MessageData = std::vector<DataPair>;
 
     struct Version {
         Version(int major, int minor, int patch)

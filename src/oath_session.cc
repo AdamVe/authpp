@@ -60,9 +60,10 @@ int Parse(const ByteArray& byte_array, OathSession::MessageData& messageData)
     while (i < byte_array.GetDataSize() - 2) {
         std::byte tag = byte_array.Get()[i];
         auto length = (std::uint8_t)byte_array.Get(i + 1);
-        messageData[tag] = ByteArray(byte_array, i + 2, length);
+        messageData.emplace_back(OathSession::DataPair { tag, ByteArray(byte_array, i + 2, length) });
+        // messageData[tag] = ByteArray(byte_array, i + 2, length);
 
-        log.d("Parsed tag {:02x} with data {}", (int8_t)tag, messageData[tag]);
+        log.d("Parsed tag {:02x} with data {}", (int8_t)tag, messageData.back().byte_array);
 
         i += length + 2;
     }
@@ -70,14 +71,13 @@ int Parse(const ByteArray& byte_array, OathSession::MessageData& messageData)
     return messageData.size();
 }
 
-ByteArray GetTag(const OathSession::MessageData& message_data, const std::byte& tag) {
-    log.v("Getting tag {:02x}", tag);
-    auto i = message_data.find(tag);
-    if (i == message_data.end()) {
-        return {};
+ByteArray GetData(const OathSession::MessageData& message_data, std::size_t index)
+{
+    if (index < message_data.size()) {
+        return message_data[index].byte_array;
     }
 
-    return i->second;
+    return {};
 }
 
 OathSession::MessageData Select(const CcidConnection& connection,
@@ -87,8 +87,7 @@ OathSession::MessageData Select(const CcidConnection& connection,
     auto select_response = SendInstruction(connection, select_oath);
 
     OathSession::MessageData tags;
-    if (Parse(select_response, tags) == -1)
-    {
+    if (Parse(select_response, tags) == -1) {
         log.e("Invalid data");
     }
     return tags;
@@ -96,21 +95,19 @@ OathSession::MessageData Select(const CcidConnection& connection,
 
 OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
 {
-    ByteArray byte_array = GetTag(message_data, TAG_VERSION);
+    ByteArray byte_array = GetData(message_data, 0);
 
     if (byte_array.GetDataSize() > 2) {
-    return OathSession::Version(std::to_integer<uint8_t>(byte_array.Get(0)),
-        std::to_integer<uint8_t>(byte_array.Get(1)),
-        std::to_integer<uint8_t>(byte_array.Get(2)));
-
+        return OathSession::Version(std::to_integer<uint8_t>(byte_array.Get(0)),
+            std::to_integer<uint8_t>(byte_array.Get(1)),
+            std::to_integer<uint8_t>(byte_array.Get(2)));
     }
-    return OathSession::Version(0,0,0);
-
+    return OathSession::Version(0, 0, 0);
 }
 
 std::string ParseName(const OathSession::MessageData& message_data)
 {
-    ByteArray byte_array = GetTag(message_data, TAG_NAME);
+    ByteArray byte_array = GetData(message_data, 1);
     std::stringstream ss;
     for (std::size_t i = 0; i < byte_array.GetDataSize(); ++i) {
         ss << std::to_integer<char>(byte_array.Get(i));
@@ -120,7 +117,7 @@ std::string ParseName(const OathSession::MessageData& message_data)
 
 OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_data)
 {
-    ByteArray byte_array = GetTag(message_data, TAG_ALGORITHM);
+    ByteArray byte_array = GetData(message_data, 3);
 
     if (byte_array.GetDataSize() == 0) {
         return {};
@@ -140,7 +137,7 @@ OathSession::OathSession(const CcidConnection& connection)
     , message_data(Select(connection, kOathId))
     , version(ParseVersion(message_data))
     , name(ParseName(message_data))
-    , challenge(GetTag(message_data, TAG_CHALLENGE))
+    , challenge(GetData(message_data, 2))
     , algorithm(ParseAlgorithm(message_data))
 {
     log.d("Opened OathSession version {} / algo {} / challenge {}", version,
@@ -152,8 +149,16 @@ void OathSession::ListCredentials() const
     Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
     auto list_response = SendInstruction(connection, list_apdu);
     MessageData parsed_response;
-    if (Parse(list_response, parsed_response) > 0) {
-        log.d("Success parsing data");
+    if (auto tags_found = Parse(list_response, parsed_response); tags_found > 0) {
+        log.d("Success parsing data. {} tags were found", tags_found);
+    }
+
+    for (auto&& credential : parsed_response) {
+
+        char c_name[255] { '\0' };
+        std::memcpy(c_name, credential.byte_array.Get() + 1, credential.byte_array.GetDataSize() - 1);
+        std::string name(c_name);
+        log.d("Found account with name `{}`, type X and algorithm Y", name);
     }
 }
 

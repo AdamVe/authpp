@@ -108,7 +108,8 @@ void CcidConnection::Setup()
         }
     }
 
-    if (libusb_claim_interface(*handle, usb_interface.number) != 0) {
+    if (auto error = libusb_claim_interface(*handle, usb_interface.number); error != 0) {
+        log.e("Failure claiming CCID interface: {}({})", libusb_error_name(error), error);
         throw new std::runtime_error("Failure claiming CCID interface");
     }
 }
