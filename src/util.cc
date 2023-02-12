@@ -6,19 +6,19 @@
 
 namespace authpp::util {
 
-std::string ByteDataToString(std::byte* data, std::size_t dataLength) {
+std::string ByteDataToString(std::byte* data, std::size_t length) {
   std::string retval = "[";
-  for (std::size_t i = 0; i < dataLength; ++i) {
+  for (std::size_t i = 0; i < length; ++i) {
     retval += fmt::format("{:02x} ", data[i]);
   }
   retval += "]";
-  retval += fmt::format("({})", dataLength);
+  retval += fmt::format("({})", length);
   return retval;
 }
 
-std::string ByteDataToStringH(std::byte* data, std::size_t dataLength) {
+std::string ByteDataToStringH(std::byte* data, std::size_t length) {
   std::string retval = "[";
-  for (std::size_t i = 0; i < dataLength; ++i) {
+  for (std::size_t i = 0; i < length; ++i) {
     auto datai = (int)(data[i]);
     if (datai >= 32 && datai < 127) {
       retval += (unsigned char)datai;
@@ -27,7 +27,7 @@ std::string ByteDataToStringH(std::byte* data, std::size_t dataLength) {
     }
   }
   retval += "]";
-  retval += fmt::format("({})", dataLength);
+  retval += fmt::format("({})", length);
   return retval;
 }
 

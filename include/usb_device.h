@@ -36,6 +36,7 @@ class UsbDevice {
 
   std::string GetManufacturer() const;
   std::string GetProduct() const;
+  std::string GetSerialNumber() const;
   std::string ToString() const;
 
  private:
@@ -54,6 +55,9 @@ class UsbDevice {
 
   mutable std::string product;
   mutable bool read_product{false};
+
+  mutable std::string serial_number;
+  mutable bool read_serial_number{false};
 };
 
 }  // namespace authpp
