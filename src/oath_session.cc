@@ -70,6 +70,16 @@ int Parse(const ByteArray& byte_array, OathSession::MessageData& messageData)
     return messageData.size();
 }
 
+ByteArray GetTag(const OathSession::MessageData& message_data, const std::byte& tag) {
+    log.v("Getting tag {:02x}", tag);
+    auto i = message_data.find(tag);
+    if (i == message_data.end()) {
+        return {};
+    }
+
+    return i->second;
+}
+
 OathSession::MessageData Select(const CcidConnection& connection,
     const ByteArray& app_id)
 {
@@ -77,27 +87,30 @@ OathSession::MessageData Select(const CcidConnection& connection,
     auto select_response = SendInstruction(connection, select_oath);
 
     OathSession::MessageData tags;
-    if (Parse(select_response, tags) != 4) {
-        log.e("Invalid response from select");
-        return tags;
-    };
-
-    log.i("Version: {}", tags[TAG_VERSION]);
-
-    log.d("Parsing select response: {}", select_response);
-
+    if (Parse(select_response, tags) == -1)
+    {
+        log.e("Invalid data");
+    }
     return tags;
 }
 
-OathSession::Version ParseVersion(const ByteArray& byte_array)
+OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
 {
+    ByteArray byte_array = GetTag(message_data, TAG_VERSION);
+
+    if (byte_array.GetDataSize() > 2) {
     return OathSession::Version(std::to_integer<uint8_t>(byte_array.Get(0)),
         std::to_integer<uint8_t>(byte_array.Get(1)),
         std::to_integer<uint8_t>(byte_array.Get(2)));
+
+    }
+    return OathSession::Version(0,0,0);
+
 }
 
-std::string ParseName(const ByteArray& byte_array)
+std::string ParseName(const OathSession::MessageData& message_data)
 {
+    ByteArray byte_array = GetTag(message_data, TAG_NAME);
     std::stringstream ss;
     for (std::size_t i = 0; i < byte_array.GetDataSize(); ++i) {
         ss << std::to_integer<char>(byte_array.Get(i));
@@ -105,8 +118,13 @@ std::string ParseName(const ByteArray& byte_array)
     return ss.str();
 }
 
-OathSession::Algorithm ParseAlgorithm(const ByteArray& byte_array)
+OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_data)
 {
+    ByteArray byte_array = GetTag(message_data, TAG_ALGORITHM);
+
+    if (byte_array.GetDataSize() == 0) {
+        return {};
+    }
     std::byte first = byte_array.Get(0);
     if (first == (std::byte)0x02) {
         return OathSession::Algorithm::HMAC_SHA256;
@@ -120,10 +138,10 @@ OathSession::Algorithm ParseAlgorithm(const ByteArray& byte_array)
 OathSession::OathSession(const CcidConnection& connection)
     : connection(connection)
     , message_data(Select(connection, kOathId))
-    , version(ParseVersion(message_data[TAG_VERSION]))
-    , name(ParseName(message_data[TAG_NAME]))
-    , challenge(message_data[TAG_CHALLENGE])
-    , algorithm(ParseAlgorithm(message_data[TAG_ALGORITHM]))
+    , version(ParseVersion(message_data))
+    , name(ParseName(message_data))
+    , challenge(GetTag(message_data, TAG_CHALLENGE))
+    , algorithm(ParseAlgorithm(message_data))
 {
     log.d("Opened OathSession version {} / algo {} / challenge {}", version,
         std::to_underlying(algorithm), challenge);
@@ -133,8 +151,9 @@ void OathSession::ListCredentials() const
 {
     Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
     auto list_response = SendInstruction(connection, list_apdu);
-    if (GetSw(list_response) != APDU_SUCCESS) {
-        log.e("Failed to get list response");
+    MessageData parsed_response;
+    if (Parse(list_response, parsed_response) > 0) {
+        log.d("Success parsing data");
     }
 }
 
