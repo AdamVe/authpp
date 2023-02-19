@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "byte_array.h"
+#include "byte_buffer.h"
 
 namespace authpp {
 
@@ -12,8 +12,8 @@ class CcidConnection;
 class OathSession {
 public:
     struct DataPair {
-        std::byte tag;
-        ByteArray byte_array;
+        uint8_t tag;
+        ByteBuffer buffer;
     };
 
     using MessageData = std::vector<DataPair>;
@@ -49,7 +49,7 @@ private:
     MessageData message_data;
     const Version version;
     const std::string name;
-    const ByteArray challenge;
+    const ByteBuffer challenge;
     const Algorithm algorithm;
 };
 

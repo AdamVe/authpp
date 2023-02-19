@@ -5,9 +5,8 @@
 #include <sstream>
 
 #include "apdu.h"
-#include "byte_array.h"
 #include "ccid_connection.h"
-#include "fmt/fmt_byte_array.h"
+#include "fmt/fmt_byte_buffer.h"
 #include "fmt/fmt_oath_version.h"
 #include "logger.h"
 #include "message.h"
@@ -16,10 +15,6 @@
 namespace authpp {
 
 #define APDU_SUCCESS 0x9000
-#define TAG_VERSION (std::byte)0x79
-#define TAG_NAME (std::byte)0x71
-#define TAG_CHALLENGE (std::byte)0x74
-#define TAG_ALGORITHM (std::byte)0x7b
 
 namespace {
 
@@ -27,43 +22,46 @@ namespace {
 
 }
 
-using bytes = unsigned char[];
-const ByteArray kOathId { bytes { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 } };
+const ByteBuffer kOathId { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 };
 
 using sw_t = std::uint16_t;
 
-sw_t GetSw(const ByteArray& byte_array)
+sw_t GetSw(const ByteBuffer& buffer)
 {
-    auto data_size = byte_array.GetDataSize();
-    auto data = byte_array.Get();
-    return std::to_integer<std::uint16_t>(data[data_size - 2]) << 8
-        | std::to_integer<std::uint8_t>(data[data_size - 1]);
+    buffer.pointTo(buffer.size() - 2);
+    return buffer.getByte() << 8 | buffer.getByte();
 }
 
-ByteArray SendInstruction(const CcidConnection& connection,
-    const Apdu& instruction)
+ByteBuffer SendInstruction(const CcidConnection& connection, const Apdu& instruction)
 {
-    Message ccid_message((std::byte)0x6f, instruction.getApduData());
+    Message ccid_message((uint8_t)0x6f, instruction.get());
     auto const response = connection.Transcieve(std::forward<Message>(ccid_message));
     return response;
 }
 
-int Parse(const ByteArray& byte_array, OathSession::MessageData& messageData)
+int Parse(const ByteBuffer& buffer, OathSession::MessageData& messageData)
 {
     std::size_t i = 0;
 
-    if (byte_array.GetDataSize() < 2 || GetSw(byte_array) != APDU_SUCCESS) {
-        log.e("Invalid data");
+    if (buffer.size() < 2) {
+        log.e("Invalid data: size < 2");
         return -1;
     }
 
-    while (i < byte_array.GetDataSize() - 2) {
-        std::byte tag = byte_array.Get()[i];
-        auto length = (std::uint8_t)byte_array.Get(i + 1);
-        messageData.emplace_back(OathSession::DataPair { tag, ByteArray(byte_array, i + 2, length) });
-        // messageData[tag] = ByteArray(byte_array, i + 2, length);
+    if (GetSw(buffer) != APDU_SUCCESS) {
+        log.e("Invalid data: sw not success");
+        return -1;
+    }
 
-        log.d("Parsed tag {:02x} with data {}", (int8_t)tag, messageData.back().byte_array);
+    buffer.pointTo(0);
+
+    while (i < buffer.size() - 2) {
+        auto tag = buffer.getByte();
+        auto length = buffer.getByte();
+        ByteBuffer data = buffer.getBytes(length);
+        messageData.emplace_back(OathSession::DataPair { tag, data });
+
+        log.d("Parsed tag {:02x} with data {}", tag, messageData.back().buffer);
 
         i += length + 2;
     }
@@ -71,61 +69,57 @@ int Parse(const ByteArray& byte_array, OathSession::MessageData& messageData)
     return messageData.size();
 }
 
-ByteArray GetData(const OathSession::MessageData& message_data, std::size_t index)
+ByteBuffer GetData(const OathSession::MessageData& message_data, std::size_t index)
 {
     if (index < message_data.size()) {
-        return message_data[index].byte_array;
+        message_data[index].buffer.pointTo(0);
+        return message_data[index].buffer;
     }
-
-    return {};
+    return ByteBuffer(0);
 }
 
 OathSession::MessageData Select(const CcidConnection& connection,
-    const ByteArray& app_id)
+    const ByteBuffer& app_id)
 {
     Apdu select_oath(0x00, 0xa4, 0x04, 0x00, app_id);
     auto select_response = SendInstruction(connection, select_oath);
 
     OathSession::MessageData tags;
     if (Parse(select_response, tags) == -1) {
-        log.e("Invalid data");
+        log.e("Invalid data: parse failed");
     }
+
     return tags;
 }
 
 OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
 {
-    ByteArray byte_array = GetData(message_data, 0);
 
-    if (byte_array.GetDataSize() > 2) {
-        return OathSession::Version(std::to_integer<uint8_t>(byte_array.Get(0)),
-            std::to_integer<uint8_t>(byte_array.Get(1)),
-            std::to_integer<uint8_t>(byte_array.Get(2)));
+    ByteBuffer buffer = GetData(message_data, 0);
+    if (buffer.size() > 2) {
+        return OathSession::Version(buffer.getByte(), buffer.getByte(), buffer.getByte());
     }
     return OathSession::Version(0, 0, 0);
 }
 
 std::string ParseName(const OathSession::MessageData& message_data)
 {
-    ByteArray byte_array = GetData(message_data, 1);
-    std::stringstream ss;
-    for (std::size_t i = 0; i < byte_array.GetDataSize(); ++i) {
-        ss << std::to_integer<char>(byte_array.Get(i));
-    }
-    return ss.str();
+    ByteBuffer buffer = GetData(message_data, 1);
+    return "TODO";
 }
 
 OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_data)
 {
-    ByteArray byte_array = GetData(message_data, 3);
+    ByteBuffer buffer = GetData(message_data, 3);
 
-    if (byte_array.GetDataSize() == 0) {
-        return {};
+    if (buffer.size() == 0) {
+        return { OathSession::Algorithm::HMAC_SHA1 };
     }
-    std::byte first = byte_array.Get(0);
-    if (first == (std::byte)0x02) {
+    auto type = buffer.getByte();
+
+    if (type == (uint8_t)0x02) {
         return OathSession::Algorithm::HMAC_SHA256;
-    } else if (first == (std::byte)0x03) {
+    } else if (type == (uint8_t)0x03) {
         return OathSession::Algorithm::HMAC_SHA512;
     }
 
@@ -146,7 +140,7 @@ OathSession::OathSession(const CcidConnection& connection)
 
 void OathSession::ListCredentials() const
 {
-    Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
+    Apdu list_apdu((uint8_t)0x00, (uint8_t)0xa1, (uint8_t)0x00, (uint8_t)0x00, ByteBuffer(0));
     auto list_response = SendInstruction(connection, list_apdu);
     MessageData parsed_response;
     if (auto tags_found = Parse(list_response, parsed_response); tags_found > 0) {
@@ -156,15 +150,16 @@ void OathSession::ListCredentials() const
     for (auto&& credential : parsed_response) {
 
         char c_name[255] { '\0' };
-        std::memcpy(c_name, credential.byte_array.Get() + 1, credential.byte_array.GetDataSize() - 1);
-        std::string name(c_name);
+        // TODO
+        // std::memcpy(c_name, credential.bytes.get_raw() + 1, credential.bytes.size() - 1);
+        // std::string name(c_name);
         log.d("Found account with name `{}`, type X and algorithm Y", name);
     }
 }
 
 void OathSession::CalculateAll() const
 {
-    Apdu apdu(0x00, 0xa4, 0x00, 0x00);
+    Apdu apdu((uint8_t)0x00, (uint8_t)0xa4, (uint8_t)0x00, (uint8_t)0x00, ByteBuffer(0));
     auto calculate_all_response = SendInstruction(connection, apdu);
     if (GetSw(calculate_all_response) != APDU_SUCCESS) {
         log.e("Failed to get calculate_all response");

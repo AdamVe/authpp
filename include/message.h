@@ -1,24 +1,21 @@
 #pragma once
 
+#include <byte_buffer.h>
+
 #include <cstddef>
 #include <string>
 
 namespace authpp {
 
-class ByteArray;
-
 class Message {
 public:
-    Message(std::byte type, ByteArray&& data);
+    Message(uint8_t type, const ByteBuffer& data);
     ~Message();
 
-    std::byte* Get() const;
-    std::size_t Size() const;
+    const ByteBuffer& get() const;
 
 private:
-    const std::size_t data_size;
-    const std::size_t message_size;
-    std::byte* message_buffer;
+    ByteBuffer buffer;
 };
 
 } // namespace authpp
