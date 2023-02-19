@@ -12,11 +12,7 @@ Message::Message(uint8_t type, const ByteBuffer& data)
     buffer
         .putByte(type)
         .putInt(data.size())
-        .putByte(0x00)
-        .putByte(0x00)
-        .putByte(0x00)
-        .putByte(0x00)
-        .putByte(0x00)
+        .putBytes({ 0x00, 0x00, 0x00, 0x00, 0x00 })
         .putBytes(data);
 }
 

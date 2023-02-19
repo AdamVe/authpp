@@ -35,7 +35,7 @@ sw_t GetSw(const ByteBuffer& buffer)
 ByteBuffer SendInstruction(const CcidConnection& connection, const Apdu& instruction)
 {
     Message ccid_message((uint8_t)0x6f, instruction.get());
-    auto const response = connection.Transcieve(std::forward<Message>(ccid_message));
+    auto const response = connection.Transcieve(ccid_message);
     return response;
 }
 
@@ -75,7 +75,7 @@ ByteBuffer GetData(const OathSession::MessageData& message_data, std::size_t ind
         message_data[index].buffer.pointTo(0);
         return message_data[index].buffer;
     }
-    return ByteBuffer(0);
+    return {};
 }
 
 OathSession::MessageData Select(const CcidConnection& connection,
@@ -117,9 +117,9 @@ OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_da
     }
     auto type = buffer.getByte();
 
-    if (type == (uint8_t)0x02) {
+    if (type == 0x02) {
         return OathSession::Algorithm::HMAC_SHA256;
-    } else if (type == (uint8_t)0x03) {
+    } else if (type == 0x03) {
         return OathSession::Algorithm::HMAC_SHA512;
     }
 
@@ -140,7 +140,7 @@ OathSession::OathSession(const CcidConnection& connection)
 
 void OathSession::ListCredentials() const
 {
-    Apdu list_apdu((uint8_t)0x00, (uint8_t)0xa1, (uint8_t)0x00, (uint8_t)0x00, ByteBuffer(0));
+    Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
     auto list_response = SendInstruction(connection, list_apdu);
     MessageData parsed_response;
     if (auto tags_found = Parse(list_response, parsed_response); tags_found > 0) {
@@ -159,7 +159,7 @@ void OathSession::ListCredentials() const
 
 void OathSession::CalculateAll() const
 {
-    Apdu apdu((uint8_t)0x00, (uint8_t)0xa4, (uint8_t)0x00, (uint8_t)0x00, ByteBuffer(0));
+    Apdu apdu(0x00, 0xa4, 0x00, 0x00);
     auto calculate_all_response = SendInstruction(connection, apdu);
     if (GetSw(calculate_all_response) != APDU_SUCCESS) {
         log.e("Failed to get calculate_all response");

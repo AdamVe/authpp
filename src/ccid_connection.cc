@@ -24,7 +24,7 @@ CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
 {
     log.v("CCID connection opened");
     Setup();
-    auto atr { Transcieve(Message(0x62, ByteBuffer(0))) };
+    auto atr { Transcieve(Message(0x62, {})) };
     log.v("ATR: {}", atr);
 }
 

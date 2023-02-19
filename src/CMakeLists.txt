@@ -1,4 +1,14 @@
 
+set(SOURCE_LIST
+  "${authpp_SOURCE_DIR}/src/apdu.cc"
+  "${authpp_SOURCE_DIR}/src/byte_buffer.cc"
+  "${authpp_SOURCE_DIR}/src/ccid_connection.cc"
+  "${authpp_SOURCE_DIR}/src/message.cc"
+  "${authpp_SOURCE_DIR}/src/oath_session.cc"
+  "${authpp_SOURCE_DIR}/src/usb_device.cc"
+  "${authpp_SOURCE_DIR}/src/util.cc"
+  )
+
 set(HEADER_LIST
   "${authpp_SOURCE_DIR}/include/apdu.h"
   "${authpp_SOURCE_DIR}/include/byte_buffer.h"
@@ -16,14 +26,7 @@ set(HEADER_LIST
 
 add_library(
   authpp_lib
-
-  byte_buffer.cc
-  ccid_connection.cc
-  message.cc
-  oath_session.cc
-  usb_device.cc
-  util.cc
-
+  ${SOURCE_LIST}
   ${HEADER_LIST})
 
 target_include_directories(authpp_lib PUBLIC ../include)
