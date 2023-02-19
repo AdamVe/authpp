@@ -6,10 +6,10 @@ namespace {
     constexpr std::size_t kHeaderSize { 10 };
 }
 
-Message::Message(uint8_t type, const Bytes& data)
-    : bytes(kHeaderSize + data.size())
+Message::Message(uint8_t type, const ByteBuffer& data)
+    : buffer(kHeaderSize + data.size())
 {
-    bytes
+    buffer
         .putByte(type)
         .putInt(data.size())
         .putByte(0x00)
@@ -22,6 +22,6 @@ Message::Message(uint8_t type, const Bytes& data)
 
 Message::~Message() = default;
 //
-const Bytes& Message::get() const { return bytes; }
+const ByteBuffer& Message::get() const { return buffer; }
 
 } // namespace authpp

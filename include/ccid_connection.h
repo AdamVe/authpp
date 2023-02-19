@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bytes.h"
+#include "byte_buffer.h"
 #include "usb_device.h"
 
 namespace authpp {
@@ -12,7 +12,7 @@ public:
     explicit CcidConnection(const UsbDevice::Connection& handle);
     virtual ~CcidConnection();
 
-    Bytes Transcieve(const Message& message, int* transferred = nullptr) const;
+    ByteBuffer Transcieve(const Message& message, int* transferred = nullptr) const;
 
 private:
     void Setup();

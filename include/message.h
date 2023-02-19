@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bytes.h>
+#include <byte_buffer.h>
 
 #include <cstddef>
 #include <string>
@@ -9,13 +9,13 @@ namespace authpp {
 
 class Message {
 public:
-    Message(uint8_t type, const Bytes& data);
+    Message(uint8_t type, const ByteBuffer& data);
     ~Message();
 
-    const Bytes& get() const;
+    const ByteBuffer& get() const;
 
 private:
-    Bytes bytes;
+    ByteBuffer buffer;
 };
 
 } // namespace authpp

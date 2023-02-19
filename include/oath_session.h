@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "bytes.h"
+#include "byte_buffer.h"
 
 namespace authpp {
 
@@ -13,7 +13,7 @@ class OathSession {
 public:
     struct DataPair {
         uint8_t tag;
-        Bytes bytes;
+        ByteBuffer buffer;
     };
 
     using MessageData = std::vector<DataPair>;
@@ -49,7 +49,7 @@ private:
     MessageData message_data;
     const Version version;
     const std::string name;
-    const Bytes challenge;
+    const ByteBuffer challenge;
     const Algorithm algorithm;
 };
 

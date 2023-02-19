@@ -6,24 +6,24 @@
 
 namespace authpp::util {
 
-std::string BytesToString(const Bytes& bytes)
+std::string BytesToString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
-    bytes.pointTo(0);
-    for (std::size_t i = 0; i < bytes.size(); ++i) {
-        retval += fmt::format("{:02x} ", bytes.getByte());
+    buffer.pointTo(0);
+    for (std::size_t i = 0; i < buffer.size(); ++i) {
+        retval += fmt::format("{:02x} ", buffer.getByte());
     }
     retval += "]";
-    retval += fmt::format("({})", bytes.size());
+    retval += fmt::format("({})", buffer.size());
     return retval;
 }
 
-std::string BytesToAsciiString(const Bytes& bytes)
+std::string BytesToAsciiString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
-    bytes.pointTo(0);
-    for (std::size_t i = 0; i < bytes.size(); ++i) {
-        uint8_t b = bytes.getByte();
+    buffer.pointTo(0);
+    for (std::size_t i = 0; i < buffer.size(); ++i) {
+        uint8_t b = buffer.getByte();
         if (b >= 32 && b < 127) {
             retval += b;
         } else {
@@ -31,7 +31,7 @@ std::string BytesToAsciiString(const Bytes& bytes)
         }
     }
     retval += "]";
-    retval += fmt::format("({})", bytes.size());
+    retval += fmt::format("({})", buffer.size());
     return retval;
 }
 

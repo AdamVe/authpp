@@ -7,7 +7,7 @@
 #include "usb_device.h"
 #include "util.h"
 
-#include "fmt/fmt_bytes.h"
+#include "fmt/fmt_byte_buffer.h"
 #include "fmt/fmt_message.h"
 
 namespace authpp {
@@ -24,13 +24,13 @@ CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
 {
     log.v("CCID connection opened");
     Setup();
-    auto atr { Transcieve(Message(0x62, Bytes(0))) };
+    auto atr { Transcieve(Message(0x62, ByteBuffer(0))) };
     log.v("ATR: {}", atr);
 }
 
 CcidConnection::~CcidConnection() { log.v("CCID connection closed"); }
 
-Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
+ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) const
 {
     int really_written = 0;
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out,
@@ -45,41 +45,37 @@ Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
     // receive
     int really_recieved = 0;
     std::size_t array_len = usb_interface.max_packet_size_in;
-    Bytes bytes(array_len);
+    ByteBuffer buffer(array_len);
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-            bytes.getRaw(),
+            buffer.getRaw(),
             array_len, &really_recieved, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
             libusb_error_name(err), err));
     };
 
-    bytes.setSize(really_recieved);
-    log.v("recv {}", bytes);
+    buffer.setSize(really_recieved);
+    log.v("recv {}", buffer);
 
     // size of data
-    bytes.pointTo(1);
-    uint32_t expected_data_size = bytes.getInt();
+    buffer.pointTo(1);
+    uint32_t expected_data_size = buffer.getInt();
     int currentLength = really_recieved - 10;
 
-    bytes.pointTo(10);
-    Bytes response_buffer = bytes.getBytes(expected_data_size);
-
-    log.v("Bytes: {}", bytes);
-    log.v("respo: {}", response_buffer);
-
+    buffer.pointTo(10);
+    ByteBuffer response_buffer = buffer.getBytes(expected_data_size);
     while (currentLength < expected_data_size) {
         // receive again
         if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-                bytes.getRaw(),
+                buffer.getRaw(),
                 array_len, &really_recieved, TIMEOUT);
             err != 0) {
             throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
                 libusb_error_name(err), err));
         }
 
-        bytes.setSize(really_recieved);
-        response_buffer.putBytes(bytes);
+        buffer.setSize(really_recieved);
+        response_buffer.putBytes(buffer);
         currentLength += really_recieved;
         response_buffer.setSize(currentLength);
     }

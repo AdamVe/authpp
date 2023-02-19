@@ -9,26 +9,26 @@
 
 namespace authpp {
 
-class Bytes {
+class ByteBuffer {
 public:
-    Bytes(std::size_t size);
+    ByteBuffer(std::size_t size);
 
-    Bytes(std::initializer_list<uint8_t> il);
+    ByteBuffer(std::initializer_list<uint8_t> il);
 
     std::size_t size() const;
     void setSize(std::size_t size);
 
-    const Bytes& pointTo(std::size_t i) const;
+    const ByteBuffer& pointTo(std::size_t i) const;
 
-    Bytes& putByte(unsigned char c);
-    Bytes& putShort(uint16_t i16);
-    Bytes& putInt(uint32_t i32);
-    Bytes& putBytes(const Bytes& bytes);
+    ByteBuffer& putByte(unsigned char c);
+    ByteBuffer& putShort(uint16_t i16);
+    ByteBuffer& putInt(uint32_t i32);
+    ByteBuffer& putBytes(const ByteBuffer& buffer);
 
     uint8_t getByte() const;
     uint16_t getShort() const;
     uint32_t getInt() const;
-    Bytes getBytes(std::size_t size) const;
+    ByteBuffer getBytes(std::size_t size) const;
 
     unsigned char* getRaw() const;
 

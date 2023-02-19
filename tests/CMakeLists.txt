@@ -6,7 +6,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
   authpp_test
-  bytes_test.cc
+  byte_buffer_test.cc
 )
 
 target_link_libraries(

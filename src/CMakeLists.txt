@@ -1,14 +1,14 @@
 
 set(HEADER_LIST
   "${authpp_SOURCE_DIR}/include/apdu.h"
-  "${authpp_SOURCE_DIR}/include/bytes.h"
+  "${authpp_SOURCE_DIR}/include/byte_buffer.h"
   "${authpp_SOURCE_DIR}/include/ccid_connection.h"
   "${authpp_SOURCE_DIR}/include/logger.h"
   "${authpp_SOURCE_DIR}/include/message.h"
   "${authpp_SOURCE_DIR}/include/oath_session.h"
   "${authpp_SOURCE_DIR}/include/usb_device.h"
   "${authpp_SOURCE_DIR}/include/util.h"
-  "${authpp_SOURCE_DIR}/include/fmt/fmt_bytes.h"
+  "${authpp_SOURCE_DIR}/include/fmt/fmt_byte_buffer.h"
   "${authpp_SOURCE_DIR}/include/fmt/fmt_logger.h"
   "${authpp_SOURCE_DIR}/include/fmt/fmt_message.h"
   "${authpp_SOURCE_DIR}/include/fmt/fmt_oath_version.h"
@@ -17,7 +17,7 @@ set(HEADER_LIST
 add_library(
   authpp_lib
 
-  bytes.cc
+  byte_buffer.cc
   ccid_connection.cc
   message.cc
   oath_session.cc

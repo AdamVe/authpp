@@ -1,18 +1,18 @@
 #include <gtest/gtest.h>
 
-#include <bytes.h>
+#include <byte_buffer.h>
 
 using namespace authpp;
 
 TEST(BytesTest, Construction)
 {
-    Bytes b(10);
+    ByteBuffer b(10);
     ASSERT_EQ(10, b.size());
 }
 
 TEST(BytesTest, ConstructionFromInitializerList)
 {
-    Bytes b({ 1, 2, 3 });
+    ByteBuffer b({ 1, 2, 3 });
     ASSERT_EQ(3, b.size());
 
     ASSERT_EQ(1, b.getByte());
@@ -22,20 +22,20 @@ TEST(BytesTest, ConstructionFromInitializerList)
 
 TEST(BytesTest, ConstructionFromEmptyInitializerList)
 {
-    Bytes b {};
+    ByteBuffer b {};
     ASSERT_EQ(0, b.size());
 }
 
 TEST(BytesTest, SetSize)
 {
-    Bytes b(0);
+    ByteBuffer b(0);
     b.setSize(100);
     ASSERT_EQ(100, b.size());
 }
 
 TEST(BytesTest, PutGetByte)
 {
-    Bytes b(10);
+    ByteBuffer b(10);
     b.pointTo(5);
     b.putByte(128);
     b.pointTo(5);
@@ -44,7 +44,7 @@ TEST(BytesTest, PutGetByte)
 
 TEST(BytesTest, PutGetShort)
 {
-    Bytes b(10);
+    ByteBuffer b(10);
     b.pointTo(7);
     b.putShort(10400);
     b.pointTo(7);
@@ -53,7 +53,7 @@ TEST(BytesTest, PutGetShort)
 
 TEST(BytesTest, PutGetInt)
 {
-    Bytes b(10);
+    ByteBuffer b(10);
     b.pointTo(2);
     b.putInt(256000);
     b.pointTo(2);
@@ -62,14 +62,14 @@ TEST(BytesTest, PutGetInt)
 
 TEST(BytesTest, PutGetBytes)
 {
-    Bytes b({ 10, 9, 8, 7 });
+    ByteBuffer b({ 10, 9, 8, 7 });
 
-    Bytes b2(20);
+    ByteBuffer b2(20);
     b2.pointTo(5);
     b2.putBytes(b);
 
     b2.pointTo(5);
-    Bytes b3 = b2.getBytes(4);
+    ByteBuffer b3 = b2.getBytes(4);
 
     b3.pointTo(0);
     ASSERT_EQ(10, b3.getByte());
@@ -80,7 +80,7 @@ TEST(BytesTest, PutGetBytes)
 
 TEST(BytesTest, GetRaw)
 {
-    Bytes b({ 100, 200, 50, 255 });
+    ByteBuffer b({ 100, 200, 50, 255 });
     auto* raw { b.getRaw() };
 
     ASSERT_EQ(100, raw[0]);

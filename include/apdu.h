@@ -1,22 +1,22 @@
 #pragma once
 
-#include "bytes.h"
+#include "byte_buffer.h"
 
 namespace authpp {
 
 class Apdu {
 public:
-    Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const Bytes& data);
-    const Bytes& get() const;
+    Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const ByteBuffer& data);
+    const ByteBuffer& get() const;
 
 private:
-    Bytes bytes;
+    ByteBuffer buffer;
 };
 
-Apdu::Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const Bytes& data)
-    : bytes(5 + data.size())
+Apdu::Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const ByteBuffer& data)
+    : buffer(5 + data.size())
 {
-    bytes
+    buffer
         .putByte(cla)
         .putByte(ins)
         .putByte(p1)
@@ -25,6 +25,6 @@ Apdu::Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const Bytes& data)
         .putBytes(data);
 }
 
-const Bytes& Apdu::get() const { return bytes; }
+const ByteBuffer& Apdu::get() const { return buffer; }
 
 } // namespace authpp
