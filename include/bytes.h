@@ -20,15 +20,15 @@ public:
 
     const Bytes& pointTo(std::size_t i) const;
 
-    Bytes& uint8(unsigned char c);
-    Bytes& uint16(uint16_t i16);
-    Bytes& uint32(uint32_t i32);
-    Bytes& set(const Bytes& bytes);
+    Bytes& putByte(unsigned char c);
+    Bytes& putShort(uint16_t i16);
+    Bytes& putInt(uint32_t i32);
+    Bytes& putBytes(const Bytes& bytes);
 
-    uint8_t uint8() const;
-    uint16_t uint16() const;
-    uint32_t uint32() const;
-    Bytes get(std::size_t size) const;
+    uint8_t getByte() const;
+    uint16_t getShort() const;
+    uint32_t getInt() const;
+    Bytes getBytes(std::size_t size) const;
 
     unsigned char* getRaw() const;
 

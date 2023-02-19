@@ -10,14 +10,14 @@ Message::Message(uint8_t type, const Bytes& data)
     : bytes(kHeaderSize + data.size())
 {
     bytes
-        .uint8(type)
-        .uint32(data.size())
-        .uint8(0x00)
-        .uint8(0x00)
-        .uint8(0x00)
-        .uint8(0x00)
-        .uint8(0x00)
-        .set(data);
+        .putByte(type)
+        .putInt(data.size())
+        .putByte(0x00)
+        .putByte(0x00)
+        .putByte(0x00)
+        .putByte(0x00)
+        .putByte(0x00)
+        .putBytes(data);
 }
 
 Message::~Message() = default;

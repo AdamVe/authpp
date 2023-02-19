@@ -17,12 +17,12 @@ Apdu::Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const Bytes& data)
     : bytes(5 + data.size())
 {
     bytes
-        .uint8(cla)
-        .uint8(ins)
-        .uint8(p1)
-        .uint8(p2)
-        .uint8(data.size()) // short APDU
-        .set(data);
+        .putByte(cla)
+        .putByte(ins)
+        .putByte(p1)
+        .putByte(p2)
+        .putByte(data.size()) // short APDU
+        .putBytes(data);
 }
 
 const Bytes& Apdu::get() const { return bytes; }

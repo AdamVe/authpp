@@ -11,8 +11,7 @@ std::string BytesToString(const Bytes& bytes)
     std::string retval = "[";
     bytes.pointTo(0);
     for (std::size_t i = 0; i < bytes.size(); ++i) {
-        uint8_t b = bytes.uint8();
-        retval += fmt::format("{:02x} ", (int)b);
+        retval += fmt::format("{:02x} ", bytes.getByte());
     }
     retval += "]";
     retval += fmt::format("({})", bytes.size());
@@ -24,7 +23,7 @@ std::string BytesToAsciiString(const Bytes& bytes)
     std::string retval = "[";
     bytes.pointTo(0);
     for (std::size_t i = 0; i < bytes.size(); ++i) {
-        uint8_t b = bytes.uint8();
+        uint8_t b = bytes.getByte();
         if (b >= 32 && b < 127) {
             retval += b;
         } else {

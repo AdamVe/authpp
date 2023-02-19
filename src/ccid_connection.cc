@@ -59,11 +59,11 @@ Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
 
     // size of data
     bytes.pointTo(1);
-    uint32_t expected_data_size = bytes.uint32();
+    uint32_t expected_data_size = bytes.getInt();
     int currentLength = really_recieved - 10;
 
     bytes.pointTo(10);
-    Bytes response_buffer = bytes.get(expected_data_size);
+    Bytes response_buffer = bytes.getBytes(expected_data_size);
 
     log.v("Bytes: {}", bytes);
     log.v("respo: {}", response_buffer);
@@ -79,7 +79,7 @@ Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
         }
 
         bytes.setSize(really_recieved);
-        response_buffer.set(bytes);
+        response_buffer.putBytes(bytes);
         currentLength += really_recieved;
         response_buffer.setSize(currentLength);
     }

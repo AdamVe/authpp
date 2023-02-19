@@ -15,12 +15,15 @@ TEST(BytesTest, ConstructionFromInitializerList)
     Bytes b({ 1, 2, 3 });
     ASSERT_EQ(3, b.size());
 
-    ASSERT_EQ(1, b.uint8());
-    ASSERT_EQ(2, b.uint8());
-    ASSERT_EQ(3, b.uint8());
+    ASSERT_EQ(1, b.getByte());
+    ASSERT_EQ(2, b.getByte());
+    ASSERT_EQ(3, b.getByte());
+}
 
-    Bytes b2 {};
-    ASSERT_EQ(0, b2.size());
+TEST(BytesTest, ConstructionFromEmptyInitializerList)
+{
+    Bytes b {};
+    ASSERT_EQ(0, b.size());
 }
 
 TEST(BytesTest, SetSize)
@@ -30,31 +33,31 @@ TEST(BytesTest, SetSize)
     ASSERT_EQ(100, b.size());
 }
 
-TEST(BytesTest, UInt8)
+TEST(BytesTest, PutGetByte)
 {
     Bytes b(10);
     b.pointTo(5);
-    b.uint8(128);
+    b.putByte(128);
     b.pointTo(5);
-    ASSERT_EQ(128, b.uint8());
+    ASSERT_EQ(128, b.getByte());
 }
 
-TEST(BytesTest, UInt16)
+TEST(BytesTest, PutGetShort)
 {
     Bytes b(10);
     b.pointTo(7);
-    b.uint16(10400);
+    b.putShort(10400);
     b.pointTo(7);
-    ASSERT_EQ(10400, b.uint16());
+    ASSERT_EQ(10400, b.getShort());
 }
 
-TEST(BytesTest, UInt32)
+TEST(BytesTest, PutGetInt)
 {
     Bytes b(10);
     b.pointTo(2);
-    b.uint32(256000);
+    b.putInt(256000);
     b.pointTo(2);
-    ASSERT_EQ(256000, b.uint32());
+    ASSERT_EQ(256000, b.getInt());
 }
 
 TEST(BytesTest, PutGetBytes)
@@ -63,16 +66,16 @@ TEST(BytesTest, PutGetBytes)
 
     Bytes b2(20);
     b2.pointTo(5);
-    b2.set(b);
+    b2.putBytes(b);
 
     b2.pointTo(5);
-    Bytes b3 = b2.get(4);
+    Bytes b3 = b2.getBytes(4);
 
     b3.pointTo(0);
-    ASSERT_EQ(10, b3.uint8());
-    ASSERT_EQ(9, b3.uint8());
-    ASSERT_EQ(8, b3.uint8());
-    ASSERT_EQ(7, b3.uint8());
+    ASSERT_EQ(10, b3.getByte());
+    ASSERT_EQ(9, b3.getByte());
+    ASSERT_EQ(8, b3.getByte());
+    ASSERT_EQ(7, b3.getByte());
 }
 
 TEST(BytesTest, GetRaw)
