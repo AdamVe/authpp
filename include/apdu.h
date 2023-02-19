@@ -1,15 +1,8 @@
 #pragma once
 
-#include "byte_array.h"
 #include "bytes.h"
 
 namespace authpp {
-
-template <typename T>
-std::byte to_byte(T value)
-{
-    return static_cast<std::byte>(value) & (std::byte)0xff;
-}
 
 class Apdu {
 public:
@@ -27,7 +20,7 @@ Apdu::Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const Bytes& data)
     bytes.putChar(ins);
     bytes.putChar(p1);
     bytes.putChar(p2);
-    bytes.putChar(data.size());  // short APDU
+    bytes.putChar(data.size()); // short APDU
     bytes.putBytes(data);
 }
 

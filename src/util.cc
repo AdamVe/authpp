@@ -6,30 +6,35 @@
 
 namespace authpp::util {
 
-std::string ByteDataToString(std::byte* data, std::size_t length)
+std::string BytesToString(const Bytes& bytes)
 {
     std::string retval = "[";
-    for (std::size_t i = 0; i < length; ++i) {
-        retval += fmt::format("{:02x} ", data[i]);
+    bytes.pointTo(0);
+    for (std::size_t i = 0; i < bytes.size(); ++i) {
+        uint8_t b;
+        bytes.getChar(b);
+        retval += fmt::format("{:02x} ", (int)b);
     }
     retval += "]";
-    retval += fmt::format("({})", length);
+    retval += fmt::format("({})", bytes.size());
     return retval;
 }
 
-std::string ByteDataToStringH(std::byte* data, std::size_t length)
+std::string BytesToAsciiString(const Bytes& bytes)
 {
     std::string retval = "[";
-    for (std::size_t i = 0; i < length; ++i) {
-        auto datai = (int)(data[i]);
-        if (datai >= 32 && datai < 127) {
-            retval += (unsigned char)datai;
+    bytes.pointTo(0);
+    for (std::size_t i = 0; i < bytes.size(); ++i) {
+        uint8_t b;
+        bytes.getChar(b);
+        if (b >= 32 && b < 127) {
+            retval += b;
         } else {
-            retval += ' ';
+            retval += '_';
         }
     }
     retval += "]";
-    retval += fmt::format("({})", length);
+    retval += fmt::format("({})", bytes.size());
     return retval;
 }
 

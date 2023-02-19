@@ -5,9 +5,8 @@
 #include <sstream>
 
 #include "apdu.h"
-#include "byte_array.h"
 #include "ccid_connection.h"
-#include "fmt/fmt_byte_array.h"
+#include "fmt/fmt_bytes.h"
 #include "fmt/fmt_oath_version.h"
 #include "logger.h"
 #include "message.h"
@@ -16,10 +15,6 @@
 namespace authpp {
 
 #define APDU_SUCCESS 0x9000
-#define TAG_VERSION (std::byte)0x79
-#define TAG_NAME (std::byte)0x71
-#define TAG_CHALLENGE (std::byte)0x74
-#define TAG_ALGORITHM (std::byte)0x7b
 
 namespace {
 
@@ -27,16 +22,21 @@ namespace {
 
 }
 
-using bytes = unsigned char[];
 const Bytes kOathId { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 };
 
 using sw_t = std::uint16_t;
 
 sw_t GetSw(const Bytes& bytes)
 {
-    uint16_t retval;
-    bytes.getI16(retval, bytes.size() - 2);
-    return retval;
+    bytes.pointTo(bytes.size() - 2);
+
+    uint8_t sw1;
+    bytes.getChar(sw1);
+
+    uint8_t sw2;
+    bytes.getChar(sw2);
+
+    return sw1 << 8 | sw2;
 }
 
 Bytes SendInstruction(const CcidConnection& connection, const Apdu& instruction)
@@ -50,20 +50,26 @@ int Parse(const Bytes& bytes, OathSession::MessageData& messageData)
 {
     std::size_t i = 0;
 
-    if (bytes.size() < 2 || GetSw(bytes) != APDU_SUCCESS) {
-        log.e("Invalid data");
+    if (bytes.size() < 2) {
+        log.e("Invalid data: size < 2");
         return -1;
     }
 
+    if (GetSw(bytes) != APDU_SUCCESS) {
+        log.e("Invalid data: sw not success");
+        return -1;
+    }
+
+    bytes.pointTo(0);
+
     while (i < bytes.size() - 2) {
         uint8_t tag;
-        bytes.getChar(tag, i);
+        bytes.getChar(tag);
         uint8_t length;
-        bytes.getChar(length, i + 1);
+        bytes.getChar(length);
         Bytes data(length);
-        bytes.getBytes(data, i + 2);
+        bytes.getBytes(data);
         messageData.emplace_back(OathSession::DataPair { tag, data });
-        // messageData[tag] = ByteArray(byte_array, i + 2, length);
 
         log.d("Parsed tag {:02x} with data {}", tag, messageData.back().bytes);
 
@@ -76,10 +82,10 @@ int Parse(const Bytes& bytes, OathSession::MessageData& messageData)
 Bytes GetData(const OathSession::MessageData& message_data, std::size_t index)
 {
     if (index < message_data.size()) {
+        message_data[index].bytes.pointTo(0);
         return message_data[index].bytes;
     }
-
-    return {};
+    return Bytes(0);
 }
 
 OathSession::MessageData Select(const CcidConnection& connection,
@@ -90,15 +96,16 @@ OathSession::MessageData Select(const CcidConnection& connection,
 
     OathSession::MessageData tags;
     if (Parse(select_response, tags) == -1) {
-        log.e("Invalid data");
+        log.e("Invalid data: parse failed");
     }
+
     return tags;
 }
 
 OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
 {
-    Bytes bytes = GetData(message_data, 0);
 
+    Bytes bytes = GetData(message_data, 0);
     if (bytes.size() > 2) {
         uint8_t major;
         uint8_t minor;
@@ -106,7 +113,6 @@ OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
         bytes.getChar(major);
         bytes.getChar(minor);
         bytes.getChar(patch);
-
         return OathSession::Version(major, minor, patch);
     }
     return OathSession::Version(0, 0, 0);
@@ -123,7 +129,7 @@ OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_da
     Bytes bytes = GetData(message_data, 3);
 
     if (bytes.size() == 0) {
-        return {};
+        return { OathSession::Algorithm::HMAC_SHA1 };
     }
     uint8_t type;
     bytes.getChar(type);
@@ -161,8 +167,9 @@ void OathSession::ListCredentials() const
     for (auto&& credential : parsed_response) {
 
         char c_name[255] { '\0' };
-        std::memcpy(c_name, credential.bytes.get_raw() + 1, credential.bytes.size() - 1);
-        std::string name(c_name);
+        // TODO
+        // std::memcpy(c_name, credential.bytes.get_raw() + 1, credential.bytes.size() - 1);
+        // std::string name(c_name);
         log.d("Found account with name `{}`, type X and algorithm Y", name);
     }
 }

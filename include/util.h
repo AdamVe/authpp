@@ -1,11 +1,13 @@
 #pragma once
 
+#include "bytes.h"
+
 #include <string>
 
 namespace authpp::util {
 
-std::string ByteDataToString(std::byte* data, std::size_t length);
+std::string BytesToString(const Bytes& bytes);
 
-std::string ByteDataToStringH(std::byte* data, std::size_t length);
+std::string BytesToAsciiString(const Bytes& bytes);
 
 } // namespace authpp::util

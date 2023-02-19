@@ -2,18 +2,17 @@
 
 #include <libusb-1.0/libusb.h>
 
-#include "byte_array.h"
 #include "logger.h"
 #include "message.h"
 #include "usb_device.h"
 #include "util.h"
 
-#include "fmt/fmt_byte_array.h"
+#include "fmt/fmt_bytes.h"
 #include "fmt/fmt_message.h"
 
 namespace authpp {
 
-#define TIMEOUT 10000
+#define TIMEOUT 100
 
 namespace {
     Logger log("CcidConnection");
@@ -25,7 +24,7 @@ CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
 {
     log.v("CCID connection opened");
     Setup();
-    auto atr { Transcieve(Message(static_cast<uint8_t>(0x62), Bytes(0))) };
+    auto atr { Transcieve(Message(0x62, Bytes(0))) };
     log.v("ATR: {}", atr);
 }
 
@@ -35,7 +34,7 @@ Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
 {
     int really_written = 0;
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out,
-            message.get().get_raw(),
+            message.get().getRaw(),
             message.get().size(), &really_written, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(
@@ -48,7 +47,7 @@ Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
     std::size_t array_len = usb_interface.max_packet_size_in;
     Bytes bytes(array_len);
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-            bytes.get_raw(),
+            bytes.getRaw(),
             array_len, &really_recieved, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
@@ -67,12 +66,15 @@ Bytes CcidConnection::Transcieve(const Message& message, int* transferred) const
     int currentLength = really_recieved - 10;
 
     bytes.pointTo(10);
-    response_buffer.putBytes(bytes);
+    bytes.getBytes(response_buffer);
+
+    log.v("Bytes: {}", bytes);
+    log.v("respo: {}", response_buffer);
 
     while (currentLength < expected_data_size) {
         // receive again
         if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-                bytes.get_raw(),
+                bytes.getRaw(),
                 array_len, &really_recieved, TIMEOUT);
             err != 0) {
             throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",

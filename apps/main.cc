@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "byte_array.h"
 #include "ccid_connection.h"
 #include "logger.h"
 #include "message.h"
@@ -18,6 +17,7 @@ int main()
 {
     Logger log("main");
     Logger::setLevel(Logger::Level::kVerbose);
+    // Bytes::setDebugLog(true);
 
     libusb_init(nullptr);
     // libusb_set_option(nullptr, LIBUSB_OPTION_LOG_LEVEL,
@@ -59,7 +59,7 @@ int main()
 
             OathSession oath_session(conn);
             oath_session.ListCredentials();
-            oath_session.CalculateAll();
+            // oath_session.CalculateAll();
         }
     }
 
