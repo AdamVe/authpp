@@ -5,11 +5,11 @@
 
 namespace authpp {
 
-class ByteArray {
+class XByteArray {
 public:
-    ByteArray() { }
+    XByteArray() { }
 
-    explicit ByteArray(std::size_t n)
+    explicit XByteArray(std::size_t n)
         : n(n)
         , dn(n)
         , buf((std::byte*)::operator new(n))
@@ -17,7 +17,7 @@ public:
     }
 
     template <std::size_t N>
-    explicit ByteArray(const unsigned char (&a)[N])
+    explicit XByteArray(const unsigned char (&a)[N])
         : n(N)
         , dn(N)
         , buf((std::byte*)::operator new(N))
@@ -25,7 +25,7 @@ public:
         std::memcpy(buf, a, N);
     }
 
-    ByteArray(const ByteArray& other)
+    XByteArray(const XByteArray& other)
         : n(other.n)
         , dn(other.dn)
         , buf((std::byte*)::operator new(n))
@@ -33,7 +33,7 @@ public:
         std::memcpy(buf, other.buf, n);
     }
 
-    ByteArray(const ByteArray& other, const std::size_t& offset,
+    XByteArray(const XByteArray& other, const std::size_t& offset,
         const std::size_t& length)
         : n(length)
         , dn(length)
@@ -42,7 +42,7 @@ public:
         std::memcpy(buf, other.buf + offset, length);
     }
 
-    ByteArray(ByteArray&& other)
+    XByteArray(XByteArray&& other)
         : n(other.n)
         , dn(other.dn)
         , buf(other.buf)
@@ -52,9 +52,9 @@ public:
         other.n = 0;
     }
 
-    ~ByteArray() { ::operator delete(buf); }
+    ~XByteArray() { ::operator delete(buf); }
 
-    ByteArray& operator=(const ByteArray& other)
+    XByteArray& operator=(const XByteArray& other)
     {
         n = other.n;
         dn = other.dn;

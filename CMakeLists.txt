@@ -19,6 +19,7 @@ add_executable(authpp
 
   include/apdu.h
   include/byte_array.h
+  include/bytes.h
   include/ccid_connection.h
   include/logger.h
   include/message.h
