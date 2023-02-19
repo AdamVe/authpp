@@ -166,9 +166,9 @@ ByteBuffer ByteBuffer::getBytes(std::size_t size) const
     return buffer;
 }
 
-unsigned char* ByteBuffer::getRaw() const
+uint8_t* ByteBuffer::array() const
 {
-    return (unsigned char*)data.data();
+    return (uint8_t*)data.data();
 }
 
 const ByteBuffer& ByteBuffer::pointTo(std::size_t i) const

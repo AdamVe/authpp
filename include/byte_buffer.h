@@ -30,7 +30,7 @@ public:
     uint32_t getInt() const;
     ByteBuffer getBytes(std::size_t size) const;
 
-    unsigned char* getRaw() const;
+    uint8_t* array() const;
 
     static void setEndian(std::endian);
     static void setDebugLog(bool);

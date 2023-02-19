@@ -78,11 +78,11 @@ TEST(BytesTest, PutGetBytes)
     ASSERT_EQ(7, b3.getByte());
 }
 
-TEST(BytesTest, GetRaw)
+TEST(BytesTest, Array)
 {
     ByteBuffer b({ 100, 200, 50, 255 });
-    auto* raw { b.getRaw() };
+    auto* a { b.array() };
 
-    ASSERT_EQ(100, raw[0]);
-    ASSERT_EQ(255, raw[3]);
+    ASSERT_EQ(100, a[0]);
+    ASSERT_EQ(255, a[3]);
 }

@@ -34,7 +34,7 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
 {
     int really_written = 0;
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out,
-            message.get().getRaw(),
+            message.get().array(),
             message.get().size(), &really_written, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(
@@ -47,7 +47,7 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
     std::size_t array_len = usb_interface.max_packet_size_in;
     ByteBuffer buffer(array_len);
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-            buffer.getRaw(),
+            buffer.array(),
             array_len, &really_recieved, TIMEOUT);
         err != 0) {
         throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
@@ -67,7 +67,7 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
     while (currentLength < expected_data_size) {
         // receive again
         if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-                buffer.getRaw(),
+                buffer.array(),
                 array_len, &really_recieved, TIMEOUT);
             err != 0) {
             throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
