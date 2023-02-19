@@ -16,12 +16,13 @@ private:
 Apdu::Apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, const Bytes& data)
     : bytes(5 + data.size())
 {
-    bytes.putChar(cla);
-    bytes.putChar(ins);
-    bytes.putChar(p1);
-    bytes.putChar(p2);
-    bytes.putChar(data.size()); // short APDU
-    bytes.putBytes(data);
+    bytes
+        .uint8(cla)
+        .uint8(ins)
+        .uint8(p1)
+        .uint8(p2)
+        .uint8(data.size()) // short APDU
+        .set(data);
 }
 
 const Bytes& Apdu::get() const { return bytes; }

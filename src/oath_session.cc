@@ -29,14 +29,7 @@ using sw_t = std::uint16_t;
 sw_t GetSw(const Bytes& bytes)
 {
     bytes.pointTo(bytes.size() - 2);
-
-    uint8_t sw1;
-    bytes.getChar(sw1);
-
-    uint8_t sw2;
-    bytes.getChar(sw2);
-
-    return sw1 << 8 | sw2;
+    return bytes.uint8() << 8 | bytes.uint8();
 }
 
 Bytes SendInstruction(const CcidConnection& connection, const Apdu& instruction)
@@ -63,12 +56,9 @@ int Parse(const Bytes& bytes, OathSession::MessageData& messageData)
     bytes.pointTo(0);
 
     while (i < bytes.size() - 2) {
-        uint8_t tag;
-        bytes.getChar(tag);
-        uint8_t length;
-        bytes.getChar(length);
-        Bytes data(length);
-        bytes.getBytes(data);
+        auto tag = bytes.uint8();
+        auto length = bytes.uint8();
+        Bytes data = bytes.get(length);
         messageData.emplace_back(OathSession::DataPair { tag, data });
 
         log.d("Parsed tag {:02x} with data {}", tag, messageData.back().bytes);
@@ -107,13 +97,7 @@ OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
 
     Bytes bytes = GetData(message_data, 0);
     if (bytes.size() > 2) {
-        uint8_t major;
-        uint8_t minor;
-        uint8_t patch;
-        bytes.getChar(major);
-        bytes.getChar(minor);
-        bytes.getChar(patch);
-        return OathSession::Version(major, minor, patch);
+        return OathSession::Version(bytes.uint8(), bytes.uint8(), bytes.uint8());
     }
     return OathSession::Version(0, 0, 0);
 }
@@ -131,8 +115,7 @@ OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_da
     if (bytes.size() == 0) {
         return { OathSession::Algorithm::HMAC_SHA1 };
     }
-    uint8_t type;
-    bytes.getChar(type);
+    auto type = bytes.uint8();
 
     if (type == (uint8_t)0x02) {
         return OathSession::Algorithm::HMAC_SHA256;

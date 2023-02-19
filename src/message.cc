@@ -9,14 +9,15 @@ namespace {
 Message::Message(uint8_t type, const Bytes& data)
     : bytes(kHeaderSize + data.size())
 {
-    bytes.putChar(type);
-    bytes.putI32(data.size());
-    bytes.putChar(0x00);
-    bytes.putChar(0x00);
-    bytes.putChar(0x00);
-    bytes.putChar(0x00);
-    bytes.putChar(0x00);
-    bytes.putBytes(data);
+    bytes
+        .uint8(type)
+        .uint32(data.size())
+        .uint8(0x00)
+        .uint8(0x00)
+        .uint8(0x00)
+        .uint8(0x00)
+        .uint8(0x00)
+        .set(data);
 }
 
 Message::~Message() = default;

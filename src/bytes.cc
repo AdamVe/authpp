@@ -21,7 +21,7 @@ Bytes::Bytes(std::initializer_list<uint8_t> il)
     : data(il.size())
 {
     for (auto&& value : il) {
-        putChar(value);
+        uint8(value);
     }
     pointTo(0);
 }
@@ -36,126 +36,134 @@ std::size_t Bytes::size() const
     return data.size();
 }
 
-void Bytes::putChar(unsigned char c)
+Bytes& Bytes::uint8(unsigned char c)
 {
     if (debugLog) {
-        log.d("putChar {:02x} to {} (bytes size: {})", c, pointer, data.size());
+        log.d("uint8 {:02x} to {} (bytes size: {})", c, pointer, data.size());
     }
     assert(pointer < data.size());
     data[pointer++] = c;
+
+    return *this;
 }
 
-void Bytes::getChar(unsigned char& c) const
+unsigned char Bytes::uint8() const
 {
     if (debugLog) {
-        log.d("getChar from {} (bytes size: {})", pointer, data.size());
+        log.d("uint8 from {} (bytes size: {})", pointer, data.size());
     }
     assert(pointer < data.size());
-    c = data[pointer++];
+    unsigned char c = data[pointer++];
     if (debugLog) {
-        log.d("getChar: {:02x}", c);
+        log.d("uint8: {:02x}", c);
     }
+    return c;
 }
 
-void Bytes::putI16(uint16_t i16)
+Bytes& Bytes::uint16(uint16_t i16)
 {
     if (debugLog) {
         log.d("putI16 {:04x} to {} (bytes size: {})", i16, pointer, data.size());
     }
     assert(pointer < data.size() - 1);
     if (endian == std::endian::big) {
-        putChar((uint8_t)(i16 >> 8));
-        putChar((uint8_t)i16);
+        uint8((uint8_t)(i16 >> 8));
+        uint8((uint8_t)i16);
     } else {
-        putChar((uint8_t)i16);
-        putChar((uint8_t)(i16 >> 8));
+        uint8((uint8_t)i16);
+        uint8((uint8_t)(i16 >> 8));
     }
+    return *this;
 }
 
-void Bytes::getI16(uint16_t& i16) const
+uint16_t Bytes::uint16() const
 {
     if (debugLog) {
-        log.d("getI16 from {} (bytes size: {})", pointer, data.size());
+        log.d("uint16 from {} (bytes size: {})", pointer, data.size());
     }
     assert(pointer < data.size() - 1);
-    if (endian == std::endian::big) {
-        i16 = data[pointer++] << 8 | data[pointer++];
-    } else {
-        i16 = data[pointer++] | data[pointer++] << 8;
-    }
+    uint16_t value = (endian == std::endian::big)
+        ? data[pointer++] << 8 | data[pointer++]
+        : data[pointer++] | data[pointer++] << 8;
+
     if (debugLog) {
-        log.d("getI16: {}", i16);
+        log.d("uint16: {}", value);
     }
+
+    return value;
 }
 
-void Bytes::putI32(uint32_t i32)
+Bytes& Bytes::uint32(uint32_t i32)
 {
     if (debugLog) {
         log.d("putI32 {:08x} to {} (bytes size: {})", i32, pointer, data.size());
     }
     assert(pointer < data.size() - 3);
     if (endian == std::endian::big) {
-        putChar((uint8_t)(i32 >> 24));
-        putChar((uint8_t)(i32 >> 16));
-        putChar((uint8_t)(i32 >> 8));
-        putChar((uint8_t)(i32));
+        uint8((uint8_t)(i32 >> 24));
+        uint8((uint8_t)(i32 >> 16));
+        uint8((uint8_t)(i32 >> 8));
+        uint8((uint8_t)(i32));
     } else {
-        putChar((uint8_t)(i32));
-        putChar((uint8_t)(i32 >> 8));
-        putChar((uint8_t)(i32 >> 16));
-        putChar((uint8_t)(i32 >> 24));
+        uint8((uint8_t)(i32));
+        uint8((uint8_t)(i32 >> 8));
+        uint8((uint8_t)(i32 >> 16));
+        uint8((uint8_t)(i32 >> 24));
     }
+
+    return *this;
 }
 
-void Bytes::getI32(uint32_t& i32) const
+uint32_t Bytes::uint32() const
 {
     if (debugLog) {
-        log.d("getI32 from {} (bytes size: {})", pointer, data.size());
+        log.d("uint32 from {} (bytes size: {})", pointer, data.size());
     }
     assert(pointer < data.size() - 3);
-    if (endian == std::endian::big) {
-        i32 = data[pointer++] << 24 | data[pointer++] << 16 | data[pointer++] << 8 | data[pointer++];
-    } else {
-        i32 = data[pointer++] | data[pointer++] << 8 | data[pointer++] << 16 | data[pointer++];
-    }
+    uint32_t value = (endian == std::endian::big)
+        ? data[pointer++] << 24 | data[pointer++] << 16 | data[pointer++] << 8 | data[pointer++]
+        : data[pointer++] | data[pointer++] << 8 | data[pointer++] << 16 | data[pointer++];
 
     if (debugLog) {
-        log.d("getI32: {}", i32);
+        log.d("uint32: {}", value);
     }
+
+    return value;
 }
 
-void Bytes::putBytes(const Bytes& bytes)
+Bytes& Bytes::set(const Bytes& bytes)
 {
-    if (bytes.size() == 0) {
-        return;
+    if (bytes.size() > 0) {
+
+        if (debugLog) {
+            log.d("set {} to {} (bytes size: {})", bytes, pointer, data.size());
+        }
+
+        assert(pointer < data.size() - bytes.size() + 1);
+        bytes.pointTo(0);
+        for (std::size_t i = 0; i < bytes.size(); ++i) {
+            auto b = bytes.uint8();
+            uint8(b);
+        }
     }
 
-    if (debugLog) {
-        log.d("putBytes {} to {} (bytes size: {})", bytes, pointer, data.size());
-    }
-
-    assert(pointer < data.size() - bytes.size() + 1);
-    bytes.pointTo(0);
-    for (std::size_t i = 0; i < bytes.size(); ++i) {
-        uint8_t b;
-        bytes.getChar(b);
-        putChar(b);
-    }
+    return *this;
 }
 
-void Bytes::getBytes(Bytes& bytes) const
+Bytes Bytes::get(std::size_t size) const
 {
     if (debugLog) {
-        log.d("getBytes of size {} from {} (bytes size: {})", bytes.size(), pointer, data.size());
+        log.d("get of size {} from {} (bytes size: {})", size, pointer, data.size());
     }
-    assert(pointer < data.size() - bytes.size() + 1);
+    assert(pointer < data.size() - size + 1);
 
+    Bytes bytes(size);
     bytes.pointTo(0);
     for (std::size_t i = 0; i < bytes.size(); ++i) {
-        uint8_t b;
-        getChar(b);
-        bytes.putChar(b);
+        auto b = uint8();
+        bytes.uint8(b);
     }
+    return bytes;
 }
 
 unsigned char* Bytes::getRaw() const
@@ -163,15 +171,16 @@ unsigned char* Bytes::getRaw() const
     return (unsigned char*)data.data();
 }
 
-void Bytes::pointTo(std::size_t i) const
+const Bytes& Bytes::pointTo(std::size_t i) const
 {
-    if (data.size() == 0) {
+    if (data.size() >= 0) {
+        assert(i < data.size());
+        pointer = i;
+    } else {
         pointer = 0;
-        return;
     }
 
-    assert(i < data.size());
-    pointer = i;
+    return *this;
 }
 
 void Bytes::setEndian(std::endian endian)

@@ -18,17 +18,17 @@ public:
     std::size_t size() const;
     void setSize(std::size_t size);
 
-    void pointTo(std::size_t i) const;
+    const Bytes& pointTo(std::size_t i) const;
 
-    void putChar(unsigned char c);
-    void putI16(uint16_t i16);
-    void putI32(uint32_t i32);
-    void putBytes(const Bytes& bytes);
+    Bytes& uint8(unsigned char c);
+    Bytes& uint16(uint16_t i16);
+    Bytes& uint32(uint32_t i32);
+    Bytes& set(const Bytes& bytes);
 
-    void getChar(unsigned char& c) const;
-    void getI16(uint16_t& i16) const;
-    void getI32(uint32_t& i32) const;
-    void getBytes(Bytes& bytes) const;
+    uint8_t uint8() const;
+    uint16_t uint16() const;
+    uint32_t uint32() const;
+    Bytes get(std::size_t size) const;
 
     unsigned char* getRaw() const;
 
