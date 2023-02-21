@@ -15,9 +15,9 @@ TEST(BytesTest, ConstructionFromInitializerList)
     ByteBuffer b({ 1, 2, 3 });
     ASSERT_EQ(3, b.size());
 
-    ASSERT_EQ(1, b.getByte());
-    ASSERT_EQ(2, b.getByte());
-    ASSERT_EQ(3, b.getByte());
+    ASSERT_EQ(1, b.getByte(0));
+    ASSERT_EQ(2, b.getByte(1));
+    ASSERT_EQ(3, b.getByte(2));
 }
 
 TEST(BytesTest, ConstructionFromEmptyInitializerList)
@@ -38,8 +38,7 @@ TEST(BytesTest, PutGetByte)
     ByteBuffer b(10);
     b.pointTo(5);
     b.putByte(128);
-    b.pointTo(5);
-    ASSERT_EQ(128, b.getByte());
+    ASSERT_EQ(128, b.getByte(5));
 }
 
 TEST(BytesTest, PutGetShort)
@@ -47,8 +46,7 @@ TEST(BytesTest, PutGetShort)
     ByteBuffer b(10);
     b.pointTo(7);
     b.putShort(10400);
-    b.pointTo(7);
-    ASSERT_EQ(10400, b.getShort());
+    ASSERT_EQ(10400, b.getShort(7));
 }
 
 TEST(BytesTest, PutGetInt)
@@ -56,8 +54,7 @@ TEST(BytesTest, PutGetInt)
     ByteBuffer b(10);
     b.pointTo(2);
     b.putInt(256000);
-    b.pointTo(2);
-    ASSERT_EQ(256000, b.getInt());
+    ASSERT_EQ(256000, b.getInt(2));
 }
 
 TEST(BytesTest, PutGetBytes)
@@ -68,14 +65,12 @@ TEST(BytesTest, PutGetBytes)
     b2.pointTo(5);
     b2.putBytes(b);
 
-    b2.pointTo(5);
-    ByteBuffer b3 = b2.getBytes(4);
+    ByteBuffer b3 = b2.getBytes(5, 4);
 
-    b3.pointTo(0);
-    ASSERT_EQ(10, b3.getByte());
-    ASSERT_EQ(9, b3.getByte());
-    ASSERT_EQ(8, b3.getByte());
-    ASSERT_EQ(7, b3.getByte());
+    ASSERT_EQ(10, b3.getByte(0));
+    ASSERT_EQ(9, b3.getByte(1));
+    ASSERT_EQ(8, b3.getByte(2));
+    ASSERT_EQ(7, b3.getByte(3));
 }
 
 TEST(BytesTest, Array)
