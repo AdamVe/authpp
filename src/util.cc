@@ -9,9 +9,8 @@ namespace authpp::util {
 std::string BytesToString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
-    buffer.pointTo(0);
     for (std::size_t i = 0; i < buffer.size(); ++i) {
-        retval += fmt::format("{:02x} ", buffer.getByte());
+        retval += fmt::format("{:02x} ", buffer.getByte(i));
     }
     retval += "]";
     retval += fmt::format("({})", buffer.size());
@@ -21,9 +20,8 @@ std::string BytesToString(const ByteBuffer& buffer)
 std::string BytesToAsciiString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
-    buffer.pointTo(0);
     for (std::size_t i = 0; i < buffer.size(); ++i) {
-        uint8_t b = buffer.getByte();
+        uint8_t b = buffer.getByte(i);
         if (b >= 32 && b < 127) {
             retval += b;
         } else {

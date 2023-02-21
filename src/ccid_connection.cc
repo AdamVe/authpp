@@ -58,12 +58,11 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
     log.v("recv {}", buffer);
 
     // size of data
-    buffer.pointTo(1);
-    uint32_t expected_data_size = buffer.getInt();
+    uint32_t expected_data_size = buffer.getInt(1);
     int currentLength = really_recieved - 10;
 
-    buffer.pointTo(10);
-    ByteBuffer response_buffer = buffer.getBytes(expected_data_size);
+    ByteBuffer response_buffer = buffer.getBytes(10, currentLength);
+    response_buffer.setSize(expected_data_size);
     while (currentLength < expected_data_size) {
         // receive again
         if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
@@ -74,10 +73,10 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
                 libusb_error_name(err), err));
         }
 
+        response_buffer.pointTo(currentLength);
         buffer.setSize(really_recieved);
         response_buffer.putBytes(buffer);
         currentLength += really_recieved;
-        response_buffer.setSize(currentLength);
     }
 
     if (transferred != nullptr) {

@@ -28,8 +28,8 @@ using sw_t = std::uint16_t;
 
 sw_t GetSw(const ByteBuffer& buffer)
 {
-    buffer.pointTo(buffer.size() - 2);
-    return buffer.getByte() << 8 | buffer.getByte();
+    std::size_t last_index = buffer.size() - 1;
+    return buffer.getByte(last_index - 1) << 8 | buffer.getByte(last_index);
 }
 
 ByteBuffer SendInstruction(const CcidConnection& connection, const Apdu& instruction)
@@ -53,12 +53,10 @@ int Parse(const ByteBuffer& buffer, OathSession::MessageData& messageData)
         return -1;
     }
 
-    buffer.pointTo(0);
-
     while (i < buffer.size() - 2) {
-        auto tag = buffer.getByte();
-        auto length = buffer.getByte();
-        ByteBuffer data = buffer.getBytes(length);
+        auto tag = buffer.getByte(i);
+        auto length = buffer.getByte(i + 1);
+        ByteBuffer data = buffer.getBytes(i + 2, length);
         messageData.emplace_back(OathSession::DataPair { tag, data });
 
         log.d("Parsed tag {:02x} with data {}", tag, messageData.back().buffer);
@@ -72,7 +70,6 @@ int Parse(const ByteBuffer& buffer, OathSession::MessageData& messageData)
 ByteBuffer GetData(const OathSession::MessageData& message_data, std::size_t index)
 {
     if (index < message_data.size()) {
-        message_data[index].buffer.pointTo(0);
         return message_data[index].buffer;
     }
     return {};
@@ -97,7 +94,7 @@ OathSession::Version ParseVersion(const OathSession::MessageData& message_data)
 
     ByteBuffer buffer = GetData(message_data, 0);
     if (buffer.size() > 2) {
-        return OathSession::Version(buffer.getByte(), buffer.getByte(), buffer.getByte());
+        return OathSession::Version(buffer.getByte(0), buffer.getByte(1), buffer.getByte(2));
     }
     return OathSession::Version(0, 0, 0);
 }
@@ -115,7 +112,7 @@ OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_da
     if (buffer.size() == 0) {
         return { OathSession::Algorithm::HMAC_SHA1 };
     }
-    auto type = buffer.getByte();
+    auto type = buffer.getByte(0);
 
     if (type == 0x02) {
         return OathSession::Algorithm::HMAC_SHA256;

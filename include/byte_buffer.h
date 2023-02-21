@@ -18,17 +18,18 @@ public:
     std::size_t size() const;
     void setSize(std::size_t size);
 
-    const ByteBuffer& pointTo(std::size_t i) const;
+    const ByteBuffer& pointTo(std::size_t i);
 
     ByteBuffer& putByte(unsigned char c);
     ByteBuffer& putShort(uint16_t i16);
     ByteBuffer& putInt(uint32_t i32);
     ByteBuffer& putBytes(const ByteBuffer& buffer);
 
-    uint8_t getByte() const;
-    uint16_t getShort() const;
-    uint32_t getInt() const;
-    ByteBuffer getBytes(std::size_t size) const;
+    uint8_t getByte(std::size_t index) const;
+    uint16_t getShort(std::size_t index) const;
+    uint32_t getInt(std::size_t index) const;
+
+    ByteBuffer getBytes(std::size_t from_index, std::size_t size) const;
 
     uint8_t* array() const;
 
@@ -36,7 +37,7 @@ public:
     static void setDebugLog(bool);
 
 private:
-    mutable std::size_t pointer = 0;
+    std::size_t pointer = 0;
     std::vector<uint8_t> data;
 
     static inline std::endian endian { std::endian::little };

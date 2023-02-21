@@ -47,19 +47,6 @@ ByteBuffer& ByteBuffer::putByte(unsigned char c)
     return *this;
 }
 
-unsigned char ByteBuffer::getByte() const
-{
-    if (debugLog) {
-        log.d("getByte from {} (buffer size: {})", pointer, data.size());
-    }
-    assert(pointer < data.size());
-    unsigned char c = data[pointer++];
-    if (debugLog) {
-        log.d("getByte: {:02x}", c);
-    }
-    return c;
-}
-
 ByteBuffer& ByteBuffer::putShort(uint16_t i16)
 {
     if (debugLog) {
@@ -74,23 +61,6 @@ ByteBuffer& ByteBuffer::putShort(uint16_t i16)
         putByte((uint8_t)(i16 >> 8));
     }
     return *this;
-}
-
-uint16_t ByteBuffer::getShort() const
-{
-    if (debugLog) {
-        log.d("getShort from {} (buffer size: {})", pointer, data.size());
-    }
-    assert(pointer < data.size() - 1);
-    uint16_t value = (endian == std::endian::big)
-        ? data[pointer++] << 8 | data[pointer++]
-        : data[pointer++] | data[pointer++] << 8;
-
-    if (debugLog) {
-        log.d("getShort: {}", value);
-    }
-
-    return value;
 }
 
 ByteBuffer& ByteBuffer::putInt(uint32_t i32)
@@ -114,35 +84,18 @@ ByteBuffer& ByteBuffer::putInt(uint32_t i32)
     return *this;
 }
 
-uint32_t ByteBuffer::getInt() const
-{
-    if (debugLog) {
-        log.d("getInt from {} (buffer size: {})", pointer, data.size());
-    }
-    assert(pointer < data.size() - 3);
-    uint32_t value = (endian == std::endian::big)
-        ? data[pointer++] << 24 | data[pointer++] << 16 | data[pointer++] << 8 | data[pointer++]
-        : data[pointer++] | data[pointer++] << 8 | data[pointer++] << 16 | data[pointer++];
-
-    if (debugLog) {
-        log.d("getInt: {}", value);
-    }
-
-    return value;
-}
-
 ByteBuffer& ByteBuffer::putBytes(const ByteBuffer& buffer)
 {
     if (buffer.size() > 0) {
 
         if (debugLog) {
             log.d("putBytes {} to {} (buffer size: {})", buffer, pointer, data.size());
+            log.d("pointer: {} assert conditin {}", pointer, data.size() - buffer.size() + 1);
         }
 
         assert(pointer < data.size() - buffer.size() + 1);
-        buffer.pointTo(0);
         for (std::size_t i = 0; i < buffer.size(); ++i) {
-            auto b = buffer.getByte();
+            auto b = buffer.getByte(i);
             putByte(b);
         }
     }
@@ -150,17 +103,64 @@ ByteBuffer& ByteBuffer::putBytes(const ByteBuffer& buffer)
     return *this;
 }
 
-ByteBuffer ByteBuffer::getBytes(std::size_t size) const
+unsigned char ByteBuffer::getByte(std::size_t i) const
 {
     if (debugLog) {
-        log.d("getBytes of size {} from {} (buffer size: {})", size, pointer, data.size());
+        log.d("getByte from {} (buffer size: {})", i, data.size());
     }
-    assert(pointer < data.size() - size + 1);
+    assert(i < data.size());
+    unsigned char c = data[i];
+    if (debugLog) {
+        log.d("getByte: {:02x}", c);
+    }
+    return c;
+}
+
+uint16_t ByteBuffer::getShort(std::size_t i) const
+{
+    if (debugLog) {
+        log.d("getShort from {} (buffer size: {})", i, data.size());
+    }
+    assert(i < data.size() - 1);
+    uint16_t value = (endian == std::endian::big)
+        ? data[i] << 8 | data[i + 1]
+        : data[i] | data[i + 1] << 8;
+
+    if (debugLog) {
+        log.d("getShort: {}", value);
+    }
+
+    return value;
+}
+
+uint32_t ByteBuffer::getInt(std::size_t i) const
+{
+    if (debugLog) {
+        log.d("getInt from {} (buffer size: {})", i, data.size());
+    }
+    assert(i < data.size() - 3);
+    uint32_t value = (endian == std::endian::big)
+        ? data[i] << 24 | data[i + 1] << 16 | data[i + 2] << 8 | data[i + 3]
+        : data[i] | data[i + 1] << 8 | data[i + 2] << 16 | data[i + 3];
+
+    if (debugLog) {
+        log.d("getInt({}): {}", i, value);
+    }
+
+    return value;
+}
+
+ByteBuffer ByteBuffer::getBytes(std::size_t from_index, std::size_t size) const
+{
+    if (debugLog) {
+        log.d("getBytes from {} of size {} from {} (buffer size: {})", from_index, size, *this, data.size());
+        log.d("from_index: {} assert condition {}", from_index, data.size() - size + 1);
+    }
+    assert(from_index < data.size() - size + 1);
 
     ByteBuffer buffer(size);
-    buffer.pointTo(0);
-    for (std::size_t i = 0; i < buffer.size(); ++i) {
-        auto b = getByte();
+    for (std::size_t i = from_index; i < from_index + buffer.size(); ++i) {
+        auto b = getByte(i);
         buffer.putByte(b);
     }
     return buffer;
@@ -171,7 +171,7 @@ uint8_t* ByteBuffer::array() const
     return (uint8_t*)data.data();
 }
 
-const ByteBuffer& ByteBuffer::pointTo(std::size_t i) const
+const ByteBuffer& ByteBuffer::pointTo(std::size_t i)
 {
     if (data.size() > 0) {
         assert(i < data.size());
