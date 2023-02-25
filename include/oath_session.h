@@ -7,6 +7,33 @@
 
 namespace authpp {
 
+enum class Type : uint8_t {
+    HOTP = 0x10,
+    TOTP = 0x20
+};
+
+enum class Algorithm : uint8_t {
+    HMAC_SHA1 = 0x01,
+    HMAC_SHA256 = 0x02,
+    HMAC_SHA512 = 0x03
+};
+
+struct Credential {
+    std::string name;
+    Type type;
+    Algorithm algorithm;
+
+    static Credential fromByteBuffer(const ByteBuffer& buffer)
+    {
+        uint8_t name_length = buffer.size() - 1;
+        auto typeAlgo = buffer.getByte(0);
+        return Credential(
+            std::string(buffer.array() + 1, buffer.array() + buffer.size()),
+            static_cast<Type>(typeAlgo & 0xF0),
+            static_cast<Algorithm>(typeAlgo & 0x0F));
+    }
+};
+
 class CcidConnection;
 
 class OathSession {
@@ -29,12 +56,6 @@ public:
         const int major;
         const int minor;
         const int patch;
-    };
-
-    enum class Algorithm : int {
-        HMAC_SHA1 = 0x01,
-        HMAC_SHA256 = 0x02,
-        HMAC_SHA512 = 0x03
     };
 
     OathSession(const CcidConnection& connection);

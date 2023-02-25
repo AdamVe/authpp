@@ -21,7 +21,7 @@ set(HEADER_LIST
   "${authpp_SOURCE_DIR}/include/fmt/fmt_byte_buffer.h"
   "${authpp_SOURCE_DIR}/include/fmt/fmt_logger.h"
   "${authpp_SOURCE_DIR}/include/fmt/fmt_message.h"
-  "${authpp_SOURCE_DIR}/include/fmt/fmt_oath_version.h"
+  "${authpp_SOURCE_DIR}/include/fmt/fmt_oath.h"
   )
 
 add_library(

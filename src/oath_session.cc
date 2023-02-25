@@ -7,6 +7,7 @@
 #include "apdu.h"
 #include "ccid_connection.h"
 #include "fmt/fmt_byte_buffer.h"
+#include "fmt/fmt_oath.h"
 #include "fmt/fmt_oath_version.h"
 #include "logger.h"
 #include "message.h"
@@ -105,22 +106,22 @@ std::string ParseName(const OathSession::MessageData& message_data)
     return "TODO";
 }
 
-OathSession::Algorithm ParseAlgorithm(const OathSession::MessageData& message_data)
+Algorithm ParseAlgorithm(const OathSession::MessageData& message_data)
 {
     ByteBuffer buffer = GetData(message_data, 3);
 
     if (buffer.size() == 0) {
-        return { OathSession::Algorithm::HMAC_SHA1 };
+        return { Algorithm::HMAC_SHA1 };
     }
     auto type = buffer.getByte(0);
 
     if (type == 0x02) {
-        return OathSession::Algorithm::HMAC_SHA256;
+        return Algorithm::HMAC_SHA256;
     } else if (type == 0x03) {
-        return OathSession::Algorithm::HMAC_SHA512;
+        return Algorithm::HMAC_SHA512;
     }
 
-    return OathSession::Algorithm::HMAC_SHA1;
+    return Algorithm::HMAC_SHA1;
 }
 
 OathSession::OathSession(const CcidConnection& connection)
@@ -142,15 +143,11 @@ void OathSession::ListCredentials() const
     MessageData parsed_response;
     if (auto tags_found = Parse(list_response, parsed_response); tags_found > 0) {
         log.d("Success parsing data. {} tags were found", tags_found);
-    }
 
-    for (auto&& credential : parsed_response) {
-
-        char c_name[255] { '\0' };
-        // TODO
-        // std::memcpy(c_name, credential.bytes.get_raw() + 1, credential.bytes.size() - 1);
-        // std::string name(c_name);
-        log.d("Found account with name `{}`, type X and algorithm Y", name);
+        for (auto&& response_buffer : parsed_response) {
+            auto credential = Credential::fromByteBuffer(response_buffer.buffer);
+            log.d("Found {}", credential);
+        }
     }
 }
 
