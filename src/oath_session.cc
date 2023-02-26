@@ -15,6 +15,7 @@
 namespace authpp {
 
 #define APDU_SUCCESS 0x9000
+#define APDU_MORE_DATA 0x6100
 
 namespace {
 
@@ -28,42 +29,66 @@ using sw_t = std::uint16_t;
 
 sw_t GetSw(const ByteBuffer& buffer)
 {
+
+    if (buffer.size() < 2) {
+        log.e("Invalid data: size < 2");
+        return 0x0000;
+    }
+
     std::size_t last_index = buffer.size() - 1;
     return buffer.getByte(last_index - 1) << 8 | buffer.getByte(last_index);
 }
 
+bool isSuccess(uint16_t sw) {
+    return (sw & APDU_SUCCESS) == APDU_SUCCESS;
+}
+
+bool isMoreData(uint16_t sw) {
+    return (sw & APDU_MORE_DATA) == APDU_MORE_DATA;
+}
+
+ByteBuffer SendInstruction(const CcidConnection& connection, const Apdu& instruction);
+
 ByteBuffer SendInstruction(const CcidConnection& connection, const Apdu& instruction)
 {
     Message ccid_message((uint8_t)0x6f, instruction.get());
-    auto const response = connection.Transcieve(ccid_message);
-    return response;
+    auto response = connection.Transcieve(ccid_message);
+
+    auto sw { GetSw(response) };
+    if (isSuccess(sw)) {
+        log.v("SW is success");
+        return response;
+    } else if (isMoreData(sw)) {
+        response.setSize(response.size()-2);
+        while (isMoreData(sw)) {
+            Message ccid_message(0x6f, {0x00, 0xa5, 0x00, 0x00});
+            auto remaining = connection.Transcieve(ccid_message);
+            sw = GetSw(remaining);
+            remaining.setSize(remaining.size() - 2);
+            auto currentSize = response.size();
+            response.setSize(response.size() + remaining.size());
+            response.pointTo(currentSize);
+            response.putBytes(remaining);
+        }
+        return response;
+    }
+
+    return {};
 }
 
 int Parse(const ByteBuffer& buffer, OathSession::MessageData& messageData)
 {
-    std::size_t i = 0;
-
-    if (buffer.size() < 2) {
-        log.e("Invalid data: size < 2");
-        return -1;
-    }
-
-    if (GetSw(buffer) != APDU_SUCCESS) {
-        log.e("Invalid data: sw not success");
-        return -1;
-    }
-
-    while (i < buffer.size() - 2) {
+    int32_t i = 0;
+    while (i < static_cast<int32_t>(buffer.size()) - 2) {
         auto tag = buffer.getByte(i);
         auto length = buffer.getByte(i + 1);
         ByteBuffer data = buffer.getBytes(i + 2, length);
         messageData.emplace_back(OathSession::DataPair { tag, data });
 
-        log.d("Parsed tag {:02x} with data {}", tag, messageData.back().buffer);
+        //log.d("Parsed tag {:02x} with data {}", tag, messageData.back().buffer);
 
         i += length + 2;
     }
-
     return messageData.size();
 }
 

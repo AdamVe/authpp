@@ -59,7 +59,7 @@ int main()
 
             OathSession oath_session(conn);
             oath_session.ListCredentials();
-            oath_session.CalculateAll();
+            //oath_session.CalculateAll();
         }
     }
 

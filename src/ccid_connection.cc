@@ -55,7 +55,6 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
     };
 
     buffer.setSize(really_recieved);
-    log.v("recv {}", buffer);
 
     // size of data
     uint32_t expected_data_size = buffer.getInt(1);
@@ -73,8 +72,8 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
                 libusb_error_name(err), err));
         }
 
-        response_buffer.pointTo(currentLength);
         buffer.setSize(really_recieved);
+        response_buffer.pointTo(currentLength);
         response_buffer.putBytes(buffer);
         currentLength += really_recieved;
     }
@@ -83,6 +82,7 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
         *transferred = really_recieved;
     }
 
+    log.v("recv {}", response_buffer);
     return response_buffer;
 }
 
