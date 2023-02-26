@@ -8,7 +8,6 @@
 #include "ccid_connection.h"
 #include "fmt/fmt_byte_buffer.h"
 #include "fmt/fmt_oath.h"
-#include "fmt/fmt_oath_version.h"
 #include "logger.h"
 #include "message.h"
 #include "util.h"
