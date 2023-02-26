@@ -12,6 +12,8 @@ namespace {
     Logger log("byte_buffer");
 }
 
+ByteBuffer::ByteBuffer() = default;
+
 ByteBuffer::ByteBuffer(std::size_t size)
     : data(size)
 {

@@ -29,10 +29,11 @@ namespace oath {
         static Credential fromByteBuffer(const ByteBuffer& buffer)
         {
             auto typeAlgo = buffer.getByte(0);
-            return Credential(
+            return Credential {
                 std::string(buffer.array() + 1, buffer.array() + buffer.size()),
                 static_cast<Type>(typeAlgo & 0xF0),
-                static_cast<Algorithm>(typeAlgo & 0x0F));
+                static_cast<Algorithm>(typeAlgo & 0x0F)
+            };
         }
     };
 

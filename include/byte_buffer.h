@@ -11,6 +11,9 @@ namespace authpp {
 
 class ByteBuffer {
 public:
+
+    ByteBuffer();
+
     explicit ByteBuffer(std::size_t size);
 
     explicit ByteBuffer(std::initializer_list<uint8_t> il);

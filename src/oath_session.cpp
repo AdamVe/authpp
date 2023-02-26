@@ -61,7 +61,7 @@ ByteBuffer sendInstruction(const CcidConnection& connection, const Apdu& instruc
     } else if (isMoreData(sw)) {
         response.setSize(response.size() - 2);
         while (isMoreData(sw)) {
-            Message send_remaining(0x6f, { 0x00, 0xa5, 0x00, 0x00 });
+            Message send_remaining(0x6f, ByteBuffer { 0x00, 0xa5, 0x00, 0x00 });
             auto remaining = connection.Transcieve(send_remaining);
             sw = getSw(remaining);
             remaining.setSize(remaining.size() - 2);
@@ -135,7 +135,7 @@ Algorithm parseAlgorithm(const MessageData& message_data)
     ByteBuffer buffer = getData(message_data, 3);
 
     if (buffer.size() == 0) {
-        return { Algorithm::HMAC_SHA1 };
+        return Algorithm::HMAC_SHA1;
     }
     auto type = buffer.getByte(0);
 
