@@ -98,7 +98,6 @@ std::string UsbDevice::ToString() const
 std::string UsbDevice::GetStringDescriptor(std::size_t index) const
 {
     if (index == 0) {
-        log.d("Descriptor index invalid");
         return {};
     }
 

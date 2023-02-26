@@ -16,12 +16,10 @@ using namespace authpp;
 int main()
 {
     Logger log("main");
-    Logger::setLevel(Logger::Level::kVerbose);
-    // ByteBuffer::setDebugLog(true);
+    Logger::setLevel(Logger::Level::kDebug);
 
     libusb_init(nullptr);
-    // libusb_set_option(nullptr, LIBUSB_OPTION_LOG_LEVEL,
-    // LIBUSB_LOG_LEVEL_DEBUG);
+    // libusb_set_option(nullptr, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
 
     auto* version { libusb_get_version() };
 
@@ -57,9 +55,9 @@ int main()
             UsbDevice::Connection usbConnection(yubiKey);
             CcidConnection conn(usbConnection);
 
-            OathSession oath_session(conn);
-            oath_session.ListCredentials();
-            //oath_session.CalculateAll();
+            oath::Session oath_session(conn);
+            oath_session.listCredentials();
+            // oath_session.calculateAll();
         }
     }
 

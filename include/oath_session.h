@@ -7,37 +7,36 @@
 
 namespace authpp {
 
-enum class Type : uint8_t {
-    HOTP = 0x10,
-    TOTP = 0x20
-};
-
-enum class Algorithm : uint8_t {
-    HMAC_SHA1 = 0x01,
-    HMAC_SHA256 = 0x02,
-    HMAC_SHA512 = 0x03
-};
-
-struct Credential {
-    std::string name;
-    Type type;
-    Algorithm algorithm;
-
-    static Credential fromByteBuffer(const ByteBuffer& buffer)
-    {
-        uint8_t name_length = buffer.size() - 1;
-        auto typeAlgo = buffer.getByte(0);
-        return Credential(
-            std::string(buffer.array() + 1, buffer.array() + buffer.size()),
-            static_cast<Type>(typeAlgo & 0xF0),
-            static_cast<Algorithm>(typeAlgo & 0x0F));
-    }
-};
-
 class CcidConnection;
 
-class OathSession {
-public:
+namespace oath {
+    enum class Type : uint8_t {
+        HOTP = 0x10,
+        TOTP = 0x20
+    };
+
+    enum class Algorithm : uint8_t {
+        HMAC_SHA1 = 0x01,
+        HMAC_SHA256 = 0x02,
+        HMAC_SHA512 = 0x03
+    };
+
+    struct Credential {
+        std::string name;
+        Type type;
+        Algorithm algorithm;
+
+        static Credential fromByteBuffer(const ByteBuffer& buffer)
+        {
+            uint8_t name_length = buffer.size() - 1;
+            auto typeAlgo = buffer.getByte(0);
+            return Credential(
+                std::string(buffer.array() + 1, buffer.array() + buffer.size()),
+                static_cast<Type>(typeAlgo & 0xF0),
+                static_cast<Algorithm>(typeAlgo & 0x0F));
+        }
+    };
+
     struct DataPair {
         uint8_t tag;
         ByteBuffer buffer;
@@ -58,20 +57,23 @@ public:
         const int patch;
     };
 
-    OathSession(const CcidConnection& connection);
+    class Session {
+    public:
+        Session(const CcidConnection& connection);
 
-    void ListCredentials() const;
-    void CalculateAll() const;
+        void listCredentials() const;
+        void calculateAll() const;
 
-    const Version& GetVersion() const;
+        const Version& getVersion() const;
 
-private:
-    const CcidConnection& connection;
-    MessageData message_data;
-    const Version version;
-    const std::string name;
-    const ByteBuffer challenge;
-    const Algorithm algorithm;
-};
+    private:
+        const CcidConnection& connection;
+        MessageData message_data;
+        const Version version;
+        const std::string name;
+        const ByteBuffer challenge;
+        const Algorithm algorithm;
+    };
 
+} // namespace oath
 } // namespace authpp
