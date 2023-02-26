@@ -194,18 +194,16 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
                         }
                     }
 
-                    if (ein > -1 && eout > -1) {
-                        log.v(
-                            "Found {:02x}:{:02x} with on interface {} with "
-                            "altsetting {} "
-                            "and endpoints IN={:02x}({}) OUT={:02x}({})",
-                            iClass, iSubClass, interfaceNum, altsettingNum, ein, max_in,
-                            eout, max_out);
-                        return UsbDevice::Interface {
-                            interfaceNum, altsettingNum, (unsigned char)ein,
-                            (unsigned char)eout, max_in, max_out
-                        };
-                    }
+                    log.v(
+                        "Found {:02x}:{:02x} with on interface {} with "
+                        "altsetting {} "
+                        "and endpoints IN={:02x}({}) OUT={:02x}({})",
+                        iClass, iSubClass, interfaceNum, altsettingNum, ein, max_in,
+                        eout, max_out);
+                    return UsbDevice::Interface {
+                        interfaceNum, altsettingNum, (unsigned char)ein,
+                        (unsigned char)eout, max_in, max_out
+                    };
                 }
             }
         }

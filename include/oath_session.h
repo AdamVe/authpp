@@ -28,7 +28,6 @@ namespace oath {
 
         static Credential fromByteBuffer(const ByteBuffer& buffer)
         {
-            uint8_t name_length = buffer.size() - 1;
             auto typeAlgo = buffer.getByte(0);
             return Credential(
                 std::string(buffer.array() + 1, buffer.array() + buffer.size()),
@@ -59,7 +58,7 @@ namespace oath {
 
     class Session {
     public:
-        Session(const CcidConnection& connection);
+        explicit Session(const CcidConnection& connection);
 
         void listCredentials() const;
         void calculateAll() const;

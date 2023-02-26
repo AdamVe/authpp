@@ -61,8 +61,8 @@ ByteBuffer sendInstruction(const CcidConnection& connection, const Apdu& instruc
     } else if (isMoreData(sw)) {
         response.setSize(response.size() - 2);
         while (isMoreData(sw)) {
-            Message ccid_message(0x6f, { 0x00, 0xa5, 0x00, 0x00 });
-            auto remaining = connection.Transcieve(ccid_message);
+            Message send_remaining(0x6f, { 0x00, 0xa5, 0x00, 0x00 });
+            auto remaining = connection.Transcieve(send_remaining);
             sw = getSw(remaining);
             remaining.setSize(remaining.size() - 2);
             auto currentSize = response.size();
