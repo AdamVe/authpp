@@ -1,12 +1,12 @@
 
 set(SOURCE_LIST
-  "${authpp_SOURCE_DIR}/src/apdu.cc"
-  "${authpp_SOURCE_DIR}/src/byte_buffer.cc"
-  "${authpp_SOURCE_DIR}/src/ccid_connection.cc"
-  "${authpp_SOURCE_DIR}/src/message.cc"
-  "${authpp_SOURCE_DIR}/src/oath_session.cc"
-  "${authpp_SOURCE_DIR}/src/usb_device.cc"
-  "${authpp_SOURCE_DIR}/src/util.cc"
+  "${authpp_SOURCE_DIR}/src/apdu.cpp"
+  "${authpp_SOURCE_DIR}/src/byte_buffer.cpp"
+  "${authpp_SOURCE_DIR}/src/ccid_connection.cpp"
+  "${authpp_SOURCE_DIR}/src/message.cpp"
+  "${authpp_SOURCE_DIR}/src/oath_session.cpp"
+  "${authpp_SOURCE_DIR}/src/usb_device.cpp"
+  "${authpp_SOURCE_DIR}/src/util.cpp"
   )
 
 set(HEADER_LIST
