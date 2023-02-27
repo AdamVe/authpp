@@ -4,10 +4,9 @@
 #include <vector>
 
 #include "byte_buffer.h"
+#include "ccid_connection.h"
 
 namespace authpp {
-
-class CcidConnection;
 
 namespace oath {
     enum class Type : uint8_t {
@@ -37,13 +36,6 @@ namespace oath {
         }
     };
 
-    struct DataPair {
-        uint8_t tag;
-        ByteBuffer buffer;
-    };
-
-    using MessageData = std::vector<DataPair>;
-
     struct Version {
         Version(int major, int minor, int patch)
             : major(major)
@@ -67,12 +59,17 @@ namespace oath {
         const Version& getVersion() const;
 
     private:
+        struct Properties {
+            const Version version;
+            const std::string name;
+            const ByteBuffer challenge;
+            const Algorithm algorithm;
+        };
+
         const CcidConnection& connection;
-        MessageData message_data;
-        const Version version;
-        const std::string name;
-        const ByteBuffer challenge;
-        const Algorithm algorithm;
+        const Properties properties;
+
+        Properties initProperties(Response&&) const;
     };
 
 } // namespace oath

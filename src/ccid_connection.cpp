@@ -2,6 +2,7 @@
 
 #include <libusb-1.0/libusb.h>
 
+#include "apdu.h"
 #include "logger.h"
 #include "message.h"
 #include "usb_device.h"
@@ -23,14 +24,105 @@ CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
     , usb_interface()
 {
     log.v("CCID connection opened");
-    Setup();
-    auto atr { Transcieve(Message(0x62, {})) };
+    setup();
+    auto atr { transcieve(Message(0x62, {})) };
     log.v("ATR: {}", atr);
 }
 
 CcidConnection::~CcidConnection() { log.v("CCID connection closed"); }
 
-ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) const
+std::size_t Response::size() const { return data.size(); }
+
+void Response::put(uint8_t tag, const ByteBuffer& buffer)
+{
+    data.emplace_back(tag, buffer);
+}
+
+ByteBuffer Response::getByIndex(int i) const
+{
+    if (i < size()) {
+        return data[i].buffer;
+    }
+
+    return {};
+}
+
+//
+using sw_t = std::uint16_t;
+
+sw_t getSw(const ByteBuffer& buffer)
+{
+
+    if (buffer.size() < 2) {
+        log.e("Invalid data: size < 2");
+        return 0x0000;
+    }
+
+    std::size_t last_index = buffer.size() - 1;
+    return buffer.getByte(last_index - 1) << 8 | buffer.getByte(last_index);
+}
+
+bool isSuccess(uint16_t sw)
+{
+    return sw == APDU_SUCCESS;
+}
+
+bool isMoreData(uint16_t sw)
+{
+    return sw >> 8 == 0x61;
+}
+
+bool isAuthRequired(uint16_t sw)
+{
+    return sw == APDU_AUTH_REQUIRED;
+}
+//
+
+Response CcidConnection::parse(const ByteBuffer& buffer) const
+{
+    Response response;
+    int32_t i = 0;
+    while (i < static_cast<int32_t>(buffer.size()) - 2) {
+        auto tag = buffer.getByte(i);
+        auto length = buffer.getByte(i + 1);
+        ByteBuffer data = buffer.getBytes(i + 2, length);
+        response.put(tag, data);
+
+        // log.d("Parsed tag {:02x} with data {}", tag, data);
+
+        i += length + 2;
+    }
+    return response;
+}
+
+Response CcidConnection::send(const Apdu& instruction) const
+{
+    Message ccid_message(0x6f, instruction.get());
+    auto buffer = transcieve(ccid_message);
+
+    auto sw { getSw(buffer) };
+    if (isSuccess(sw)) {
+        // success
+    } else if (isMoreData(sw)) {
+        buffer.setSize(buffer.size() - 2);
+        while (isMoreData(sw)) {
+            Message send_remaining(0x6f, ByteBuffer { 0x00, 0xa5, 0x00, 0x00 });
+            auto remaining = transcieve(send_remaining);
+            sw = getSw(remaining);
+            remaining.setSize(remaining.size() - 2);
+            auto currentSize = buffer.size();
+            buffer.setSize(buffer.size() + remaining.size());
+            buffer.pointTo(currentSize);
+            buffer.putBytes(remaining);
+        }
+    } else if (isAuthRequired(sw)) {
+        log.e("Auth required");
+    }
+
+    return parse(buffer);
+}
+
+ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) const
 {
     int really_written = 0;
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out,
@@ -86,7 +178,7 @@ ByteBuffer CcidConnection::Transcieve(const Message& message, int* transferred) 
     return response_buffer;
 }
 
-void CcidConnection::Setup()
+void CcidConnection::setup()
 {
     usb_interface = handle.claimInterface(USB_CLASS_CSCID, 0);
     if (usb_interface.number == -1) {

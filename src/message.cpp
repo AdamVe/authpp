@@ -13,7 +13,7 @@ Message::Message(uint8_t type, const ByteBuffer& data)
     buffer
         .putByte(type)
         .putInt(data.size())
-        .putBytes(ByteBuffer{0x00, 0x00, 0x00, 0x00, 0x00 })
+        .putBytes(ByteBuffer { 0x00, 0x00, 0x00, 0x00, 0x00 })
         .putBytes(data);
 }
 
