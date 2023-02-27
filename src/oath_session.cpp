@@ -16,6 +16,11 @@ namespace authpp::oath {
 
 #define APDU_SUCCESS 0x9000
 #define APDU_MORE_DATA 0x6100
+#define APDU_AUTH_REQUIRED 0x6982
+#define APDU_NO_SPACE 0x6a84
+#define APDU_WRONG_SYNTAX 0x6a80
+#define APDU_GENERIC_ERROR 0x6581
+
 
 namespace {
 
@@ -41,12 +46,17 @@ sw_t getSw(const ByteBuffer& buffer)
 
 bool isSuccess(uint16_t sw)
 {
-    return (sw & APDU_SUCCESS) == APDU_SUCCESS;
+    return sw == APDU_SUCCESS;
 }
 
 bool isMoreData(uint16_t sw)
 {
-    return (sw & APDU_MORE_DATA) == APDU_MORE_DATA;
+    return sw >> 8 == 0x61;
+}
+
+bool isAuthRequired(uint16_t sw)
+{
+    return sw == APDU_AUTH_REQUIRED;
 }
 
 ByteBuffer sendInstruction(const CcidConnection& connection, const Apdu& instruction)
@@ -56,7 +66,6 @@ ByteBuffer sendInstruction(const CcidConnection& connection, const Apdu& instruc
 
     auto sw { getSw(response) };
     if (isSuccess(sw)) {
-        log.v("SW is success");
         return response;
     } else if (isMoreData(sw)) {
         response.setSize(response.size() - 2);
@@ -71,6 +80,8 @@ ByteBuffer sendInstruction(const CcidConnection& connection, const Apdu& instruc
             response.putBytes(remaining);
         }
         return response;
+    } else if (isAuthRequired(sw)) {
+        log.e("Auth required");
     }
 
     return {};
