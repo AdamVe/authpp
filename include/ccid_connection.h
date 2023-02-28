@@ -20,8 +20,7 @@ public:
     std::size_t size() const;
 
     void put(uint8_t tag, const ByteBuffer& buffer);
-
-    ByteBuffer getByIndex(int i) const;
+    ByteBuffer operator[](int i) const;
 
 private:
     struct DataPair {

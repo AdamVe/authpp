@@ -38,7 +38,7 @@ void Response::put(uint8_t tag, const ByteBuffer& buffer)
     data.emplace_back(tag, buffer);
 }
 
-ByteBuffer Response::getByIndex(int i) const
+ByteBuffer Response::operator[](int i) const
 {
     if (i < size()) {
         return data[i].buffer;

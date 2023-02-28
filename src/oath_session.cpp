@@ -15,9 +15,7 @@
 namespace authpp::oath {
 
 namespace {
-
     Logger log("OathSession");
-
 }
 
 const ByteBuffer kOathId { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 };
@@ -34,39 +32,6 @@ Response select(const CcidConnection& connection, const ByteBuffer& app_id)
     return tags;
 }
 
-Version parseVersion(const Response& response)
-{
-    auto buffer = response.getByIndex(0);
-    if (buffer.size() > 2) {
-        return Version(buffer.getByte(0), buffer.getByte(1), buffer.getByte(2));
-    }
-    return Version(0, 0, 0);
-}
-
-std::string parseName(const Response& response)
-{
-    auto buffer = response.getByIndex(1);
-    return "TODO";
-}
-
-Algorithm parseAlgorithm(const Response& response)
-{
-    auto buffer = response.getByIndex(3);
-
-    if (buffer.size() == 0) {
-        return Algorithm::HMAC_SHA1;
-    }
-    auto type = buffer.getByte(0);
-
-    if (type == 0x02) {
-        return Algorithm::HMAC_SHA256;
-    } else if (type == 0x03) {
-        return Algorithm::HMAC_SHA512;
-    }
-
-    return Algorithm::HMAC_SHA1;
-}
-
 Session::Session(const CcidConnection& connection)
     : connection(connection)
     , properties(initProperties(select(connection, kOathId)))
@@ -77,11 +42,37 @@ Session::Session(const CcidConnection& connection)
 
 Session::Properties Session::initProperties(Response&& response) const
 {
+    auto parseVersion = [](auto&& buffer) -> Version {
+        if (buffer.size() > 2) {
+            return Version(buffer.getByte(0), buffer.getByte(1), buffer.getByte(2));
+        }
+        return Version(0, 0, 0);
+    };
+
+    auto parseName = [](auto&& buffer) -> std::string {
+        return "TODO";
+    };
+
+    auto parseAlgorithm = [](auto&& buffer) -> Algorithm {
+        if (buffer.size() == 0) {
+            return Algorithm::HMAC_SHA1;
+        }
+        auto type = buffer.getByte(0);
+
+        if (type == 0x02) {
+            return Algorithm::HMAC_SHA256;
+        } else if (type == 0x03) {
+            return Algorithm::HMAC_SHA512;
+        }
+
+        return Algorithm::HMAC_SHA1;
+    };
+
     return Properties {
-        parseVersion(response),
-        parseName(response),
-        response.getByIndex(2),
-        parseAlgorithm(response)
+        parseVersion(response[0]),
+        parseName(response[1]),
+        response[2],
+        parseAlgorithm(response[3])
     };
 }
 
@@ -90,7 +81,7 @@ void Session::listCredentials() const
     Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
     auto response = connection.send(list_apdu);
     for (int i = 0; i < response.size(); ++i) {
-        auto credential = Credential::fromByteBuffer(response.getByIndex(i));
+        auto credential = Credential::fromByteBuffer(response[i]);
         log.d("Found {}", credential);
     }
 }
@@ -101,6 +92,9 @@ void Session::calculateAll() const
     auto calculate_all_response = connection.send(apdu);
 }
 
-const Version& Session::getVersion() const { return properties.version; }
+const Version& Session::getVersion() const
+{
+    return properties.version;
+}
 
 } // namespace authpp
