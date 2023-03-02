@@ -35,7 +35,7 @@ std::size_t Response::size() const { return data.size(); }
 
 void Response::put(uint8_t tag, const ByteBuffer& buffer)
 {
-    data.emplace_back(tag, buffer);
+    data.push_back(DataPair { tag, buffer });
 }
 
 ByteBuffer Response::operator[](int i) const
