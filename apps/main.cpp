@@ -43,7 +43,7 @@ int main()
 
             oath::Session oath_session(conn);
             oath_session.listCredentials();
-            // oath_session.calculateAll();
+            oath_session.calculateAll();
         }
     }
 
