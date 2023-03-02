@@ -21,6 +21,7 @@ public:
 
     void put(uint8_t tag, const ByteBuffer& buffer);
     ByteBuffer operator[](int i) const;
+    uint8_t tag(int i) const;
 
 private:
     struct DataPair {

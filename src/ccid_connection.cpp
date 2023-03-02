@@ -47,6 +47,15 @@ ByteBuffer Response::operator[](int i) const
     return {};
 }
 
+uint8_t Response::tag(int i) const
+{
+    if (i < size()) {
+        return data[i].tag;
+    }
+
+    return 0x00;
+}
+
 //
 using sw_t = std::uint16_t;
 

@@ -86,10 +86,28 @@ void Session::listCredentials() const
     }
 }
 
+std::string fromAllDataResponse(const ByteBuffer& nameBuffer, const ByteBuffer& response)
+{
+    return std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size());
+}
+
+
 void Session::calculateAll() const
 {
-    Apdu apdu(0x00, 0xa4, 0x00, 0x00);
-    auto calculate_all_response = connection.send(apdu);
+    auto challengeSize = static_cast<uint8_t>(properties.challenge.size());
+    ByteBuffer calculateData(2 + challengeSize);
+    calculateData
+        .putByte(0x74)
+        .putByte(challengeSize)
+        .putBytes(properties.challenge);
+
+
+    Apdu apdu(0x00, 0xa4, 0x00, 0x00, calculateData);
+    auto response = connection.send(apdu);
+    for (int i = 0; i < response.size(); i += 2) {
+        auto name = fromAllDataResponse(response[i], response[i+1]);
+        log.d("Found {} ({:02x} {})", name, response.tag(i), response[i]);
+    }
 }
 
 const Version& Session::getVersion() const
