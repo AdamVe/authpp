@@ -24,6 +24,7 @@ namespace oath {
         std::string name;
         Type type;
         Algorithm algorithm;
+        std::string code;
 
         static Credential fromByteBuffer(const ByteBuffer& buffer)
         {
@@ -31,7 +32,8 @@ namespace oath {
             return Credential {
                 std::string(buffer.array() + 1, buffer.array() + buffer.size()),
                 static_cast<Type>(typeAlgo & 0xF0),
-                static_cast<Algorithm>(typeAlgo & 0x0F)
+                static_cast<Algorithm>(typeAlgo & 0x0F),
+                ""
             };
         }
     };

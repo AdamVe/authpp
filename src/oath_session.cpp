@@ -86,9 +86,39 @@ void Session::listCredentials() const
     }
 }
 
-std::string fromAllDataResponse(const ByteBuffer& nameBuffer, const ByteBuffer& response)
+Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
 {
-    return std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size());
+    auto name = std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size());
+    auto type = Type::HOTP;
+    std::string code = "";
+    switch (codeType) {
+    case 0x77:
+        type = Type::HOTP;
+        break;
+    case 0x7c:
+        type = Type::TOTP;
+        break;
+    case 0x75: {
+        type = Type::TOTP;
+        uint8_t digits = response.getByte(0);
+        code = std::string(response.array() + 1, response.array() + response.size());
+        break;
+    }
+    case 0x76: {
+        type = Type::TOTP;
+        uint8_t digits = response.getByte(0);
+        code = std::string(response.array() + 1, response.array() + response.size());
+        break;
+    }
+    }
+
+    Credential credential {
+        name,
+        type,
+        Algorithm::HMAC_SHA1,
+        code
+    };
+    return credential;
 }
 
 void Session::calculateAll() const
@@ -103,8 +133,8 @@ void Session::calculateAll() const
     Apdu apdu(0x00, 0xa4, 0x00, 0x00, calculateData);
     auto response = connection.send(apdu);
     for (int i = 0; i < response.size(); i += 2) {
-        auto name = fromAllDataResponse(response[i], response[i + 1]);
-        log.d("Found {} ({:02x} {})", name, response.tag(i), response[i]);
+        auto credential = fromAllDataResponse(response[i], response.tag(i + 1), response[i + 1]);
+        log.d("Found {} code:{} ({:02x} {})", credential.name, credential.code, response.tag(i), response[i]);
     }
 }
 
