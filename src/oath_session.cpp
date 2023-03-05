@@ -77,14 +77,15 @@ Session::Properties Session::initProperties(Response&& response) const
     };
 }
 
-void Session::listCredentials() const
+std::vector<Credential> Session::listCredentials() const
 {
+    std::vector<Credential> credentials;
     Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
     auto response = connection.send(list_apdu);
     for (int i = 0; i < response.size(); ++i) {
-        auto credential = Credential::fromByteBuffer(response[i]);
-        log.d("Found {}", credential);
+        credentials.push_back(Credential::fromByteBuffer(response[i]));
     }
+    return credentials;
 }
 
 Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
@@ -123,8 +124,9 @@ Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, c
     return credential;
 }
 
-void Session::calculateAll() const
+std::vector<Credential> Session::calculateAll() const
 {
+    std::vector<Credential> credentials;
     auto now = std::chrono::system_clock::now();
     auto duration = now.time_since_epoch();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
@@ -146,12 +148,15 @@ void Session::calculateAll() const
     auto response = connection.send(apdu);
     for (int i = 0; i < response.size(); i += 2) {
         auto credential = fromAllDataResponse(response[i], response.tag(i + 1), response[i + 1]);
-        log.d("Found {} code:{} ({:02x} {})",
+        credentials.push_back(credential);
+        log.v("Found {} code:{} ({:02x} {})",
             credential.name,
             credential.code,
             response.tag(i + 1),
             response[i + 1]);
     }
+
+    return credentials;
 }
 
 const Version& Session::getVersion() const

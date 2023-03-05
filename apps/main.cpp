@@ -1,5 +1,9 @@
 #include <libusb-1.0/libusb.h>
 
+#include <algorithm>
+#include <iostream>
+#include <ranges>
+#include <string>
 #include <vector>
 
 #include "ccid_connection.h"
@@ -42,8 +46,12 @@ int main()
             CcidConnection conn(usbConnection);
 
             oath::Session oath_session(conn);
-            oath_session.listCredentials();
-            oath_session.calculateAll();
+
+            auto credentials = oath_session.calculateAll();
+            std::ranges::sort(credentials, {}, &authpp::oath::Credential::name);
+            for (auto&& c : credentials) {
+                log.i("{} {}", c.name, c.code);
+            }
         }
     }
 

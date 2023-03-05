@@ -55,8 +55,8 @@ namespace oath {
     public:
         explicit Session(const CcidConnection& connection);
 
-        void listCredentials() const;
-        void calculateAll() const;
+        std::vector<Credential> listCredentials() const;
+        std::vector<Credential> calculateAll() const;
 
         const Version& getVersion() const;
 
