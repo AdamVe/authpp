@@ -22,9 +22,12 @@ public:
 
     const ByteBuffer& pointTo(std::size_t i);
 
+    ByteBuffer& setByteOrder(std::endian);
+
     ByteBuffer& putByte(unsigned char c);
     ByteBuffer& putShort(uint16_t i16);
     ByteBuffer& putInt(uint32_t i32);
+    ByteBuffer& putLong(uint64_t i64);
     ByteBuffer& putBytes(const ByteBuffer& buffer);
 
     uint8_t getByte(std::size_t index) const;
@@ -35,14 +38,13 @@ public:
 
     uint8_t* array() const;
 
-    static void setEndian(std::endian);
     static void setDebugLog(bool);
 
 private:
+    std::endian byteOrder { std::endian::big };
     std::size_t pointer = 0;
     std::vector<uint8_t> data;
 
-    static inline std::endian endian { std::endian::little };
     static inline bool debugLog { false };
 };
 

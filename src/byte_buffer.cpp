@@ -38,6 +38,12 @@ std::size_t ByteBuffer::size() const
     return data.size();
 }
 
+ByteBuffer& ByteBuffer::setByteOrder(std::endian order)
+{
+    byteOrder = order;
+    return *this;
+}
+
 ByteBuffer& ByteBuffer::putByte(unsigned char c)
 {
     if (debugLog) {
@@ -55,7 +61,7 @@ ByteBuffer& ByteBuffer::putShort(uint16_t i16)
         log.d("putShort {:04x} to {} (buffer size: {})", i16, pointer, data.size());
     }
     assert(pointer < data.size() - 1);
-    if (endian == std::endian::big) {
+    if (byteOrder == std::endian::big) {
         putByte((uint8_t)(i16 >> 8));
         putByte((uint8_t)i16);
     } else {
@@ -71,7 +77,7 @@ ByteBuffer& ByteBuffer::putInt(uint32_t i32)
         log.d("putInt {:08x} to {} (buffer size: {})", i32, pointer, data.size());
     }
     assert(pointer < data.size() - 3);
-    if (endian == std::endian::big) {
+    if (byteOrder == std::endian::big) {
         putByte((uint8_t)(i32 >> 24));
         putByte((uint8_t)(i32 >> 16));
         putByte((uint8_t)(i32 >> 8));
@@ -86,13 +92,44 @@ ByteBuffer& ByteBuffer::putInt(uint32_t i32)
     return *this;
 }
 
+ByteBuffer& ByteBuffer::putLong(uint64_t i64)
+{
+    if (debugLog) {
+        log.d("putLong {:016x} to {} (buffer size: {})", i64, pointer, data.size());
+    }
+    assert(pointer < data.size() - 7);
+    if (byteOrder == std::endian::big) {
+        putByte((uint8_t)(i64 >> 56));
+        putByte((uint8_t)(i64 >> 48));
+        putByte((uint8_t)(i64 >> 40));
+        putByte((uint8_t)(i64 >> 32));
+        putByte((uint8_t)(i64 >> 24));
+        putByte((uint8_t)(i64 >> 16));
+        putByte((uint8_t)(i64 >> 8));
+        putByte((uint8_t)(i64));
+    } else {
+        putByte((uint8_t)(i64));
+        putByte((uint8_t)(i64 >> 8));
+        putByte((uint8_t)(i64 >> 16));
+        putByte((uint8_t)(i64 >> 24));
+        putByte((uint8_t)(i64 >> 32));
+        putByte((uint8_t)(i64 >> 40));
+        putByte((uint8_t)(i64 >> 48));
+        putByte((uint8_t)(i64 >> 56));
+    }
+
+    if (debugLog) {
+        log.d("Stored long {}", i64);
+    }
+    return *this;
+}
+
 ByteBuffer& ByteBuffer::putBytes(const ByteBuffer& buffer)
 {
     if (buffer.size() > 0) {
 
         if (debugLog) {
             log.d("putBytes {} to {} (buffer size: {})", buffer, pointer, data.size());
-            log.d("pointer: {} assert conditin {}", pointer, data.size() - buffer.size() + 1);
         }
 
         assert(pointer < data.size() - buffer.size() + 1);
@@ -124,7 +161,7 @@ uint16_t ByteBuffer::getShort(std::size_t i) const
         log.d("getShort from {} (buffer size: {})", i, data.size());
     }
     assert(i < data.size() - 1);
-    uint16_t value = (endian == std::endian::big)
+    uint16_t value = byteOrder == std::endian::big
         ? data[i] << 8 | data[i + 1]
         : data[i] | data[i + 1] << 8;
 
@@ -141,9 +178,9 @@ uint32_t ByteBuffer::getInt(std::size_t i) const
         log.d("getInt from {} (buffer size: {})", i, data.size());
     }
     assert(i < data.size() - 3);
-    uint32_t value = (endian == std::endian::big)
-        ? data[i] << 24 | data[i + 1] << 16 | data[i + 2] << 8 | data[i + 3]
-        : data[i] | data[i + 1] << 8 | data[i + 2] << 16 | data[i + 3];
+    uint32_t value = byteOrder == std::endian::big
+        ? (data[i] << 24) + (data[i + 1] << 16) + (data[i + 2] << 8) + data[i + 3]
+        : data[i] + (data[i + 1] << 8) + (data[i + 2] << 16) + (data[i + 3] << 24);
 
     if (debugLog) {
         log.d("getInt({}): {}", i, value);
@@ -156,7 +193,6 @@ ByteBuffer ByteBuffer::getBytes(std::size_t from_index, std::size_t size) const
 {
     if (debugLog) {
         log.d("getBytes from {} of size {} from {} (buffer size: {})", from_index, size, *this, data.size());
-        log.d("from_index: {} assert condition {}", from_index, data.size() - size + 1);
     }
     assert(from_index < data.size() - size + 1);
 
@@ -183,11 +219,6 @@ const ByteBuffer& ByteBuffer::pointTo(std::size_t i)
     }
 
     return *this;
-}
-
-void ByteBuffer::setEndian(std::endian endian)
-{
-    ByteBuffer::endian = endian;
 }
 
 void ByteBuffer::setDebugLog(bool debugLog)

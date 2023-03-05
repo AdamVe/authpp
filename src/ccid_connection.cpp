@@ -147,6 +147,7 @@ ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) 
     int really_recieved = 0;
     std::size_t array_len = usb_interface.max_packet_size_in;
     ByteBuffer buffer(array_len);
+    buffer.setByteOrder(std::endian::little);
     if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
             buffer.array(),
             array_len, &really_recieved, TIMEOUT);
@@ -162,7 +163,7 @@ ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) 
     int currentLength = really_recieved - 10;
 
     ByteBuffer response_buffer = buffer.getBytes(10, currentLength);
-    response_buffer.setSize(expected_data_size);
+    response_buffer.setByteOrder(std::endian::little).setSize(expected_data_size);
     while (currentLength < expected_data_size) {
         // receive again
         if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,

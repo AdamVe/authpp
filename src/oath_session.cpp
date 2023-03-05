@@ -1,5 +1,6 @@
 #include "oath_session.h"
 
+#include <chrono>
 #include <cstddef>
 #include <map>
 #include <sstream>
@@ -99,15 +100,16 @@ Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, c
         type = Type::TOTP;
         break;
     case 0x75: {
-        type = Type::TOTP;
-        uint8_t digits = response.getByte(0);
-        code = std::string(response.array() + 1, response.array() + response.size());
+        // TODO
         break;
     }
     case 0x76: {
         type = Type::TOTP;
         uint8_t digits = response.getByte(0);
-        code = std::string(response.array() + 1, response.array() + response.size());
+        auto codeValue = response.getInt(1);
+        std::stringstream ss;
+        ss << codeValue;
+        code = ss.str();
         break;
     }
     }
@@ -123,18 +125,32 @@ Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, c
 
 void Session::calculateAll() const
 {
-    auto challengeSize = static_cast<uint8_t>(properties.challenge.size());
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+    long timeStep = seconds / 30;
+
+    log.d("Current time: {} (timestep = {})", seconds, timeStep);
+
+    ByteBuffer challenge(8);
+    challenge.putLong(timeStep);
+
+    auto challengeSize = static_cast<uint8_t>(challenge.size());
     ByteBuffer calculateData(2 + challengeSize);
     calculateData
         .putByte(0x74)
         .putByte(challengeSize)
-        .putBytes(properties.challenge);
+        .putBytes(challenge);
 
-    Apdu apdu(0x00, 0xa4, 0x00, 0x00, calculateData);
+    Apdu apdu(0x00, 0xa4, 0x00, 0x01, calculateData);
     auto response = connection.send(apdu);
     for (int i = 0; i < response.size(); i += 2) {
         auto credential = fromAllDataResponse(response[i], response.tag(i + 1), response[i + 1]);
-        log.d("Found {} code:{} ({:02x} {})", credential.name, credential.code, response.tag(i), response[i]);
+        log.d("Found {} code:{} ({:02x} {})",
+            credential.name,
+            credential.code,
+            response.tag(i + 1),
+            response[i + 1]);
     }
 }
 
