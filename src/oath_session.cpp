@@ -1,9 +1,7 @@
 #include "oath_session.h"
 
-#include <chrono>
 #include <cstddef>
 #include <map>
-#include <sstream>
 
 #include "apdu.h"
 #include "ccid_connection.h"
@@ -29,7 +27,6 @@ Response select(const CcidConnection& connection, const ByteBuffer& app_id)
     if (tags.size() < 0) {
         log.e("Invalid data: parse failed");
     }
-
     return tags;
 }
 
@@ -91,48 +88,19 @@ std::vector<Credential> Session::listCredentials() const
 Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
 {
     auto name = std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size());
-    auto type = Type::HOTP;
     std::string code = "";
-    switch (codeType) {
-    case 0x77:
-        type = Type::HOTP;
-        break;
-    case 0x7c:
-        type = Type::TOTP;
-        break;
-    case 0x75: {
-        // TODO
-        break;
-    }
-    case 0x76: {
-        type = Type::TOTP;
-        uint8_t digits = response.getByte(0);
-        auto codeValue = response.getInt(1);
-        std::stringstream ss;
-        ss << codeValue;
-        code = ss.str();
-        break;
-    }
-    }
 
     Credential credential {
         name,
-        type,
         Algorithm::HMAC_SHA1,
-        code
+        Code::fromByteBuffer(codeType, response)
     };
     return credential;
 }
 
-std::vector<Credential> Session::calculateAll() const
+std::vector<Credential> Session::calculateAll(long timeStep) const
 {
     std::vector<Credential> credentials;
-    auto now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-    long timeStep = seconds / 30;
-
-    log.d("Current time: {} (timestep = {})", seconds, timeStep);
 
     ByteBuffer challenge(8);
     challenge.putLong(timeStep);
@@ -151,7 +119,7 @@ std::vector<Credential> Session::calculateAll() const
         credentials.push_back(credential);
         log.v("Found {} code:{} ({:02x} {})",
             credential.name,
-            credential.code,
+            credential.code.value,
             response.tag(i + 1),
             response[i + 1]);
     }

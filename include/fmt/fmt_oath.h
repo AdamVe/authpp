@@ -57,7 +57,7 @@ struct fmt::formatter<authpp::oath::Credential> {
         -> decltype(ctx.out())
     {
         return fmt::format_to(
-            ctx.out(), "[{};{};{}]", credential.name, credential.type, credential.algorithm);
+            ctx.out(), "[{};{};{}]", credential.name, credential.code.type, credential.algorithm);
     }
 
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())

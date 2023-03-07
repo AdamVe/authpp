@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -20,20 +21,56 @@ namespace oath {
         HMAC_SHA512 = 0x03
     };
 
+    struct Code {
+        Type type;
+        uint8_t digits;
+        std::string value;
+
+        static Code fromByteBuffer(uint8_t type, const ByteBuffer& byteBuffer)
+        {
+            Type t;
+            uint8_t digits;
+            std::string val;
+            switch (type) {
+            case 0x77:
+                t = Type::HOTP;
+                break;
+            case 0x7c:
+                t = Type::TOTP;
+                break;
+            case 0x75: {
+                t = Type::TOTP;
+                // TODO
+                break;
+            }
+            case 0x76: {
+                t = Type::TOTP;
+                digits = byteBuffer.getByte(0);
+                auto codeValue = byteBuffer.getInt(1);
+                std::stringstream ss;
+                ss << codeValue;
+                val = ss.str();
+                break;
+            }
+            }
+            return { t, digits, val };
+        }
+    };
+
     struct Credential {
         std::string name;
-        Type type;
         Algorithm algorithm;
-        std::string code;
+        Code code;
 
         static Credential fromByteBuffer(const ByteBuffer& buffer)
         {
             auto typeAlgo = buffer.getByte(0);
             return Credential {
                 std::string(buffer.array() + 1, buffer.array() + buffer.size()),
-                static_cast<Type>(typeAlgo & 0xF0),
                 static_cast<Algorithm>(typeAlgo & 0x0F),
-                ""
+                Code {
+                    static_cast<Type>(typeAlgo & 0xF0),
+                }
             };
         }
     };
@@ -56,7 +93,7 @@ namespace oath {
         explicit Session(const CcidConnection& connection);
 
         std::vector<Credential> listCredentials() const;
-        std::vector<Credential> calculateAll() const;
+        std::vector<Credential> calculateAll(long timeStep) const;
 
         const Version& getVersion() const;
 

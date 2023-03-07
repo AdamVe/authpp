@@ -1,6 +1,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <ranges>
 #include <string>
@@ -16,6 +17,15 @@
 #define VENDOR_YUBICO (0x1050)
 
 using namespace authpp;
+
+long getTimeStep()
+{
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+    long timeStep = seconds / 30;
+    return timeStep;
+}
 
 int main()
 {
@@ -43,13 +53,12 @@ int main()
 
             UsbDevice::Connection usbConnection(yubiKey);
             CcidConnection conn(usbConnection);
-
             oath::Session oath_session(conn);
 
-            auto credentials = oath_session.calculateAll();
+            auto credentials = oath_session.calculateAll(getTimeStep());
             std::ranges::sort(credentials, {}, &authpp::oath::Credential::name);
             for (auto&& c : credentials) {
-                log.i("{} {}", c.name, c.code);
+                log.i("{} {}", c.name, c.code.value);
             }
         }
     }
