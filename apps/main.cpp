@@ -26,8 +26,7 @@ int main()
 
     auto* version { libusb_get_version() };
 
-    log.i("Using libusb version: {}.{}.{}", version->major, version->minor,
-        version->micro);
+    log.i("Using libusb version: {}.{}.{}", version->major, version->minor, version->micro);
 
     libusb_device** devices;
 
