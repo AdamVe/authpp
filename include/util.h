@@ -6,8 +6,8 @@
 
 namespace authpp::util {
 
-std::string BytesToString(const ByteBuffer& buffer);
+std::string bytesToString(const ByteBuffer& buffer);
 
-std::string BytesToAsciiString(const ByteBuffer& buffer);
+std::string bytesToAsciiString(const ByteBuffer& buffer);
 
 } // namespace authpp::util

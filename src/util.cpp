@@ -6,7 +6,7 @@
 
 namespace authpp::util {
 
-std::string BytesToString(const ByteBuffer& buffer)
+std::string bytesToString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
     for (std::size_t i = 0; i < buffer.size(); ++i) {
@@ -17,7 +17,7 @@ std::string BytesToString(const ByteBuffer& buffer)
     return retval;
 }
 
-std::string BytesToAsciiString(const ByteBuffer& buffer)
+std::string bytesToAsciiString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
     for (std::size_t i = 0; i < buffer.size(); ++i) {

@@ -31,11 +31,11 @@ UsbDevice::UsbDevice(libusb_device* device)
 
 UsbDevice::~UsbDevice() { libusb_unref_device(device); }
 
-std::string UsbDevice::GetManufacturer() const
+std::string UsbDevice::getManufacturer() const
 {
     if (!read_manufacturer) {
         try {
-            manufacturer = GetStringDescriptor(device_descriptor.iManufacturer);
+            manufacturer = getStringDescriptor(device_descriptor.iManufacturer);
         } catch (const std::runtime_error& error) {
             log.e("Failed to get manufacturer: {}", error.what());
         }
@@ -46,11 +46,11 @@ std::string UsbDevice::GetManufacturer() const
     return manufacturer;
 }
 
-std::string UsbDevice::GetProduct() const
+std::string UsbDevice::getProduct() const
 {
     if (!read_product) {
         try {
-            product = GetStringDescriptor(device_descriptor.iProduct);
+            product = getStringDescriptor(device_descriptor.iProduct);
         } catch (const std::runtime_error& error) {
             log.e("Failed to get product: {}", error.what());
         }
@@ -60,12 +60,12 @@ std::string UsbDevice::GetProduct() const
     return product;
 }
 
-std::string UsbDevice::GetSerialNumber() const
+std::string UsbDevice::getSerialNumber() const
 {
     if (!read_serial_number) {
         Connection deviceHandle(*this);
         try {
-            serial_number = GetStringDescriptor(device_descriptor.iSerialNumber);
+            serial_number = getStringDescriptor(device_descriptor.iSerialNumber);
         } catch (const std::runtime_error& error) {
             log.e("Failed to get serial number: {}", error.what());
         }
@@ -75,7 +75,7 @@ std::string UsbDevice::GetSerialNumber() const
     return serial_number;
 }
 
-std::string UsbDevice::ToString() const
+std::string UsbDevice::toString() const
 {
     return fmt::format(
         "device_descriptor[bLenght={},bDescriptorType={},bcdUSB={},"
@@ -90,12 +90,12 @@ std::string UsbDevice::ToString() const
         device_descriptor.bDeviceSubClass, device_descriptor.bDeviceProtocol,
         device_descriptor.bMaxPacketSize0, device_descriptor.idVendor,
         device_descriptor.idProduct, device_descriptor.bcdDevice,
-        device_descriptor.iManufacturer, GetManufacturer(),
-        device_descriptor.iProduct, GetProduct(), device_descriptor.iSerialNumber,
-        GetSerialNumber(), device_descriptor.bNumConfigurations);
+        device_descriptor.iManufacturer, getManufacturer(),
+        device_descriptor.iProduct, getProduct(), device_descriptor.iSerialNumber,
+        getSerialNumber(), device_descriptor.bNumConfigurations);
 }
 
-std::string UsbDevice::GetStringDescriptor(std::size_t index) const
+std::string UsbDevice::getStringDescriptor(std::size_t index) const
 {
     if (index == 0) {
         return {};
@@ -120,14 +120,14 @@ std::string UsbDevice::GetStringDescriptor(std::size_t index) const
     return std::string((char*)string_descriptor);
 }
 
-void UsbDevice::OpenConnection(libusb_device_handle** handle) const
+void UsbDevice::openConnection(libusb_device_handle** handle) const
 {
     if (0 != libusb_open(device, handle)) {
         throw std::runtime_error("Failed to open device");
     }
 }
 
-void UsbDevice::CloseConnection(libusb_device_handle** handle) const
+void UsbDevice::closeConnection(libusb_device_handle** handle) const
 {
     libusb_close(*handle);
 }
@@ -135,10 +135,10 @@ void UsbDevice::CloseConnection(libusb_device_handle** handle) const
 UsbDevice::Connection::Connection(const UsbDevice& usb_device)
     : usb_device(usb_device)
 {
-    usb_device.OpenConnection(&handle);
+    usb_device.openConnection(&handle);
 }
 
-UsbDevice::Connection::~Connection() { usb_device.CloseConnection(&handle); }
+UsbDevice::Connection::~Connection() { usb_device.closeConnection(&handle); }
 
 libusb_device_handle* UsbDevice::Connection::operator*() const
 {

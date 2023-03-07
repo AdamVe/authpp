@@ -12,7 +12,7 @@ struct fmt::formatter<authpp::Message> {
         -> decltype(ctx.out())
     {
         return fmt::format_to(
-            ctx.out(), "{}", authpp::util::BytesToString(message.get()));
+            ctx.out(), "{}", authpp::util::bytesToString(message.get()));
     }
 
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())

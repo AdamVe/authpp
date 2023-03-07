@@ -15,8 +15,8 @@ struct fmt::formatter<authpp::ByteBuffer> {
         -> decltype(ctx.out())
     {
         return presentation == 'm'
-            ? fmt::format_to(ctx.out(), "{}", BytesToString(buffer))
-            : fmt::format_to(ctx.out(), "{}", BytesToAsciiString(buffer));
+            ? fmt::format_to(ctx.out(), "{}", bytesToString(buffer))
+            : fmt::format_to(ctx.out(), "{}", bytesToAsciiString(buffer));
     }
 
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())

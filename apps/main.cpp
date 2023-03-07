@@ -49,7 +49,7 @@ int main()
         libusb_get_device_descriptor(d, &desc);
         if (desc.idVendor == VENDOR_YUBICO) {
             UsbDevice yubiKey(d);
-            log.d("Yubikey: {}", yubiKey.ToString());
+            log.d("Yubikey: {}", yubiKey.toString());
 
             UsbDevice::Connection usbConnection(yubiKey);
             CcidConnection conn(usbConnection);

@@ -34,16 +34,16 @@ public:
     explicit UsbDevice(libusb_device* device);
     ~UsbDevice();
 
-    std::string GetManufacturer() const;
-    std::string GetProduct() const;
-    std::string GetSerialNumber() const;
-    std::string ToString() const;
+    std::string getManufacturer() const;
+    std::string getProduct() const;
+    std::string getSerialNumber() const;
+    std::string toString() const;
 
 private:
-    std::string GetStringDescriptor(std::size_t index) const;
+    std::string getStringDescriptor(std::size_t index) const;
 
-    void OpenConnection(libusb_device_handle**) const;
-    void CloseConnection(libusb_device_handle**) const;
+    void openConnection(libusb_device_handle**) const;
+    void closeConnection(libusb_device_handle**) const;
 
     libusb_device* device;
 
