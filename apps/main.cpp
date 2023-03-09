@@ -31,7 +31,15 @@ int main()
         oath::Session oath_session(conn);
 
         auto credentials = oath_session.calculateAll(TimeUtil::getTimeStep());
+#ifdef __cpp_lib_ranges
         std::ranges::sort(credentials, {}, &authpp::oath::Credential::name);
+#else
+        std::sort(credentials.begin(), credentials.end(),
+            [](const authpp::oath::Credential& lhs,
+                const authpp::oath::Credential& rhs) {
+                return lhs.name < rhs.name;
+            });
+#endif
         for (auto&& c : credentials) {
             log.i("{} {}", c.name, c.code.value);
         }

@@ -33,7 +33,10 @@ add_library(
   ${SOURCE_LIST}
   ${HEADER_LIST})
 
-target_include_directories(authpp_lib PUBLIC ../include)
+target_include_directories(authpp_lib PUBLIC
+  "${authpp_SOURCE_DIR}/include"
+  "${fmtlib_SOURCE_DIR}/include"
+  "${LIBUSB_INCLUDE_DIR}/../")
 
 source_group(
   TREE "${PROJECT_SOURCE_DIR}/include"

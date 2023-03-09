@@ -24,6 +24,7 @@ std::vector<UsbDevice> UsbManager::poll(std::function<bool(libusb_device_descrip
     libusb_device** usbDevices;
     std::size_t usbDeviceCount = libusb_get_device_list(NULL, &usbDevices);
 
+#ifdef __cpp_lib_ranges
     auto deviceSpan = std::span { usbDevices, usbDevices + usbDeviceCount };
     auto matchingDevices = deviceSpan | std::views::filter([&p](auto&& d) {
         libusb_device_descriptor desc;
@@ -36,6 +37,19 @@ std::vector<UsbDevice> UsbManager::poll(std::function<bool(libusb_device_descrip
 
     libusb_free_device_list(usbDevices, false);
     return result;
+#else
+    std::vector<UsbDevice> result;
+    auto deviceSpan = std::span { usbDevices, usbDevices + usbDeviceCount };
+    for (auto&& usbDevice : deviceSpan) {
+        libusb_device_descriptor desc;
+        libusb_get_device_descriptor(usbDevice, &desc);
+        if (p(desc)) {
+            result.emplace_back(UsbDevice(usbDevice));
+        }
+    }
+    libusb_free_device_list(usbDevices, false);
+    return result;
+#endif
 }
 
 std::vector<UsbDevice> UsbManager::pollUsbDevices(std::function<bool(libusb_device_descriptor)> p, long timeout)
