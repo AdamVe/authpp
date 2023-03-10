@@ -37,9 +37,9 @@ void listCredentials(const UsbDevice& key)
 
 void getCode(const UsbDevice& key, std::string_view name)
 {
-    useOathSession(key, [](auto& session) {
-        // auto c = session.calculateOne(TimeUtil::getTimeStep(), name);
-        // std::cout << c.name << " " << c.code.value << std::endl;
+    useOathSession(key, [&name](auto& session) {
+        auto c = session.calculateOne(TimeUtil::getTimeStep(), name);
+        std::cout << c.code.value << std::endl;
     });
 }
 

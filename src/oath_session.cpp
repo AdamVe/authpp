@@ -98,6 +98,34 @@ Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, c
     return credential;
 }
 
+Credential Session::calculateOne(long timeStep, std::string_view name) const
+{
+    ByteBuffer challenge(8);
+    challenge.putLong(timeStep);
+
+    auto challengeSize = static_cast<uint8_t>(challenge.size());
+    ByteBuffer calculateData(2 + name.length() + 2 + challengeSize);
+    calculateData
+        .putByte(0x71)
+        .putByte(name.length());
+
+    for (std::size_t i = 0; i < name.length(); ++i) {
+        calculateData.putByte(name[i]);
+    };
+    calculateData.putByte(0x74)
+        .putByte(challengeSize)
+        .putBytes(challenge);
+
+    Apdu apdu(0x00, 0xa2, 0x00, 0x01, calculateData);
+    auto response = connection.send(apdu);
+    Credential credential {
+        std::string(name),
+        Algorithm::HMAC_SHA1,
+        Code::fromByteBuffer(response.tag(0), response[0])
+    };
+    return credential;
+}
+
 std::vector<Credential> Session::calculateAll(long timeStep) const
 {
     std::vector<Credential> credentials;

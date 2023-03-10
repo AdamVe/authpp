@@ -100,6 +100,7 @@ namespace oath {
         explicit Session(const CcidConnection& connection);
 
         std::vector<Credential> listCredentials() const;
+        Credential calculateOne(long timeStep, std::string_view name) const;
         std::vector<Credential> calculateAll(long timeStep) const;
 
         const Version& getVersion() const;
