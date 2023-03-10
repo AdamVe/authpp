@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <iostream>
 #include <ranges>
+#include <string_view>
 #include <vector>
 
 #include "ccid_connection.h"
@@ -10,10 +12,60 @@
 
 using namespace authpp;
 
-int main()
+void useOathSession(const UsbDevice& key, std::function<void(const oath::Session&)> f)
+{
+    UsbDevice::Connection usbConnection(key);
+    CcidConnection conn(usbConnection);
+    oath::Session oath_session(conn);
+    f(oath_session);
+}
+
+void listCredentials(const UsbDevice& key)
+{
+    useOathSession(key, [](auto& session) {
+        auto credentials = session.calculateAll(TimeUtil::getTimeStep());
+#ifdef __cpp_lib_ranges
+        std::ranges::sort(credentials, oath::Credential::compareByName);
+#else
+        std::sort(credentials.begin(), credentials.end(), oath::Credential::compareByName);
+#endif
+        for (auto&& c : credentials) {
+            std::cout << c.name << " " << c.code.value << std::endl;
+        }
+    });
+}
+
+void getCode(const UsbDevice& key, std::string_view name)
+{
+    useOathSession(key, [](auto& session) {
+        // auto c = session.calculateOne(TimeUtil::getTimeStep(), name);
+        // std::cout << c.name << " " << c.code.value << std::endl;
+    });
+}
+
+bool hasParam(const std::span<char*>& params, std::string_view value)
+{
+    return std::ranges::count(params, value) > 0;
+}
+
+std::string getParamValue(const std::span<char*>& params, std::string_view value)
+{
+    auto i = std::ranges::find(params, value);
+    if (i++ != params.end() && i != params.end()) {
+        return *i;
+    }
+    return {};
+}
+
+int main(int argc, char** argv)
 {
     Logger log("main");
-    Logger::setLevel(Logger::Level::kDebug);
+
+    std::span params { argv, argv + argc };
+
+    if (hasParam(params, "-D")) {
+        Logger::setLevel(Logger::Level::kDebug);
+    }
 
     UsbManager usbManager;
 
@@ -24,18 +76,17 @@ int main()
 
     auto keys = usbManager.pollUsbDevices(matchVendorYubico);
     if (!keys.empty()) {
-        UsbDevice::Connection usbConnection(keys[0]);
-        CcidConnection conn(usbConnection);
-        oath::Session oath_session(conn);
+        if (hasParam(params, "list")) {
+            listCredentials(keys[0]);
+        }
 
-        auto credentials = oath_session.calculateAll(TimeUtil::getTimeStep());
-#ifdef __cpp_lib_ranges
-        std::ranges::sort(credentials, oath::Credential::compareByName);
-#else
-        std::sort(credentials.begin(), credentials.end(), oath::Credential::compareByName);
-#endif
-        for (auto&& c : credentials) {
-            log.i("{} {}", c.name, c.code.value);
+        if (hasParam(params, "get")) {
+            auto name = getParamValue(params, "get");
+            if (!name.empty()) {
+                getCode(keys[0], name);
+            } else {
+                std::cerr << "get needs a value" << std::endl;
+            }
         }
     }
 
