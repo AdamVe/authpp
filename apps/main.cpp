@@ -1,5 +1,3 @@
-#include <libusb-1.0/libusb.h>
-
 #include <algorithm>
 #include <ranges>
 #include <vector>
@@ -32,13 +30,9 @@ int main()
 
         auto credentials = oath_session.calculateAll(TimeUtil::getTimeStep());
 #ifdef __cpp_lib_ranges
-        std::ranges::sort(credentials, {}, &authpp::oath::Credential::name);
+        std::ranges::sort(credentials, oath::Credential::compareByName);
 #else
-        std::sort(credentials.begin(), credentials.end(),
-            [](const authpp::oath::Credential& lhs,
-                const authpp::oath::Credential& rhs) {
-                return lhs.name < rhs.name;
-            });
+        std::sort(credentials.begin(), credentials.end(), oath::Credential::compareByName);
 #endif
         for (auto&& c : credentials) {
             log.i("{} {}", c.name, c.code.value);

@@ -73,6 +73,13 @@ namespace oath {
                 }
             };
         }
+
+        static struct {
+            bool operator()(const oath::Credential& lhs, const oath::Credential& rhs) const
+            {
+                return lhs.name < rhs.name;
+            }
+        } compareByName;
     };
 
     struct Version {
