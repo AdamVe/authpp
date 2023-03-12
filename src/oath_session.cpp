@@ -44,18 +44,18 @@ Session::Session(const CcidConnection& connection)
 
 Session::Properties Session::initProperties(Response&& response) const
 {
-    auto parseVersion = [](auto&& buffer) -> Version {
+    auto parseVersion = [](ByteBuffer&& buffer) -> Version {
         if (buffer.size() > 2) {
-            return Version(buffer.getByte(0), buffer.getByte(1), buffer.getByte(2));
+            return Version(buffer.get<uint8_t>(0), buffer.get<uint8_t>(1), buffer.get<uint8_t>(2));
         }
         return Version(0, 0, 0);
     };
 
-    auto parseAlgorithm = [](auto&& buffer) -> Algorithm {
+    auto parseAlgorithm = [](ByteBuffer&& buffer) -> Algorithm {
         if (buffer.size() == 0) {
             return Algorithm::HMAC_SHA1;
         }
-        auto type = buffer.getByte(0);
+        auto type = buffer.get<uint8_t>(0);
 
         if (type == 0x02) {
             return Algorithm::HMAC_SHA256;
@@ -101,20 +101,20 @@ Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, c
 Credential Session::calculateOne(long timeStep, std::string_view name) const
 {
     ByteBuffer challenge(8);
-    challenge.putLong(timeStep);
+    challenge.put<uint64_t>(timeStep);
 
     auto challengeSize = static_cast<uint8_t>(challenge.size());
     ByteBuffer calculateData(2 + name.length() + 2 + challengeSize);
     calculateData
-        .putByte(0x71)
-        .putByte(name.length());
+        .put<uint8_t>(0x71)
+        .put<uint8_t>(name.length());
 
     for (std::size_t i = 0; i < name.length(); ++i) {
-        calculateData.putByte(name[i]);
+        calculateData.put<uint8_t>(name[i]);
     };
-    calculateData.putByte(0x74)
-        .putByte(challengeSize)
-        .putBytes(challenge);
+    calculateData.put<uint8_t>(0x74)
+        .put<uint8_t>(challengeSize)
+        .put(challenge);
 
     Apdu apdu(0x00, 0xa2, 0x00, 0x01, calculateData);
     auto response = connection.send(apdu);
@@ -131,14 +131,14 @@ std::vector<Credential> Session::calculateAll(long timeStep) const
     std::vector<Credential> credentials;
 
     ByteBuffer challenge(8);
-    challenge.putLong(timeStep);
+    challenge.put<uint64_t>(timeStep);
 
     auto challengeSize = static_cast<uint8_t>(challenge.size());
     ByteBuffer calculateData(2 + challengeSize);
     calculateData
-        .putByte(0x74)
-        .putByte(challengeSize)
-        .putBytes(challenge);
+        .put<uint8_t>(0x74)
+        .put<uint8_t>(challengeSize)
+        .put(challenge);
 
     Apdu apdu(0x00, 0xa4, 0x00, 0x01, calculateData);
     auto response = connection.send(apdu);
@@ -207,12 +207,12 @@ bool Session::validate(AccessKeyValidator validator) const
     auto validateDataSize = static_cast<uint8_t>(2 + challengeResponse.size() + 2 + clientChallenge.size());
     ByteBuffer validateData(validateDataSize);
     validateData
-        .putByte(0x75)
-        .putByte(challengeResponse.size())
-        .putBytes(challengeResponse)
-        .putByte(0x74)
-        .putByte(clientChallenge.size())
-        .putBytes(clientChallenge);
+        .put<uint8_t>(0x75)
+        .put<uint8_t>(challengeResponse.size())
+        .put(challengeResponse)
+        .put<uint8_t>(0x74)
+        .put<uint8_t>(clientChallenge.size())
+        .put(clientChallenge);
 
     Apdu apdu(0x00, 0xa3, 0x00, 0x00, validateData);
     auto response = connection.send(apdu);

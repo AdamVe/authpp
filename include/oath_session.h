@@ -46,8 +46,8 @@ namespace oath {
             }
             case 0x76: {
                 t = Type::TOTP;
-                digits = byteBuffer.getByte(0);
-                auto codeValue = byteBuffer.getInt(1);
+                digits = byteBuffer.get<uint8_t>(0);
+                auto codeValue = byteBuffer.get<uint16_t>(1);
                 std::stringstream ss;
                 ss << codeValue;
                 val = ss.str();
@@ -65,7 +65,7 @@ namespace oath {
 
         static Credential fromByteBuffer(const ByteBuffer& buffer)
         {
-            auto typeAlgo = buffer.getByte(0);
+            auto typeAlgo = buffer.get<uint8_t>(0);
             return Credential {
                 std::string(buffer.array() + 1, buffer.array() + buffer.size()),
                 static_cast<Algorithm>(typeAlgo & 0x0F),

@@ -3,6 +3,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include "apdu.h"
+#include "byte_buffer.h"
 #include "logger.h"
 #include "message.h"
 #include "usb_device.h"
@@ -68,7 +69,7 @@ sw_t getSw(const ByteBuffer& buffer)
     }
 
     std::size_t last_index = buffer.size() - 1;
-    return buffer.getByte(last_index - 1) << 8 | buffer.getByte(last_index);
+    return buffer.get<uint8_t>(last_index - 1) << 8 | buffer.get<uint8_t>(last_index);
 }
 
 bool isSuccess(uint16_t sw)
@@ -92,9 +93,9 @@ Response CcidConnection::parse(const ByteBuffer& buffer) const
     Response response;
     int32_t i = 0;
     while (i < static_cast<int32_t>(buffer.size()) - 2) {
-        auto tag = buffer.getByte(i);
-        auto length = buffer.getByte(i + 1);
-        ByteBuffer data = buffer.getBytes(i + 2, length);
+        auto tag = buffer.get<uint8_t>(i);
+        auto length = buffer.get<uint8_t>(i + 1);
+        ByteBuffer data = buffer.get(i + 2, length);
         response.put(tag, data);
 
         // log.d("Parsed tag {:02x} with data {}", tag, data);
@@ -122,7 +123,7 @@ Response CcidConnection::send(const Apdu& instruction) const
             auto currentSize = buffer.size();
             buffer.setSize(buffer.size() + remaining.size());
             buffer.pointTo(currentSize);
-            buffer.putBytes(remaining);
+            buffer.put(remaining);
         }
     } else if (isAuthRequired(sw)) {
         log.e("Auth required");
@@ -159,16 +160,16 @@ ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) 
             throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
                 libusb_error_name(err), err));
         };
-        needMoreTime = buffer.getByte(7) && 0x80 == 0x80;
+        needMoreTime = buffer.get<uint8_t>(7) && 0x80 == 0x80;
     } while (needMoreTime);
 
     buffer.setSize(really_recieved);
 
     // size of data
-    uint32_t expected_data_size = buffer.getInt(1);
+    uint32_t expected_data_size = buffer.get<uint16_t>(1);
     int currentLength = really_recieved - 10;
 
-    ByteBuffer response_buffer = buffer.getBytes(10, currentLength);
+    ByteBuffer response_buffer = buffer.get(10, currentLength);
     response_buffer.setByteOrder(std::endian::little).setSize(expected_data_size);
     while (currentLength < expected_data_size) {
         // receive again
@@ -182,7 +183,7 @@ ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) 
 
         buffer.setSize(really_recieved);
         response_buffer.pointTo(currentLength);
-        response_buffer.putBytes(buffer);
+        response_buffer.put(buffer);
         currentLength += really_recieved;
     }
 

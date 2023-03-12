@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #include <bit>
 #include <initializer_list>
@@ -18,24 +20,32 @@ public:
     explicit ByteBuffer(std::initializer_list<uint8_t> il);
 
     std::size_t size() const;
+
     void setSize(std::size_t size);
 
-    const ByteBuffer& pointTo(std::size_t i);
+    const ByteBuffer& pointTo(std::size_t index);
 
     ByteBuffer& setByteOrder(std::endian);
 
-    ByteBuffer& putByte(unsigned char c);
-    ByteBuffer& putShort(uint16_t i16);
-    ByteBuffer& putInt(uint32_t i32);
-    ByteBuffer& putLong(uint64_t i64);
-    ByteBuffer& putBytes(const ByteBuffer& buffer);
+    template <typename T>
+    ByteBuffer& put(const T& value)
+    {
+        assert(pointer < data.size() - sizeof(T) + 1);
+        std::memcpy(data.data() + pointer, &value, sizeof(T));
+        pointer += sizeof(T);
+        return *this;
+    }
 
-    uint8_t getByte(std::size_t index) const;
-    uint16_t getShort(std::size_t index) const;
-    uint32_t getInt(std::size_t index) const;
-    uint64_t getLong(std::size_t index) const;
+    template <typename T>
+    T get(std::size_t i) const
+    {
+        assert(i < data.size() - sizeof(T) + 1);
+        T value;
+        std::memcpy(&value, data.data() + i, sizeof(T));
+        return value;
+    }
 
-    ByteBuffer getBytes(std::size_t from_index, std::size_t size) const;
+    ByteBuffer get(std::size_t index, std::size_t size) const;
 
     uint8_t* array() const;
 

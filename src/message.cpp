@@ -1,5 +1,7 @@
 #include "message.h"
 
+#include "byte_buffer.h"
+
 namespace authpp {
 
 namespace {
@@ -12,10 +14,10 @@ Message::Message(uint8_t type, const ByteBuffer& data)
     ;
     buffer
         .setByteOrder(std::endian::little)
-        .putByte(type)
-        .putInt(data.size())
-        .putBytes(ByteBuffer { 0x00, 0x00, 0x00, 0x00, 0x00 })
-        .putBytes(data);
+        .put<uint8_t>(type)
+        .put<uint32_t>(data.size())
+        .put(ByteBuffer { 0x00, 0x00, 0x00, 0x00, 0x00 })
+        .put(data);
 }
 
 Message::~Message() = default;
