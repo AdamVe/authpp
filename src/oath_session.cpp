@@ -159,17 +159,20 @@ ByteBuffer Session::deriveAccessKey(std::string_view password) const
     std::size_t accessKeyLength = 16;
     ByteBuffer derivedKey(accessKeyLength * 8);
 
-    PKCS5_PBKDF2_HMAC_SHA1(
-        password.data(),
-        password.size(),
-        properties.salt.array(),
-        properties.salt.size(),
-        1000,
-        accessKeyLength * 8,
-        derivedKey.array());
+    if (PKCS5_PBKDF2_HMAC_SHA1(
+            password.data(),
+            password.size(),
+            properties.salt.array(),
+            properties.salt.size(),
+            1000,
+            accessKeyLength * 8,
+            derivedKey.array())
+        == 1) {
+        derivedKey.setSize(accessKeyLength);
+        return derivedKey;
+    }
 
-    derivedKey.setSize(accessKeyLength);
-    return derivedKey;
+    return {};
 }
 
 void Session::unlock(std::string_view password)
@@ -178,15 +181,18 @@ void Session::unlock(std::string_view password)
     if (validate([&derivedKey](const ByteBuffer& challenge) -> ByteBuffer {
             ByteBuffer hmac_sha1(20 * 8);
             unsigned int size;
-            HMAC(EVP_sha1(),
+            auto* result = HMAC(EVP_sha1(),
                 derivedKey.array(),
                 derivedKey.size(),
                 challenge.array(),
                 challenge.size(),
                 hmac_sha1.array(),
                 &size);
-            hmac_sha1.setSize(static_cast<std::size_t>(size));
-            return hmac_sha1;
+            if (result != nullptr) {
+                hmac_sha1.setSize(static_cast<std::size_t>(size));
+                return hmac_sha1;
+            }
+            return {};
         })) {
         accessKey = derivedKey;
     }
