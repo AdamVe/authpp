@@ -61,13 +61,8 @@ ByteBuffer& ByteBuffer::putShort(uint16_t i16)
         log.d("putShort {:04x} to {} (buffer size: {})", i16, pointer, data.size());
     }
     assert(pointer < data.size() - 1);
-    if (byteOrder == std::endian::big) {
-        putByte((uint8_t)(i16 >> 8));
-        putByte((uint8_t)i16);
-    } else {
-        putByte((uint8_t)i16);
-        putByte((uint8_t)(i16 >> 8));
-    }
+    std::memcpy(data.data() + pointer, &i16, 2);
+    pointer += 2;
     return *this;
 }
 
@@ -77,18 +72,11 @@ ByteBuffer& ByteBuffer::putInt(uint32_t i32)
         log.d("putInt {:08x} to {} (buffer size: {})", i32, pointer, data.size());
     }
     assert(pointer < data.size() - 3);
-    if (byteOrder == std::endian::big) {
-        putByte((uint8_t)(i32 >> 24));
-        putByte((uint8_t)(i32 >> 16));
-        putByte((uint8_t)(i32 >> 8));
-        putByte((uint8_t)(i32));
-    } else {
-        putByte((uint8_t)(i32));
-        putByte((uint8_t)(i32 >> 8));
-        putByte((uint8_t)(i32 >> 16));
-        putByte((uint8_t)(i32 >> 24));
+    std::memcpy(data.data() + pointer, &i32, 4);
+    if (debugLog) {
+        log.d("Stored int {}", i32);
     }
-
+    pointer += 4;
     return *this;
 }
 
@@ -98,26 +86,8 @@ ByteBuffer& ByteBuffer::putLong(uint64_t i64)
         log.d("putLong {:016x} to {} (buffer size: {})", i64, pointer, data.size());
     }
     assert(pointer < data.size() - 7);
-    if (byteOrder == std::endian::big) {
-        putByte((uint8_t)(i64 >> 56));
-        putByte((uint8_t)(i64 >> 48));
-        putByte((uint8_t)(i64 >> 40));
-        putByte((uint8_t)(i64 >> 32));
-        putByte((uint8_t)(i64 >> 24));
-        putByte((uint8_t)(i64 >> 16));
-        putByte((uint8_t)(i64 >> 8));
-        putByte((uint8_t)(i64));
-    } else {
-        putByte((uint8_t)(i64));
-        putByte((uint8_t)(i64 >> 8));
-        putByte((uint8_t)(i64 >> 16));
-        putByte((uint8_t)(i64 >> 24));
-        putByte((uint8_t)(i64 >> 32));
-        putByte((uint8_t)(i64 >> 40));
-        putByte((uint8_t)(i64 >> 48));
-        putByte((uint8_t)(i64 >> 56));
-    }
-
+    std::memcpy(data.data() + pointer, &i64, 8);
+    pointer += 8;
     if (debugLog) {
         log.d("Stored long {}", i64);
     }
@@ -161,9 +131,8 @@ uint16_t ByteBuffer::getShort(std::size_t i) const
         log.d("getShort from {} (buffer size: {})", i, data.size());
     }
     assert(i < data.size() - 1);
-    uint16_t value = byteOrder == std::endian::big
-        ? data[i] << 8 | data[i + 1]
-        : data[i] | data[i + 1] << 8;
+    uint16_t value;
+    std::memcpy(&value, data.data() + i, 2);
 
     if (debugLog) {
         log.d("getShort: {}", value);
@@ -178,9 +147,8 @@ uint32_t ByteBuffer::getInt(std::size_t i) const
         log.d("getInt from {} (buffer size: {})", i, data.size());
     }
     assert(i < data.size() - 3);
-    uint32_t value = byteOrder == std::endian::big
-        ? (data[i] << 24) + (data[i + 1] << 16) + (data[i + 2] << 8) + data[i + 3]
-        : data[i] + (data[i + 1] << 8) + (data[i + 2] << 16) + (data[i + 3] << 24);
+    uint32_t value;
+    std::memcpy(&value, data.data() + i, 4);
 
     if (debugLog) {
         log.d("getInt({}): {}", i, value);
@@ -195,9 +163,8 @@ uint64_t ByteBuffer::getLong(std::size_t i) const
         log.d("getLong from {} (buffer size: {})", i, data.size());
     }
     assert(i < data.size() - 7);
-    uint64_t value = byteOrder == std::endian::big
-        ? ((uint64_t)data[i] << 56) | ((uint64_t)data[i + 1] << 48) | ((uint64_t)data[i + 2] << 40) | ((uint64_t)data[i + 3] << 32) | (data[i + 4] << 24) | (data[i + 5] << 16) | (data[i + 6] << 8) | data[i + 7]
-        : data[i] | (data[i + 1] << 8) | (data[i + 2] << 16) | (data[i + 3] << 24) | ((uint64_t)data[i + 4] << 32) | ((uint64_t)data[i + 5] << 40) | ((uint64_t)data[i + 6] << 48) | ((uint64_t)data[i + 7] << 56);
+    uint64_t value;
+    std::memcpy(&value, data.data() + i, 8);
 
     if (debugLog) {
         log.d("getLong({}): {}", i, value);
