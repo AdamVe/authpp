@@ -38,6 +38,7 @@ find_path(LIBUSB_INCLUDE_DIR
 find_library(LIBUSB_LIBRARY
   NAMES "usb-1.0"
   PATH_SUFFIXES "lib" "lib32" "lib64")
+find_package(OpenSSL REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(apps)

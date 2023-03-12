@@ -36,6 +36,7 @@ add_library(
 target_include_directories(authpp_lib PUBLIC
   "${authpp_SOURCE_DIR}/include"
   "${fmtlib_SOURCE_DIR}/include"
+  "${OPENSSL_INCLUDE_DIR}"
   "${LIBUSB_INCLUDE_DIR}/../")
 
 source_group(

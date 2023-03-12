@@ -12,15 +12,37 @@
 
 using namespace authpp;
 
-void useOathSession(const UsbDevice& key, std::function<void(const oath::Session&)> f)
+namespace {
+std::string pwd;
+}
+
+void useOathSession(const UsbDevice& key, std::function<void(oath::Session&)> f)
 {
     UsbDevice::Connection usbConnection(key);
     CcidConnection conn(usbConnection);
     oath::Session oath_session(conn);
+    if (!pwd.empty()) {
+        oath_session.unlock(pwd);
+    }
     f(oath_session);
 }
 
 void listCredentials(const UsbDevice& key)
+{
+    useOathSession(key, [](auto& session) {
+        auto credentials = session.listCredentials();
+#ifdef __cpp_lib_ranges
+        std::ranges::sort(credentials, oath::Credential::compareByName);
+#else
+        std::sort(credentials.begin(), credentials.end(), oath::Credential::compareByName);
+#endif
+        for (auto&& c : credentials) {
+            std::cout << c.name << " " << c.code.value << std::endl;
+        }
+    });
+}
+
+void calculateAll(const UsbDevice& key)
 {
     useOathSession(key, [](auto& session) {
         auto credentials = session.calculateAll(TimeUtil::getTimeStep());
@@ -59,8 +81,6 @@ std::string getParamValue(const std::span<char*>& params, std::string_view value
 
 int main(int argc, char** argv)
 {
-    Logger log("main");
-
     std::span params { argv, argv + argc };
 
     if (hasParam(params, "-D")) {
@@ -76,6 +96,14 @@ int main(int argc, char** argv)
 
     auto keys = usbManager.pollUsbDevices(matchVendorYubico);
     if (!keys.empty()) {
+        if (hasParam(params, "-p")) {
+            pwd = getParamValue(params, "-p");
+        }
+
+        if (hasParam(params, "all")) {
+            calculateAll(keys[0]);
+        }
+
         if (hasParam(params, "list")) {
             listCredentials(keys[0]);
         }

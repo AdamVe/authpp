@@ -13,7 +13,7 @@
 
 namespace authpp {
 
-#define TIMEOUT 100
+#define TIMEOUT 1000
 
 namespace {
     Logger log("CcidConnection");
@@ -148,13 +148,19 @@ ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) 
     std::size_t array_len = usb_interface.max_packet_size_in;
     ByteBuffer buffer(array_len);
     buffer.setByteOrder(std::endian::little);
-    if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-            buffer.array(),
-            array_len, &really_recieved, TIMEOUT);
-        err != 0) {
-        throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
-            libusb_error_name(err), err));
-    };
+
+    bool needMoreTime = false;
+    do {
+        needMoreTime = false;
+        if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
+                buffer.array(),
+                array_len, &really_recieved, TIMEOUT);
+            err != 0) {
+            throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
+                libusb_error_name(err), err));
+        };
+        needMoreTime = buffer.getByte(7) && 0x80 == 0x80;
+    } while (needMoreTime);
 
     buffer.setSize(really_recieved);
 

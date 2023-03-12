@@ -3,6 +3,9 @@
 #include <cstddef>
 #include <map>
 
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+
 #include "apdu.h"
 #include "ccid_connection.h"
 #include "fmt/fmt_byte_buffer.h"
@@ -47,10 +50,6 @@ Session::Properties Session::initProperties(Response&& response) const
         return Version(0, 0, 0);
     };
 
-    auto parseName = [](auto&& buffer) -> std::string {
-        return "TODO";
-    };
-
     auto parseAlgorithm = [](auto&& buffer) -> Algorithm {
         if (buffer.size() == 0) {
             return Algorithm::HMAC_SHA1;
@@ -68,7 +67,7 @@ Session::Properties Session::initProperties(Response&& response) const
 
     return Properties {
         parseVersion(response[0]),
-        parseName(response[1]),
+        response[1],
         response[2],
         parseAlgorithm(response[3])
     };
@@ -153,6 +152,79 @@ std::vector<Credential> Session::calculateAll(long timeStep) const
     }
 
     return credentials;
+}
+
+ByteBuffer Session::deriveAccessKey(std::string_view password) const
+{
+    std::size_t accessKeyLength = 16;
+    ByteBuffer derivedKey(accessKeyLength * 8);
+
+    PKCS5_PBKDF2_HMAC_SHA1(
+        password.data(),
+        password.size(),
+        properties.salt.array(),
+        properties.salt.size(),
+        1000,
+        accessKeyLength * 8,
+        derivedKey.array());
+
+    derivedKey.setSize(accessKeyLength);
+    return derivedKey;
+}
+
+void Session::unlock(std::string_view password)
+{
+    auto derivedKey = deriveAccessKey(password);
+    if (validate([&derivedKey](const ByteBuffer& challenge) -> ByteBuffer {
+            ByteBuffer hmac_sha1(20 * 8);
+            unsigned int size;
+            HMAC(EVP_sha1(),
+                derivedKey.array(),
+                derivedKey.size(),
+                challenge.array(),
+                challenge.size(),
+                hmac_sha1.array(),
+                &size);
+            hmac_sha1.setSize(static_cast<std::size_t>(size));
+            return hmac_sha1;
+        })) {
+        accessKey = derivedKey;
+    }
+}
+
+bool Session::validate(AccessKeyValidator validator) const
+{
+    ByteBuffer unlockChallenge(8);
+    unlockChallenge.putByte('c');
+    unlockChallenge.putByte('h');
+    unlockChallenge.putByte('a');
+    unlockChallenge.putByte('c');
+    unlockChallenge.putByte('h');
+    unlockChallenge.putByte('a');
+    unlockChallenge.putByte('r');
+    unlockChallenge.putByte('c');
+
+    auto challengeResponse = validator(properties.challenge);
+
+    auto validateDataSize = static_cast<uint8_t>(2 + challengeResponse.size() + 2 + unlockChallenge.size());
+    ByteBuffer validateData(validateDataSize);
+    validateData
+        .putByte(0x75)
+        .putByte(challengeResponse.size())
+        .putBytes(challengeResponse)
+        .putByte(0x74)
+        .putByte(unlockChallenge.size())
+        .putBytes(unlockChallenge);
+
+    Apdu apdu(0x00, 0xa3, 0x00, 0x00, validateData);
+    auto response = connection.send(apdu);
+
+    if (response.tag(0) == 0x75) {
+        auto clienteChallengeResponse = validator(unlockChallenge);
+        return true;
+    }
+
+    return false;
 }
 
 const Version& Session::getVersion() const

@@ -18,18 +18,12 @@ UsbDevice::UsbDevice(libusb_device* device)
     if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
     };
-
-    config_descriptors.resize(device_descriptor.bNumConfigurations);
-    for (std::size_t configurationNum = 0;
-         configurationNum < device_descriptor.bNumConfigurations;
-         ++configurationNum) {
-        if (0 != libusb_get_config_descriptor(device, configurationNum, &config_descriptors[configurationNum])) {
-            throw std::runtime_error("Failed to acquire configuration descriptor");
-        }
-    }
 }
 
-UsbDevice::~UsbDevice() { libusb_unref_device(device); }
+UsbDevice::~UsbDevice()
+{
+    libusb_unref_device(device);
+}
 
 std::string UsbDevice::getManufacturer() const
 {
@@ -138,7 +132,10 @@ UsbDevice::Connection::Connection(const UsbDevice& usb_device)
     usb_device.openConnection(&handle);
 }
 
-UsbDevice::Connection::~Connection() { usb_device.closeConnection(&handle); }
+UsbDevice::Connection::~Connection()
+{
+    usb_device.closeConnection(&handle);
+}
 
 libusb_device_handle* UsbDevice::Connection::operator*() const
 {
@@ -149,7 +146,13 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
     int usbClass, int usbSubClass) const
 {
     log.v("Searching config for {:02x}:{:02x}", usbClass, usbSubClass);
-    for (auto&& config : usb_device.config_descriptors) {
+    for (uint8_t config_index = 0; config_index < usb_device.device_descriptor.bNumConfigurations; ++config_index) {
+        libusb_config_descriptor* config;
+        if (0 != libusb_get_config_descriptor(usb_device.device, config_index, &config)) {
+            libusb_free_config_descriptor(config);
+            continue;
+        }
+
         log.v("  Config has {} interfaces", config->bNumInterfaces);
         for (int interfaceNum = 0; interfaceNum < config->bNumInterfaces;
              ++interfaceNum) {
@@ -200,6 +203,7 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
                         "and endpoints IN={:02x}({}) OUT={:02x}({})",
                         iClass, iSubClass, interfaceNum, altsettingNum, ein, max_in,
                         eout, max_out);
+                    libusb_free_config_descriptor(config);
                     return UsbDevice::Interface {
                         interfaceNum, altsettingNum, (unsigned char)ein,
                         (unsigned char)eout, max_in, max_out

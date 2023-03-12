@@ -48,7 +48,6 @@ private:
     libusb_device* device;
 
     libusb_device_descriptor device_descriptor;
-    std::vector<libusb_config_descriptor*> config_descriptors;
 
     mutable std::string manufacturer;
     mutable bool read_manufacturer { false };

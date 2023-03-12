@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -99,24 +100,30 @@ namespace oath {
     public:
         explicit Session(const CcidConnection& connection);
 
-        std::vector<Credential> listCredentials() const;
         Credential calculateOne(long timeStep, std::string_view name) const;
+        std::vector<Credential> listCredentials() const;
         std::vector<Credential> calculateAll(long timeStep) const;
 
+        void unlock(std::string_view password);
         const Version& getVersion() const;
 
     private:
+        using AccessKeyValidator = std::function<ByteBuffer(const ByteBuffer&)>;
         struct Properties {
             const Version version;
-            const std::string name;
+            const ByteBuffer salt;
             const ByteBuffer challenge;
             const Algorithm algorithm;
         };
 
+        Properties initProperties(Response&&) const;
+        ByteBuffer deriveAccessKey(std::string_view password) const;
+        bool validate(AccessKeyValidator validator) const;
+
         const CcidConnection& connection;
         const Properties properties;
 
-        Properties initProperties(Response&&) const;
+        ByteBuffer accessKey;
     };
 
 } // namespace oath
