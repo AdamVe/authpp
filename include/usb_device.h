@@ -34,6 +34,12 @@ public:
     explicit UsbDevice(libusb_device* device);
     ~UsbDevice();
 
+    UsbDevice(const UsbDevice&);
+    UsbDevice(UsbDevice&&);
+
+    UsbDevice& operator=(const UsbDevice&) = delete;
+    UsbDevice& operator=(UsbDevice&&) = delete;
+
     std::string getManufacturer() const;
     std::string getProduct() const;
     std::string getSerialNumber() const;

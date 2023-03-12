@@ -25,6 +25,23 @@ UsbDevice::~UsbDevice()
     libusb_unref_device(device);
 }
 
+UsbDevice::UsbDevice(UsbDevice&& other)
+    : device(other.device)
+{
+    if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
+        throw std::runtime_error("Failed to acquire device descriptor");
+    };
+    other.device = nullptr;
+}
+
+UsbDevice::UsbDevice(const UsbDevice& other)
+    : device(libusb_ref_device(other.device))
+{
+    if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
+        throw std::runtime_error("Failed to acquire device descriptor");
+    };
+}
+
 std::string UsbDevice::getManufacturer() const
 {
     if (!read_manufacturer) {
