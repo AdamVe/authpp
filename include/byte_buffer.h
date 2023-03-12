@@ -38,6 +38,8 @@ public:
 
     uint8_t* array() const;
 
+    bool operator==(const ByteBuffer& other) const;
+
     static void setDebugLog(bool);
 
 private:

@@ -221,6 +221,11 @@ const ByteBuffer& ByteBuffer::pointTo(std::size_t i)
     return *this;
 }
 
+bool ByteBuffer::operator==(const ByteBuffer& other) const
+{
+    return data == other.data;
+}
+
 void ByteBuffer::setDebugLog(bool debugLog)
 {
     ByteBuffer::debugLog = debugLog;

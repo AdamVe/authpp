@@ -5,6 +5,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/rand.h>
 
 #include "apdu.h"
 #include "ccid_connection.h"
@@ -144,11 +145,6 @@ std::vector<Credential> Session::calculateAll(long timeStep) const
     for (int i = 0; i < response.size(); i += 2) {
         auto credential = fromAllDataResponse(response[i], response.tag(i + 1), response[i + 1]);
         credentials.push_back(credential);
-        log.v("Found {} code:{} ({:02x} {})",
-            credential.name,
-            credential.code.value,
-            response.tag(i + 1),
-            response[i + 1]);
     }
 
     return credentials;
@@ -200,37 +196,28 @@ void Session::unlock(std::string_view password)
 
 bool Session::validate(AccessKeyValidator validator) const
 {
-    ByteBuffer unlockChallenge(8);
-    unlockChallenge.putByte('c');
-    unlockChallenge.putByte('h');
-    unlockChallenge.putByte('a');
-    unlockChallenge.putByte('c');
-    unlockChallenge.putByte('h');
-    unlockChallenge.putByte('a');
-    unlockChallenge.putByte('r');
-    unlockChallenge.putByte('c');
+    ByteBuffer clientChallenge(8);
+    if (RAND_bytes(clientChallenge.array(), 8) != 1) {
+        log.e("Failed to generate random challenge");
+        return false;
+    };
 
     auto challengeResponse = validator(properties.challenge);
 
-    auto validateDataSize = static_cast<uint8_t>(2 + challengeResponse.size() + 2 + unlockChallenge.size());
+    auto validateDataSize = static_cast<uint8_t>(2 + challengeResponse.size() + 2 + clientChallenge.size());
     ByteBuffer validateData(validateDataSize);
     validateData
         .putByte(0x75)
         .putByte(challengeResponse.size())
         .putBytes(challengeResponse)
         .putByte(0x74)
-        .putByte(unlockChallenge.size())
-        .putBytes(unlockChallenge);
+        .putByte(clientChallenge.size())
+        .putBytes(clientChallenge);
 
     Apdu apdu(0x00, 0xa3, 0x00, 0x00, validateData);
     auto response = connection.send(apdu);
 
-    if (response.tag(0) == 0x75) {
-        auto clienteChallengeResponse = validator(unlockChallenge);
-        return true;
-    }
-
-    return false;
+    return response.tag(0) == 0x75 && validator(clientChallenge) == response[0];
 }
 
 const Version& Session::getVersion() const
