@@ -33,6 +33,7 @@ public:
     uint8_t getByte(std::size_t index) const;
     uint16_t getShort(std::size_t index) const;
     uint32_t getInt(std::size_t index) const;
+    uint64_t getLong(std::size_t index) const;
 
     ByteBuffer getBytes(std::size_t from_index, std::size_t size) const;
 

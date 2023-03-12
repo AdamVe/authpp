@@ -189,6 +189,23 @@ uint32_t ByteBuffer::getInt(std::size_t i) const
     return value;
 }
 
+uint64_t ByteBuffer::getLong(std::size_t i) const
+{
+    if (debugLog) {
+        log.d("getLong from {} (buffer size: {})", i, data.size());
+    }
+    assert(i < data.size() - 7);
+    uint64_t value = byteOrder == std::endian::big
+        ? ((uint64_t)data[i] << 56) | ((uint64_t)data[i + 1] << 48) | ((uint64_t)data[i + 2] << 40) | ((uint64_t)data[i + 3] << 32) | (data[i + 4] << 24) | (data[i + 5] << 16) | (data[i + 6] << 8) | data[i + 7]
+        : data[i] | (data[i + 1] << 8) | (data[i + 2] << 16) | (data[i + 3] << 24) | ((uint64_t)data[i + 4] << 32) | ((uint64_t)data[i + 5] << 40) | ((uint64_t)data[i + 6] << 48) | ((uint64_t)data[i + 7] << 56);
+
+    if (debugLog) {
+        log.d("getLong({}): {}", i, value);
+    }
+
+    return value;
+}
+
 ByteBuffer ByteBuffer::getBytes(std::size_t from_index, std::size_t size) const
 {
     if (debugLog) {

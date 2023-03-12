@@ -57,6 +57,14 @@ TEST(BytesTest, PutGetInt)
     ASSERT_EQ(256000, b.getInt(2));
 }
 
+TEST(BytesTest, PutGetLong)
+{
+    ByteBuffer b(10);
+    b.pointTo(2);
+    b.putLong(4756927171371729432UL);
+    ASSERT_EQ(4756927171371729432UL, b.getLong(2));
+}
+
 TEST(BytesTest, PutGetBytes)
 {
     ByteBuffer b({ 10, 9, 8, 7 });
