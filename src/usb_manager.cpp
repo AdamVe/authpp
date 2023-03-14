@@ -25,7 +25,7 @@ std::vector<UsbDevice> UsbManager::poll(std::function<bool(libusb_device_descrip
     std::vector<UsbDevice> result;
     std::size_t usbDeviceCount = libusb_get_device_list(context, &usbDevices);
 
-#ifdef __cpp_lib_ranges
+#if __cpp_lib_ranges > 202110L
     auto deviceSpan = std::span { usbDevices, usbDevices + usbDeviceCount };
     auto matchingDevices = deviceSpan | std::views::filter([&p](auto&& d) {
         libusb_device_descriptor desc;

@@ -40,6 +40,7 @@ find_library(LIBUSB_LIBRARY
   PATH_SUFFIXES "lib" "lib32" "lib64")
 find_package(OpenSSL REQUIRED)
 
+add_subdirectory(common)
 add_subdirectory(src)
 add_subdirectory(apps)
 

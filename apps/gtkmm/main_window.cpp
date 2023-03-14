@@ -31,7 +31,7 @@ namespace {
     {
         return useOathSession<std::vector<oath::Credential>>(key, [](auto& session) {
             auto credentials = session.calculateAll(TimeUtil::getTimeStep());
-#ifdef __cpp_lib_ranges
+#if __cpp_lib_ranges > 202110L
             std::ranges::sort(credentials, oath::Credential::compareByName);
 #else
         std::sort(credentials.begin(), credentials.end(), oath::Credential::compareByName);
