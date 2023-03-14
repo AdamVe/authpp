@@ -41,7 +41,7 @@ find_library(LIBUSB_LIBRARY
 find_package(OpenSSL REQUIRED)
 
 add_subdirectory(common)
-add_subdirectory(src)
+add_subdirectory(authpp_lib)
 add_subdirectory(apps)
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
