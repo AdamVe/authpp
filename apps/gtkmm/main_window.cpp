@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "oath_session.h"
+#include "oath_session_helper.h"
 #include "time_util.h"
 #include "usb_device.h"
 #include "usb_manager.h"
@@ -13,36 +14,9 @@ using namespace authpp;
 namespace authppgtk {
 
 namespace {
-    std::string pwd;
-
-    template <typename T>
-    T useOathSession(const UsbDevice& key, std::function<T(oath::Session&)> f)
-    {
-        UsbDevice::Connection usbConnection(key);
-        CcidConnection conn(usbConnection);
-        oath::Session oath_session(conn);
-        if (!pwd.empty()) {
-            oath_session.unlock(pwd);
-        }
-        return f(oath_session);
-    }
-
-    std::vector<oath::Credential> calculateAll(const UsbDevice& key)
-    {
-        return useOathSession<std::vector<oath::Credential>>(key, [](auto& session) {
-            auto credentials = session.calculateAll(TimeUtil::getTimeStep());
-#if __cpp_lib_ranges > 202110L
-            std::ranges::sort(credentials, oath::Credential::compareByName);
-#else
-        std::sort(credentials.begin(), credentials.end(), oath::Credential::compareByName);
-#endif
-            return credentials;
-        });
-    }
-
     std::vector<oath::Credential> getAccounts()
     {
-
+        using namespace oath;
         UsbManager usbManager;
 
         auto matchVendorYubico = [](auto&& descriptor) {
@@ -50,7 +24,7 @@ namespace {
             return descriptor.idVendor == VENDOR_YUBICO;
         };
 
-        std::vector<oath::Credential> accounts;
+        std::vector<Credential> accounts;
         auto keys = usbManager.pollUsbDevices(matchVendorYubico, 100);
         if (!keys.empty()) {
             auto calculated = calculateAll(keys[0]);
