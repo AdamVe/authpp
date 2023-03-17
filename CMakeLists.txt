@@ -32,19 +32,14 @@ FetchContent_Declare(
   GIT_TAG 9.1.0)
 FetchContent_MakeAvailable(fmtlib)
 
-find_path(LIBUSB_INCLUDE_DIR
-  NAMES libusb.h
-  PATH_SUFFIXES "include" "libusb" "libusb-1.0")
-find_library(LIBUSB_LIBRARY
-  NAMES "usb-1.0"
-  PATH_SUFFIXES "lib" "lib32" "lib64")
+find_package(PkgConfig)
+pkg_check_modules(libusb REQUIRED libusb-1.0)
 find_package(OpenSSL REQUIRED)
 
 add_subdirectory(common)
 add_subdirectory(authpp_lib)
 add_subdirectory(apps)
 
-if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    AND BUILD_TESTING)
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_TESTING)
   add_subdirectory(tests)
 endif()

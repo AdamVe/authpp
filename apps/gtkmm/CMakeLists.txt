@@ -1,5 +1,4 @@
 
-find_package(PkgConfig)
 
 pkg_check_modules(GTKMM gtkmm-4.0)
 
@@ -19,6 +18,6 @@ target_link_libraries(authppgtk
   PRIVATE
   authpp_lib
   ${GTKMM_LIBRARIES}
-  ${LIBUSB_LIBRARY}
+  ${libusb_LINK_LIBRARIES}
   fmt::fmt
   OpenSSL::SSL)

@@ -4,6 +4,6 @@ target_link_libraries(
   PRIVATE
   authpp_lib
   common_lib
-  ${LIBUSB_LIBRARY}
+  ${libusb_LINK_LIBRARIES}
   fmt::fmt
   OpenSSL::SSL)
