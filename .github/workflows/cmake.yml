@@ -26,9 +26,6 @@ jobs:
     - name: Build cli
       run: cmake --build ${{github.workspace}}/build --config=${{env.BUILD_TYPE}} --target authpp
 
-    - name: Build gtk
-      run: cmake --build ${{github.workspace}}/build --config=${{env.BUILD_TYPE}} --target authppgtk
-
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
