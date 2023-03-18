@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 #include <common/arg_parser.h>
 
@@ -32,14 +32,14 @@ int main(int argc, char** argv)
         if (argParser.hasParam("all")) {
             auto credentials = authpp::oath::calculateAll(keys[0]);
             for (auto&& c : credentials) {
-                std::cout << c.name << " " << c.code.value << std::endl;
+                fmt::print("{} {}\n", c.name, c.code.value);
             }
         }
 
         if (argParser.hasParam("list")) {
             auto credentials = authpp::oath::listCredentials(keys[0]);
             for (auto&& c : credentials) {
-                std::cout << c.name << " " << c.code.value << std::endl;
+                fmt::print("{}\n", c.name);
             }
         }
 
@@ -47,9 +47,9 @@ int main(int argc, char** argv)
             auto name = argParser.getParamValue("get");
             if (!name.empty()) {
                 auto c = authpp::oath::calculate(keys[0], name);
-                std::cout << c.code.value << std::endl;
+                fmt::print("{}\n", c.code.value);
             } else {
-                std::cerr << "get needs a value" << std::endl;
+                fmt::print("get needs a value\n");
             }
         }
     }
