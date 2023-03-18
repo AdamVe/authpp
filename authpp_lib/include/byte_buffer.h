@@ -27,26 +27,17 @@ public:
 
     ByteBuffer& setByteOrder(std::endian);
 
-    ByteBuffer& put(const ByteBuffer& buffer)
+    ByteBuffer& put(const ByteBuffer& buffer);
+
+    ByteBuffer& put(const std::integral auto& value)
     {
-        auto bs = buffer.size();
-        assert(pointer < data.size() - bs + 1);
-        std::memcpy(data.data() + pointer, buffer.array(), bs);
-        pointer += bs;
+        assert(pointer < data.size() - sizeof(value) + 1);
+        std::memcpy(data.data() + pointer, &value, sizeof(value));
+        pointer += sizeof(value);
         return *this;
     }
 
-    template <typename T,
-        std::enable_if_t<std::is_integral<T>::value, bool> = true>
-    ByteBuffer& put(const T& value)
-    {
-        assert(pointer < data.size() - sizeof(T) + 1);
-        std::memcpy(data.data() + pointer, &value, sizeof(T));
-        pointer += sizeof(T);
-        return *this;
-    }
-
-    template <typename T>
+    template <std::integral T>
     T get(std::size_t i) const
     {
         assert(i < data.size() - sizeof(T) + 1);

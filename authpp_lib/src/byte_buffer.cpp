@@ -44,6 +44,15 @@ ByteBuffer& ByteBuffer::setByteOrder(std::endian order)
     return *this;
 }
 
+ByteBuffer& ByteBuffer::put(const ByteBuffer& buffer)
+{
+    auto bs = buffer.size();
+    assert(pointer < data.size() - bs + 1);
+    std::memcpy(data.data() + pointer, buffer.array(), bs);
+    pointer += bs;
+    return *this;
+}
+
 ByteBuffer ByteBuffer::get(std::size_t index, std::size_t size) const
 {
     if (debugLog) {
