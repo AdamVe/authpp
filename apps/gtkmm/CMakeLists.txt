@@ -5,6 +5,7 @@ pkg_check_modules(GTKMM gtkmm-4.0)
 add_executable(authppgtk
   main.cpp
   main_window.cpp
+  account_widget.cpp
 )
 
 target_include_directories(authppgtk PUBLIC

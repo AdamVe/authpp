@@ -3,11 +3,17 @@
 #include <functional>
 #include <vector>
 
+#include <fmt/printf.h>
+
+#include <giomm/liststore.h>
+
 #include "oath_session.h"
 #include "oath_session_helper.h"
 #include "time_util.h"
 #include "usb_device.h"
 #include "usb_manager.h"
+
+#include "account_widget.h"
 
 using namespace authpp;
 
@@ -44,7 +50,7 @@ MainWindow::MainWindow()
     verticalBox.set_margin(8);
     set_child(verticalBox);
 
-    scrolledWindow.set_child(accountList);
+    scrolledWindow.set_child(accountListView);
 
     scrolledWindow.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
     scrolledWindow.set_expand();
@@ -63,12 +69,12 @@ MainWindow::MainWindow()
     auto selection_model = Gtk::SingleSelection::create(stringList);
     selection_model->set_autoselect(false);
     selection_model->set_can_unselect(true);
-    accountList.set_model(selection_model);
+    accountListView.set_model(selection_model);
 
     auto factory = Gtk::SignalListItemFactory::create();
     factory->signal_setup().connect(sigc::mem_fun(*this, &MainWindow::onSetupLabel));
     factory->signal_bind().connect(sigc::mem_fun(*this, &MainWindow::onBindName));
-    accountList.set_factory(factory);
+    accountListView.set_factory(factory);
 
     onButtonRefresh();
 }
@@ -79,20 +85,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::onButtonRefresh()
 {
-    auto accounts = getAccounts();
-    std::vector<Glib::ustring> accountInfos;
-    std::transform(accounts.cbegin(),
-        accounts.cend(),
-        std::back_insert_iterator(accountInfos),
-        [](auto&& account) {
-            return account.name + " " + account.code.value;
-        });
-    stringList->splice(0, stringList->get_n_items(), accountInfos);
+    accountList = getAccounts();
+    std::vector<Glib::ustring> accountNames;
+    for (auto&& account : accountList) {
+        accountNames.emplace_back(account.name);
+    }
+    stringList->splice(0, stringList->get_n_items(), accountNames);
 }
 
 void MainWindow::onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item)
 {
-    list_item->set_child(*Gtk::make_managed<Gtk::Label>("", Gtk::Align::START));
+    list_item->set_child(*Gtk::make_managed<AccountWidget>());
 }
 
 void MainWindow::onBindName(const Glib::RefPtr<Gtk::ListItem>& list_item)
@@ -100,9 +103,11 @@ void MainWindow::onBindName(const Glib::RefPtr<Gtk::ListItem>& list_item)
     auto pos = list_item->get_position();
     if (pos == GTK_INVALID_LIST_POSITION)
         return;
-    auto label = dynamic_cast<Gtk::Label*>(list_item->get_child());
-    if (!label)
+    auto accountWidget = dynamic_cast<AccountWidget*>(list_item->get_child());
+    if (!accountWidget) {
         return;
-    label->set_text(stringList->get_string(pos));
+    }
+    accountWidget->setName(accountList[pos].name);
+    accountWidget->setCode(accountList[pos].code.value);
 }
 } // namespace authppgtk

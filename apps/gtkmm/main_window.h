@@ -2,6 +2,8 @@
 
 #include <gtkmm.h>
 
+#include "oath_session.h"
+
 namespace authppgtk {
 
 class MainWindow : public Gtk::Window {
@@ -16,11 +18,12 @@ protected:
 
     Gtk::Box verticalBox;
     Gtk::ScrolledWindow scrolledWindow;
-    Gtk::ListView accountList;
+    Gtk::ListView accountListView;
     Gtk::Box boxButtons;
     Gtk::Button buttonRefresh;
 
     Glib::RefPtr<Gtk::StringList> stringList;
+    std::vector<authpp::oath::Credential> accountList;
 };
 
 } // namespace authppgtk
