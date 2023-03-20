@@ -38,11 +38,9 @@ add_library(
 target_include_directories(authpp_lib
   PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
-  PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-  "${fmtlib_SOURCE_DIR}/include"
-  "${OPENSSL_INCLUDE_DIR}"
-  "${LIBUSB_INCLUDE_DIR}/../")
+  "${fmtlib_SOURCE_DIR}/include/"
+  "${libusb_INCLUDEDIR}/"
+  "${OPENSSL_INCLUDE_DIR}/")
 
 source_group(
   TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"

@@ -13,7 +13,12 @@ target_include_directories(authppgtk PUBLIC
   "${fmtlib_SOURCE_DIR}/include"
   "${OPENSSL_INCLUDE_DIR}"
   "${GTKMM_INCLUDE_DIRS}"
-  "${LIBUSB_INCLUDE_DIR}/../}")
+  "${libusb_INCLUDEDIR}/}")
+
+target_link_directories(authppgtk
+  PRIVATE
+  ${GTKMM_LIBRARY_DIRS}
+)
 
 target_link_libraries(authppgtk
   PRIVATE
