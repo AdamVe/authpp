@@ -7,7 +7,7 @@ class AccountWidget : public Gtk::Box {
 public:
     AccountWidget();
 
-    ~AccountWidget();
+    ~AccountWidget() override;
 
     void setName(const Glib::ustring& newName);
 

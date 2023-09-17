@@ -17,15 +17,15 @@ class Apdu;
 
 class Response {
 public:
-    std::size_t size() const;
+    [[nodiscard]] std::size_t size() const;
 
     void put(uint8_t tag, const ByteBuffer& buffer);
     ByteBuffer operator[](int i) const;
-    uint8_t tag(int i) const;
+    [[nodiscard]] uint8_t tag(int i) const;
 
 private:
     struct DataPair {
-        uint8_t tag;
+        uint8_t tag{};
         ByteBuffer buffer;
     };
 
@@ -37,11 +37,11 @@ public:
     explicit CcidConnection(const UsbDevice::Connection& handle);
     virtual ~CcidConnection();
 
-    Response send(const Apdu& apdu) const;
+    [[nodiscard]] Response send(const Apdu& apdu) const;
 
 private:
     void setup();
-    Response parse(const ByteBuffer& buffer) const;
+    [[nodiscard]] Response parse(const ByteBuffer& buffer) const;
     ByteBuffer transcieve(const Message& message, int* transferred = nullptr) const;
 
     const UsbDevice::Connection& handle;
@@ -54,3 +54,5 @@ private:
 };
 
 } // namespace authpp
+
+#pragma clang diagnostic pop

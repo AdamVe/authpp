@@ -1,5 +1,3 @@
-#include <fmt/format.h>
-
 #include <common/arg_parser.h>
 
 #include "logger.h"

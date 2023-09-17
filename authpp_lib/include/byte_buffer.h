@@ -17,9 +17,9 @@ public:
 
     explicit ByteBuffer(std::size_t size);
 
-    explicit ByteBuffer(std::initializer_list<uint8_t> il);
+    ByteBuffer(std::initializer_list<uint8_t> il);
 
-    std::size_t size() const;
+    [[nodiscard]] std::size_t size() const;
 
     void setSize(std::size_t size);
 
@@ -46,9 +46,9 @@ public:
         return value;
     }
 
-    ByteBuffer get(std::size_t index, std::size_t size) const;
+    [[nodiscard]] ByteBuffer get(std::size_t index, std::size_t size) const;
 
-    uint8_t* array() const;
+    [[nodiscard]] uint8_t* array() const;
 
     bool operator==(const ByteBuffer& other) const;
 

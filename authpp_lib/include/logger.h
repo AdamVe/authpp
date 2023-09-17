@@ -23,7 +23,7 @@ public:
     {
     }
 
-    static void setLevel(Level level) { Logger::level = level; }
+    static void setLevel(Level loggerLevel) { Logger::level = loggerLevel; }
 
     template <typename... Args>
     void i(fmt::format_string<Args...> fmt, Args&&... args) const
@@ -59,18 +59,17 @@ private:
     inline static Level level { Level::kError };
     std::string name;
 
-    inline static std::vector<std::string_view> enumNames { "I", "W", "E", "D",
-        "V" };
+    inline static std::vector<std::string_view> enumNames { "I", "W", "E", "D", "V" };
 
     template <typename... Args>
-    void log(Level level, fmt::format_string<Args...> fmt, Args&&... args) const
+    void log(Level loggerLevel, fmt::format_string<Args...> fmt, Args&&... args) const
     {
-        if (level <= Logger::level) {
+        if (loggerLevel <= Logger::level) {
             if (name.length() > 0) {
-                fmt::print("[{}] <{}> {}\n", enumNames[std::to_underlying(level)], name,
+                fmt::print("[{}] <{}> {}\n", enumNames[std::to_underlying(loggerLevel)], name,
                     fmt::vformat(fmt, fmt::make_format_args(args...)));
             } else {
-                fmt::print("[{}] {}\n", enumNames[std::to_underlying(level)],
+                fmt::print("[{}] {}\n", enumNames[std::to_underlying(loggerLevel)],
                     fmt::vformat(fmt, fmt::make_format_args(args...)));
             }
         }

@@ -12,7 +12,7 @@ public:
     Message(uint8_t type, const ByteBuffer& data);
     ~Message();
 
-    const ByteBuffer& get() const;
+    [[nodiscard]] const ByteBuffer& get() const;
 
 private:
     ByteBuffer buffer;

@@ -1,16 +1,11 @@
 #include "main_window.h"
 
-#include <functional>
 #include <vector>
-
-#include <fmt/printf.h>
 
 #include <giomm/liststore.h>
 
 #include "oath_session.h"
 #include "oath_session_helper.h"
-#include "time_util.h"
-#include "usb_device.h"
 #include "usb_manager.h"
 
 #include "account_widget.h"
@@ -80,8 +75,7 @@ MainWindow::MainWindow()
 }
 
 MainWindow::~MainWindow()
-{
-}
+= default;
 
 void MainWindow::onButtonRefresh()
 {
@@ -93,7 +87,7 @@ void MainWindow::onButtonRefresh()
     stringList->splice(0, stringList->get_n_items(), accountNames);
 }
 
-void MainWindow::onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item)
+void MainWindow::onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item) // NOLINT(*-convert-member-functions-to-static)
 {
     list_item->set_child(*Gtk::make_managed<AccountWidget>());
 }

@@ -14,10 +14,11 @@ namespace {
 
 UsbDevice::UsbDevice(libusb_device* device)
     : device(libusb_ref_device(device))
+    , device_descriptor()
 {
     if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
-    };
+    }
 }
 
 UsbDevice::~UsbDevice()
@@ -25,21 +26,23 @@ UsbDevice::~UsbDevice()
     libusb_unref_device(device);
 }
 
-UsbDevice::UsbDevice(UsbDevice&& other)
+UsbDevice::UsbDevice(UsbDevice&& other) noexcept
     : device(other.device)
+    , device_descriptor()
 {
     if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
-    };
+    }
     other.device = nullptr;
 }
 
 UsbDevice::UsbDevice(const UsbDevice& other)
     : device(libusb_ref_device(other.device))
+    , device_descriptor()
 {
     if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
-    };
+    }
 }
 
 std::string UsbDevice::getManufacturer() const
@@ -128,7 +131,7 @@ std::string UsbDevice::getStringDescriptor(std::size_t index) const
     log.v("Read string descriptor from index {} with content {}", index,
         (const char*)string_descriptor);
 
-    return std::string((char*)string_descriptor);
+    return { ((char*)string_descriptor) };
 }
 
 void UsbDevice::openConnection(libusb_device_handle** handle) const
@@ -138,13 +141,14 @@ void UsbDevice::openConnection(libusb_device_handle** handle) const
     }
 }
 
-void UsbDevice::closeConnection(libusb_device_handle** handle) const
+void UsbDevice::closeConnection(libusb_device_handle** handle) const // NOLINT(*-convert-member-functions-to-static)
 {
     libusb_close(*handle);
 }
 
 UsbDevice::Connection::Connection(const UsbDevice& usb_device)
     : usb_device(usb_device)
+    , handle()
 {
     usb_device.openConnection(&handle);
 }

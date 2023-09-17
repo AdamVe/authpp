@@ -19,7 +19,7 @@ AccountWidget::AccountWidget()
     append(code);
 };
 
-AccountWidget::~AccountWidget() {};
+AccountWidget::~AccountWidget() = default;
 
 void AccountWidget::setName(const Glib::ustring& newName)
 {

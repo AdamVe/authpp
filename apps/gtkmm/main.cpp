@@ -1,7 +1,6 @@
 #include "main_window.h"
 
 #include <gtkmm/application.h>
-#include <iostream>
 
 using namespace std;
 

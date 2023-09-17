@@ -11,11 +11,11 @@ class UsbDevice {
 public:
     struct Interface {
         int number { -1 };
-        int altsetting;
-        unsigned char endpoint_in;
-        unsigned char endpoint_out;
-        uint16_t max_packet_size_in;
-        uint16_t max_packet_size_out;
+        int altsetting {};
+        unsigned char endpoint_in {};
+        unsigned char endpoint_out {};
+        uint16_t max_packet_size_in {};
+        uint16_t max_packet_size_out {};
     };
 
     class Connection {
@@ -25,7 +25,7 @@ public:
 
         libusb_device_handle* operator*() const;
 
-        Interface claimInterface(int usbClass, int usbSubclass) const;
+        [[nodiscard]] Interface claimInterface(int usbClass, int usbSubclass) const;
 
     private:
         const UsbDevice& usb_device;
@@ -35,7 +35,7 @@ public:
     ~UsbDevice();
 
     UsbDevice(const UsbDevice&);
-    UsbDevice(UsbDevice&&);
+    UsbDevice(UsbDevice&&) noexcept;
 
     UsbDevice& operator=(const UsbDevice&) = delete;
     UsbDevice& operator=(UsbDevice&&) = delete;
