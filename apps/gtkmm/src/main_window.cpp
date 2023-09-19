@@ -8,7 +8,7 @@
 #include "oath_session_helper.h"
 #include "usb_manager.h"
 
-#include "account_widget.h"
+#include "../include/account_widget.h"
 
 using namespace authpp;
 
