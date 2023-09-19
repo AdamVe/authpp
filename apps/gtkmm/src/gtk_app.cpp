@@ -1,14 +1,16 @@
-#include "main_window.h"
+#include "gtk_app.h"
 
 #include <vector>
 
 #include <giomm/liststore.h>
 
+#include "resources.h"
+
 #include "oath_session.h"
 #include "oath_session_helper.h"
 #include "usb_manager.h"
 
-#include "../include/account_widget.h"
+#include "account_widget.h"
 
 using namespace authpp;
 
@@ -33,51 +35,39 @@ namespace {
         }
         return accounts;
     }
+
+    Gtk::Button* refreshButton = nullptr;
 } // namespace
 
-MainWindow::MainWindow()
-    : verticalBox(Gtk::Orientation::VERTICAL)
-    , buttonRefresh("Refresh")
+GtkApp::GtkApp()
 {
-    set_title("Authpp Gtk");
-    set_default_size(250, 600);
+    auto refBuilder = Gtk::Builder::create();
+    refBuilder->add_from_file(Resources::get_ui_path() / "authppgtk.ui");
 
-    verticalBox.set_margin(8);
-    set_child(verticalBox);
+    appWindow = refBuilder->get_widget<Gtk::Window>("win_app");
+    refreshButton = refBuilder->get_widget<Gtk::Button>("btn_refresh");
 
-    scrolledWindow.set_child(accountListView);
-
-    scrolledWindow.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
-    scrolledWindow.set_expand();
-
-    verticalBox.append(scrolledWindow);
-    verticalBox.append(boxButtons);
-
-    boxButtons.append(buttonRefresh);
-    boxButtons.set_margin(5);
-    buttonRefresh.set_hexpand(true);
-    buttonRefresh.set_halign(Gtk::Align::CENTER);
-    buttonRefresh.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onButtonRefresh));
+    auto accountListView = refBuilder->get_widget<Gtk::ListView>("listview_accounts");
 
     stringList = Gtk::StringList::create({});
 
     auto selection_model = Gtk::SingleSelection::create(stringList);
     selection_model->set_autoselect(false);
     selection_model->set_can_unselect(true);
-    accountListView.set_model(selection_model);
+    accountListView->set_model(selection_model);
 
     auto factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(sigc::mem_fun(*this, &MainWindow::onSetupLabel));
-    factory->signal_bind().connect(sigc::mem_fun(*this, &MainWindow::onBindName));
-    accountListView.set_factory(factory);
+    factory->signal_setup().connect(sigc::mem_fun(*this, &GtkApp::onSetupLabel));
+    factory->signal_bind().connect(sigc::mem_fun(*this, &GtkApp::onBindName));
+    accountListView->set_factory(factory);
 
+    refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &GtkApp::onButtonRefresh));
     onButtonRefresh();
 }
 
-MainWindow::~MainWindow()
-= default;
+GtkApp::~GtkApp() = default;
 
-void MainWindow::onButtonRefresh()
+void GtkApp::onButtonRefresh()
 {
     accountList = getAccounts();
     std::vector<Glib::ustring> accountNames;
@@ -87,12 +77,12 @@ void MainWindow::onButtonRefresh()
     stringList->splice(0, stringList->get_n_items(), accountNames);
 }
 
-void MainWindow::onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item) // NOLINT(*-convert-member-functions-to-static)
+void GtkApp::onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item) // NOLINT(*-convert-member-functions-to-static)
 {
     list_item->set_child(*Gtk::make_managed<AccountWidget>());
 }
 
-void MainWindow::onBindName(const Glib::RefPtr<Gtk::ListItem>& list_item)
+void GtkApp::onBindName(const Glib::RefPtr<Gtk::ListItem>& list_item)
 {
     auto pos = list_item->get_position();
     if (pos == GTK_INVALID_LIST_POSITION)
