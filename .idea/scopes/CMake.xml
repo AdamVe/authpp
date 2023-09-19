@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="CMake" pattern="file:CMakeLists.txt||file:tests/CMakeLists.txt||file:authpp_lib/CMakeLists.txt||file:apps/CMakeLists.txt||file:apps/gtkmm/CMakeLists.txt||file:apps/cli/CMakeLists.txt||file:common/CMakeLists.txt" />
+</component>

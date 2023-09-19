@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Gtk4" pattern="file[authpp]:apps/gtkmm//*||file[authpp]:authpp_lib//*" />
+</component>
