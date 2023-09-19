@@ -6,21 +6,19 @@
 
 namespace authppgtk {
 
-class MainWindow : public Gtk::Window {
+class GtkApp {
 public:
-    MainWindow();
-    ~MainWindow() override;
+    GtkApp();
+    virtual ~GtkApp();
+
+    Gtk::Window& getAppWindow() { return *appWindow; }
 
 protected:
     void onButtonRefresh();
     void onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item);
     void onBindName(const Glib::RefPtr<Gtk::ListItem>& list_item);
 
-    Gtk::Box verticalBox;
-    Gtk::ScrolledWindow scrolledWindow;
-    Gtk::ListView accountListView;
-    Gtk::Box boxButtons;
-    Gtk::Button buttonRefresh;
+    Gtk::Window* appWindow;
 
     Glib::RefPtr<Gtk::StringList> stringList;
     std::vector<authpp::oath::Credential> accountList;
