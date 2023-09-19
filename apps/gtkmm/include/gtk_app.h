@@ -15,8 +15,8 @@ public:
 
 protected:
     void onButtonRefresh();
-    void onSetupLabel(const Glib::RefPtr<Gtk::ListItem>& list_item);
-    void onBindName(const Glib::RefPtr<Gtk::ListItem>& list_item);
+    void onSetupItem(const Glib::RefPtr<Gtk::ListItem>& list_item);
+    void onBindItem(const Glib::RefPtr<Gtk::ListItem>& list_item);
 
     Gtk::Window* appWindow;
 

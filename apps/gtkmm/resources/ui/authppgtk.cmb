@@ -2,7 +2,8 @@
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
 <cambalache-project version="0.13.1" target_tk="gtk-4.0">
   <ui>
-	(1,None,"authppgtk.ui","authppgtk.ui",None,None,None,None,None,None,None)
+	(1,None,"authppgtk.ui","authppgtk.ui",None,None,None,None,None,None,None),
+	(2,None,None,"account_widget.ui",None,None,None,None,None,None,None)
   </ui>
   <object>
 	(1,1,"GtkWindow","win_app",None,None,None,None,-1,None),
@@ -11,7 +12,9 @@
 	(1,4,"GtkListView","listview_accounts",3,None,None,None,-1,None),
 	(1,5,"GtkBox",None,2,None,None,None,1,None),
 	(1,6,"GtkButton","btn_refresh",5,None,None,None,None,None),
-	(1,7,"GtkSpinner",None,5,None,None,None,1,None)
+	(2,1,"GtkBox","account",None,None,None,None,None,None),
+	(2,2,"GtkLabel","name",1,None,None,None,None,None),
+	(2,3,"GtkLabel","code",1,None,None,None,1,None)
   </object>
   <object_property>
 	(1,1,"GtkWidget","height-request","600",None,None,None,None,None,None,None,None,None),
@@ -35,6 +38,33 @@
 	(1,6,"GtkButton","label","Refresh",None,None,None,None,None,None,None,None,None),
 	(1,6,"GtkWidget","halign","center",None,None,None,None,None,None,None,None,None),
 	(1,6,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
-	(1,7,"GtkSpinner","spinning","True",None,None,None,None,None,None,None,None,None)
+	(2,1,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,1,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,1,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
+	(2,1,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
+	(2,1,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
+	(2,1,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkLabel","label","name",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkLabel","natural-wrap-mode","none",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,2,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","label","code",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None)
   </object_property>
+  <object_data>
+	(2,2,"GtkWidget",1,1,None,None,None,None,None,None)
+  </object_data>
 </cambalache-project>

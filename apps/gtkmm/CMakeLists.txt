@@ -3,15 +3,18 @@ pkg_check_modules(GTKMM gtkmm-4.0)
 add_executable(authppgtk
         src/main.cpp
         src/gtk_app.cpp
-        src/account_widget.cpp
         src/resources.cpp
 )
+
+add_custom_target(build-time-make-directory ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+        $<TARGET_FILE_DIR:authppgtk>/data/ui/)
 
 add_custom_command(
         TARGET authppgtk POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/authppgtk.ui
-        $<TARGET_FILE_DIR:authppgtk>/data/ui/authppgtk.ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.ui
+        $<TARGET_FILE_DIR:authppgtk>/data/ui/
 )
 
 target_include_directories(authppgtk

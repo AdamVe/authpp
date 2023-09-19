@@ -41,11 +41,6 @@
                 <property name="label">Refresh</property>
               </object>
             </child>
-            <child>
-              <object class="GtkSpinner">
-                <property name="spinning">True</property>
-              </object>
-            </child>
           </object>
         </child>
       </object>
