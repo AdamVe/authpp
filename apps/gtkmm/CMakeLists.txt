@@ -16,22 +16,6 @@ add_executable(
         ${SOURCE_LIST}
         ${HEADER_LIST})
 
-add_custom_target(build-time-make-directory ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-        "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
-
-add_custom_command(
-        TARGET authppgtk POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.ui"
-        "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
-
-add_custom_command(
-        TARGET authppgtk POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.css"
-        "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
-
 target_include_directories(authppgtk
         PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -53,3 +37,13 @@ target_link_libraries(authppgtk
         ${libusb_LINK_LIBRARIES}
         fmt::fmt
         OpenSSL::SSL)
+
+add_custom_target(copy-resources ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:authppgtk>/data/ui/
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/authppgtk.ui" $<TARGET_FILE_DIR:authppgtk>/data/ui/authppgtk.ui
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/account_widget.ui" $<TARGET_FILE_DIR:authppgtk>/data/ui/account_widget.ui
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/authppgtk.css" $<TARGET_FILE_DIR:authppgtk>/data/ui/authppgtk.css
+)
+
+add_dependencies(authppgtk copy-resources)
+

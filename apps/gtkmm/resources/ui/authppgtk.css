@@ -1,11 +1,11 @@
 label.account_code {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     font-family: monospace;
 }
 
 label.account_issuer {
-    font-size: 12px;
+    font-size: 10px;
 }
 
 label.account_name {
