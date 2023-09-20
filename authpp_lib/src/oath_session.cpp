@@ -87,11 +87,8 @@ std::vector<Credential> Session::listCredentials() const
 
 Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
 {
-    auto name = std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size());
-    std::string code = "";
-
     Credential credential {
-        name,
+        std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size()),
         Algorithm::HMAC_SHA1,
         Code::fromByteBuffer(codeType, response)
     };
@@ -109,9 +106,9 @@ Credential Session::calculateOne(long timeStep, std::string_view name) const
         .put<uint8_t>(0x71)
         .put<uint8_t>(name.length());
 
-    for (std::size_t i = 0; i < name.length(); ++i) {
-        calculateData.put<uint8_t>(name[i]);
-    };
+    for (char i : name) {
+        calculateData.put<uint8_t>(i);
+    }
     calculateData.put<uint8_t>(0x74)
         .put<uint8_t>(challengeSize)
         .put(challenge);

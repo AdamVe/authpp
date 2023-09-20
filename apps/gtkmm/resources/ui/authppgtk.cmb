@@ -13,8 +13,10 @@
 	(1,5,"GtkBox",None,2,None,None,None,1,None),
 	(1,6,"GtkButton","btn_refresh",5,None,None,None,None,None),
 	(2,1,"GtkBox","account",None,None,None,None,None,None),
-	(2,2,"GtkLabel","name",1,None,None,None,None,None),
-	(2,3,"GtkLabel","code",1,None,None,None,1,None)
+	(2,3,"GtkLabel","code",1,None,None,None,1,None),
+	(2,4,"GtkBox",None,1,None,None,None,None,None),
+	(2,5,"GtkLabel","name",4,None,None,None,1,None),
+	(2,6,"GtkLabel","issuer",4,None,None,None,None,None)
   </object>
   <object_property>
 	(1,1,"GtkWidget","height-request","600",None,None,None,None,None,None,None,None,None),
@@ -38,33 +40,55 @@
 	(1,6,"GtkButton","label","Refresh",None,None,None,None,None,None,None,None,None),
 	(1,6,"GtkWidget","halign","center",None,None,None,None,None,None,None,None,None),
 	(1,6,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
-	(2,1,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
-	(2,1,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,1,"GtkBox","spacing","8",None,None,None,None,None,None,None,None,None),
 	(2,1,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
 	(2,1,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
 	(2,1,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
 	(2,1,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkLabel","label","name",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkLabel","natural-wrap-mode","none",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
-	(2,2,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
-	(2,3,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","justify","center",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","label","code",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","lines","1",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkWidget","valign","center",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
-	(2,3,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None)
+	(2,3,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,4,"GtkBox","spacing","4",None,None,None,None,None,None,None,None,None),
+	(2,4,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
+	(2,4,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,4,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,4,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,4,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkLabel","label","name",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkLabel","natural-wrap-mode","none",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkLabel","label","issuer",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkLabel","natural-wrap-mode","none",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None)
   </object_property>
   <object_data>
-	(2,2,"GtkWidget",1,1,None,None,None,None,None,None)
+	(2,5,"GtkWidget",1,1,None,None,None,None,None,None),
+	(2,6,"GtkWidget",1,1,None,None,None,None,None,None),
+	(2,5,"GtkWidget",2,2,None,1,None,None,None,None)
   </object_data>
+  <object_data_arg>
+	(2,5,"GtkWidget",2,2,"name","s")
+  </object_data_arg>
 </cambalache-project>

@@ -58,15 +58,30 @@ GtkApp::GtkApp()
         const auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
         auto* const accountWidget = builder->get_widget<Gtk::Box>("account");
         list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
+        list_item->set_data("issuer", builder->get_widget<Gtk::Label>("issuer"));
         list_item->set_data("code", builder->get_widget<Gtk::Label>("code"));
         list_item->set_child(*accountWidget);
     });
     factory->signal_bind().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
         auto* const name = static_cast<Gtk::Label*>(list_item->get_data("name"));
+        auto* const issuer = static_cast<Gtk::Label*>(list_item->get_data("issuer"));
         auto* const code = static_cast<Gtk::Label*>(list_item->get_data("code"));
 
         auto holder = std::dynamic_pointer_cast<AccountHolder>(list_item->get_item());
-        name->set_text(holder->account.name);
+
+        std::string issuerValue;
+        std::string nameValue;
+        auto index = holder->account.name.find(':');
+        if (index == std::string::npos) {
+            // no issuer
+            nameValue = holder->account.name;
+        } else {
+            issuerValue = holder->account.name.substr(0, index);
+            nameValue = holder->account.name.substr(index+1);
+        }
+
+        name->set_text(nameValue);
+        issuer->set_text(issuerValue);
         code->set_text(holder->account.code.value);
     });
 
