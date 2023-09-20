@@ -1,4 +1,4 @@
-pkg_check_modules(GTKMM gtkmm-4.0)
+pkg_check_modules(GTKMM gtkmm-4.10)
 
 add_executable(authppgtk
         src/main.cpp
