@@ -1,6 +1,6 @@
 #pragma once
 
-#include "oath_session.h"
+#include <libauthpp/oath_session.h>
 
 #include <glibmm/object.h>
 #include <glibmm/refptr.h>

@@ -35,7 +35,7 @@ add_custom_command(
 target_include_directories(authppgtk
         PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        "${authpp_SOURCE_DIR}/include"
+        authpp_lib
         "${fmtlib_SOURCE_DIR}/include"
         "${OPENSSL_INCLUDE_DIR}"
         "${GTKMM_INCLUDE_DIRS}"

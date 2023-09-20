@@ -1,6 +1,6 @@
 #pragma once
 
-#include <byte_buffer.h>
+#include "byte_buffer.h"
 
 #include <cstddef>
 #include <string>

@@ -13,34 +13,38 @@ set(SOURCE_LIST
 )
 
 set(HEADER_LIST
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/apdu.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/byte_buffer.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/ccid_connection.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/logger.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/message.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/oath_session.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/oath_session_helper.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/time_util.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/usb_device.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/usb_manager.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/util.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/fmt/fmt_byte_buffer.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/fmt/fmt_logger.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/fmt/fmt_message.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/fmt/fmt_oath.h"
+        "include/libauthpp/apdu.h"
+        "include/libauthpp/byte_buffer.h"
+        "include/libauthpp/ccid_connection.h"
+        "include/libauthpp/logger.h"
+        "include/libauthpp/message.h"
+        "include/libauthpp/oath_session.h"
+        "include/libauthpp/oath_session_helper.h"
+        "include/libauthpp/time_util.h"
+        "include/libauthpp/usb_device.h"
+        "include/libauthpp/usb_manager.h"
+        "include/libauthpp/util.h"
+        "include/libauthpp/fmt/fmt_byte_buffer.h"
+        "include/libauthpp/fmt/fmt_logger.h"
+        "include/libauthpp/fmt/fmt_message.h"
+        "include/libauthpp/fmt/fmt_oath.h"
 )
 
 add_library(
         authpp_lib
         ${SOURCE_LIST}
-        ${HEADER_LIST})
+        ${HEADER_LIST}
+)
 
 target_include_directories(authpp_lib
         PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${fmtlib_SOURCE_DIR}/include/"
         "${libusb_INCLUDEDIR}/"
-        "${OPENSSL_INCLUDE_DIR}/")
+        "${OPENSSL_INCLUDE_DIR}/"
+        PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/libauthpp"
+        INTERFACE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 source_group(
         TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"

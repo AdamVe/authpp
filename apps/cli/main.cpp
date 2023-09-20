@@ -1,8 +1,8 @@
 #include <common/arg_parser.h>
 
-#include "logger.h"
-#include "oath_session_helper.h"
-#include "usb_manager.h"
+#include <libauthpp/logger.h>
+#include <libauthpp/oath_session_helper.h>
+#include <libauthpp/usb_manager.h>
 
 using namespace authpp;
 

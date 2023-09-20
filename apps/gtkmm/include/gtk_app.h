@@ -3,7 +3,8 @@
 #include <gtkmm.h>
 
 #include "account_holder.h"
-#include "oath_session.h"
+
+#include <libauthpp/oath_session.h>
 
 namespace authppgtk {
 

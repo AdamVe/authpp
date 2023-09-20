@@ -4,11 +4,11 @@
 
 #include <giomm/liststore.h>
 
-#include "resources.h"
+#include <libauthpp/oath_session.h>
+#include <libauthpp/oath_session_helper.h>
+#include <libauthpp/usb_manager.h>
 
-#include "oath_session.h"
-#include "oath_session_helper.h"
-#include "usb_manager.h"
+#include "resources.h"
 
 using namespace authpp;
 

@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <cstdint>
-
-#include <byte_buffer.h>
+#include <libauthpp/byte_buffer.h>
 
 using namespace authpp;
 
