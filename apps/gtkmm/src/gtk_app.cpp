@@ -40,6 +40,13 @@ GtkApp::GtkApp()
     , accountModel(Gio::ListStore<AccountHolder>::create())
     , appWindow()
 {
+
+    // load css
+    auto provider = Gtk::CssProvider::create();
+    provider->load_from_path(Resources::get_ui_path() / "authppgtk.css");
+    Gtk::StyleContext::add_provider_for_display(Gdk::Display::get_default(), provider,
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
     auto refBuilder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "authppgtk.ui");
 
     appWindow = refBuilder->get_widget<Gtk::Window>("win_app");
@@ -57,6 +64,7 @@ GtkApp::GtkApp()
     factory->signal_setup().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
         const auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
         auto* const accountWidget = builder->get_widget<Gtk::Box>("account");
+
         list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
         list_item->set_data("issuer", builder->get_widget<Gtk::Label>("issuer"));
         list_item->set_data("code", builder->get_widget<Gtk::Label>("code"));
@@ -77,7 +85,7 @@ GtkApp::GtkApp()
             nameValue = holder->account.name;
         } else {
             issuerValue = holder->account.name.substr(0, index);
-            nameValue = holder->account.name.substr(index+1);
+            nameValue = holder->account.name.substr(index + 1);
         }
 
         name->set_text(nameValue);

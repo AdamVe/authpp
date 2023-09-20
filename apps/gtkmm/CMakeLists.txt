@@ -26,6 +26,12 @@ add_custom_command(
         "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.ui"
         "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
 
+add_custom_command(
+        TARGET authppgtk POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.css"
+        "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
+
 target_include_directories(authppgtk
         PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/include"

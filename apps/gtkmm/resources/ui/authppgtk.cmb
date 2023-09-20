@@ -6,7 +6,7 @@
 	(2,None,None,"account_widget.ui",None,None,None,None,None,None,None)
   </ui>
   <css>
-	(1,None,None,None)
+	(1,"authppgtk.css",None,None)
   </css>
   <css_ui>
 	(1,2)
@@ -28,7 +28,7 @@
 	(1,1,"GtkWidget","height-request","600",None,None,None,None,None,None,None,None,None),
 	(1,1,"GtkWidget","width-request","250",None,None,None,None,None,None,None,None,None),
 	(1,1,"GtkWindow","default-height","600",None,None,None,None,None,None,None,None,None),
-	(1,1,"GtkWindow","default-width","250",None,None,None,None,None,None,None,None,None),
+	(1,1,"GtkWindow","default-width","300",None,None,None,None,None,None,None,None,None),
 	(1,1,"GtkWindow","title","Authpp Gtk",None,None,None,None,None,None,None,None,None),
 	(1,2,"GtkBox","spacing","5",None,None,None,None,None,None,None,None,None),
 	(1,2,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
@@ -51,12 +51,13 @@
 	(2,1,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
 	(2,1,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
 	(2,1,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
-	(2,3,"GtkLabel","justify","center",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","label","code",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","lines","1",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
-	(2,3,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkLabel","xalign","1.0",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,3,"GtkWidget","css-classes","account_code",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
 	(2,3,"GtkWidget","valign","center",None,None,None,None,None,None,None,None,None),
@@ -74,6 +75,7 @@
 	(2,5,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
 	(2,5,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
 	(2,5,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,5,"GtkWidget","css-classes","account_name",None,None,None,None,None,None,None,None,None),
 	(2,5,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
 	(2,5,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
 	(2,5,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
@@ -83,6 +85,7 @@
 	(2,6,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
 	(2,6,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
 	(2,6,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,6,"GtkWidget","css-classes","account_issuer",None,None,None,None,None,None,None,None,None),
 	(2,6,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
 	(2,6,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
 	(2,6,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
