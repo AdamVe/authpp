@@ -1,21 +1,30 @@
 pkg_check_modules(GTKMM gtkmm-4.10)
 
-add_executable(authppgtk
-        src/main.cpp
-        src/gtk_app.cpp
-        src/resources.cpp
-)
+set(SOURCE_LIST
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/gtk_app.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/resources.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/account_holder.cpp")
+
+set(HEADER_LIST
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/account_holder.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/gtk_app.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/resources.h")
+
+add_executable(
+        authppgtk
+        ${SOURCE_LIST}
+        ${HEADER_LIST})
 
 add_custom_target(build-time-make-directory ALL
         COMMAND ${CMAKE_COMMAND} -E make_directory
-        $<TARGET_FILE_DIR:authppgtk>/data/ui/)
+        "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
 
 add_custom_command(
         TARGET authppgtk POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.ui
-        $<TARGET_FILE_DIR:authppgtk>/data/ui/
-)
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/*.ui"
+        "$<TARGET_FILE_DIR:authppgtk>/data/ui/")
 
 target_include_directories(authppgtk
         PUBLIC
@@ -38,5 +47,3 @@ target_link_libraries(authppgtk
         ${libusb_LINK_LIBRARIES}
         fmt::fmt
         OpenSSL::SSL)
-
-

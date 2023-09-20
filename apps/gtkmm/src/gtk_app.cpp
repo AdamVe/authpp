@@ -36,25 +36,39 @@ namespace {
 } // namespace
 
 GtkApp::GtkApp()
+    : accountHolder()
+    , accountModel(Gio::ListStore<AccountHolder>::create())
+    , appWindow()
 {
-    auto refBuilder = Gtk::Builder::create();
-    refBuilder->add_from_file(Resources::get_ui_path() / "authppgtk.ui");
+    auto refBuilder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "authppgtk.ui");
 
     appWindow = refBuilder->get_widget<Gtk::Window>("win_app");
     auto refreshButton = refBuilder->get_widget<Gtk::Button>("btn_refresh");
     auto accountListView = refBuilder->get_widget<Gtk::ListView>("listview_accounts");
 
-    stringList = Gtk::StringList::create({});
-
-    auto selection_model = Gtk::SingleSelection::create(stringList);
-    selection_model->set_autoselect(false);
-    selection_model->set_can_unselect(true);
-    accountListView->set_model(selection_model);
+    auto gtkSingleSelection = Gtk::SingleSelection::create(accountModel);
+    gtkSingleSelection->set_autoselect(false);
+    gtkSingleSelection->set_can_unselect(true);
+    accountListView->set_model(gtkSingleSelection);
 
     auto factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(sigc::mem_fun(*this, &GtkApp::onSetupItem));
-    factory->signal_bind().connect(sigc::mem_fun(*this, &GtkApp::onBindItem));
     accountListView->set_factory(factory);
+
+    factory->signal_setup().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
+        const auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
+        auto* const accountWidget = builder->get_widget<Gtk::Box>("account");
+        list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
+        list_item->set_data("code", builder->get_widget<Gtk::Label>("code"));
+        list_item->set_child(*accountWidget);
+    });
+    factory->signal_bind().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
+        auto* const name = static_cast<Gtk::Label*>(list_item->get_data("name"));
+        auto* const code = static_cast<Gtk::Label*>(list_item->get_data("code"));
+
+        auto holder = std::dynamic_pointer_cast<AccountHolder>(list_item->get_item());
+        name->set_text(holder->account.name);
+        code->set_text(holder->account.code.value);
+    });
 
     refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &GtkApp::onButtonRefresh));
     onButtonRefresh();
@@ -64,33 +78,12 @@ GtkApp::~GtkApp() = default;
 
 void GtkApp::onButtonRefresh()
 {
-    accountList = getAccounts();
-    std::vector<Glib::ustring> accountNames;
+    auto accountList = getAccounts();
+    std::vector<Glib::RefPtr<AccountHolder>> credentials;
     for (auto&& account : accountList) {
-        accountNames.emplace_back(account.name);
+        credentials.push_back(AccountHolder::create(account));
     }
-    stringList->splice(0, stringList->get_n_items(), accountNames);
+    accountModel->splice(0, accountModel->get_n_items(), credentials);
 }
 
-void GtkApp::onSetupItem(const Glib::RefPtr<Gtk::ListItem>& list_item) // NOLINT(*-convert-member-functions-to-static)
-{
-    const auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
-    auto* const accountWidget = builder->get_widget<Gtk::Box>("account");
-    list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
-    list_item->set_data("code", builder->get_widget<Gtk::Label>("code"));
-    list_item->set_child(*accountWidget);
-}
-
-void GtkApp::onBindItem(const Glib::RefPtr<Gtk::ListItem>& list_item)
-{
-    auto pos = list_item->get_position();
-    if (pos == GTK_INVALID_LIST_POSITION)
-        return;
-
-    auto* const name = static_cast<Gtk::Label*>(list_item->get_data("name"));
-    auto* const code = static_cast<Gtk::Label*>(list_item->get_data("code"));
-
-    name->set_text(accountList[pos].name);
-    code->set_text(accountList[pos].code.value);
-}
 } // namespace authppgtk

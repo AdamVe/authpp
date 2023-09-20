@@ -2,6 +2,7 @@
 
 #include <gtkmm.h>
 
+#include "account_holder.h"
 #include "oath_session.h"
 
 namespace authppgtk {
@@ -15,13 +16,10 @@ public:
 
 protected:
     void onButtonRefresh();
-    void onSetupItem(const Glib::RefPtr<Gtk::ListItem>& list_item);
-    void onBindItem(const Glib::RefPtr<Gtk::ListItem>& list_item);
 
+    Glib::RefPtr<AccountHolder> accountHolder;
+    Glib::RefPtr<Gio::ListStore<AccountHolder>> accountModel;
     Gtk::Window* appWindow;
-
-    Glib::RefPtr<Gtk::StringList> stringList;
-    std::vector<authpp::oath::Credential> accountList;
 };
 
 } // namespace authppgtk
