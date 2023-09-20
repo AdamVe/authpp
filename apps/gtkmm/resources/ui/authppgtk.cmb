@@ -5,6 +5,12 @@
 	(1,None,"authppgtk.ui","authppgtk.ui",None,None,None,None,None,None,None),
 	(2,None,None,"account_widget.ui",None,None,None,None,None,None,None)
   </ui>
+  <css>
+	(1,None,None,None)
+  </css>
+  <css_ui>
+	(1,2)
+  </css_ui>
   <object>
 	(1,1,"GtkWindow","win_app",None,None,None,None,-1,None),
 	(1,2,"GtkBox","content",1,None,None,None,-1,None),
@@ -85,10 +91,6 @@
   </object_property>
   <object_data>
 	(2,5,"GtkWidget",1,1,None,None,None,None,None,None),
-	(2,6,"GtkWidget",1,1,None,None,None,None,None,None),
-	(2,5,"GtkWidget",2,2,None,1,None,None,None,None)
+	(2,6,"GtkWidget",1,1,None,None,None,None,None,None)
   </object_data>
-  <object_data_arg>
-	(2,5,"GtkWidget",2,2,"name","s")
-  </object_data_arg>
 </cambalache-project>
