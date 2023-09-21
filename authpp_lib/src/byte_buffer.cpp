@@ -73,7 +73,7 @@ uint8_t* ByteBuffer::array() const
 
 const ByteBuffer& ByteBuffer::pointTo(std::size_t index)
 {
-    if (data.size() > 0) {
+    if (!data.empty()) {
         assert(index < data.size());
         pointer = index;
     } else {
@@ -88,9 +88,9 @@ bool ByteBuffer::operator==(const ByteBuffer& other) const
     return data == other.data;
 }
 
-void ByteBuffer::setDebugLog(bool debugLog)
+void ByteBuffer::setDebugLog(bool enabled)
 {
-    ByteBuffer::debugLog = debugLog;
+    ByteBuffer::debugLog = enabled;
 }
 
 } // namespace authpp

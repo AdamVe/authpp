@@ -1,8 +1,5 @@
 #include "oath_session.h"
 
-#include <cstddef>
-#include <map>
-
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/rand.h>
@@ -19,6 +16,18 @@ namespace authpp::oath {
 
 namespace {
     Logger log("OathSession");
+}
+
+Credential Credential::fromByteBuffer(const ByteBuffer& buffer)
+{
+    std::integral auto typeAlgo = buffer.get<uint8_t>(0);
+    return Credential {
+        std::string(buffer.array() + 1, buffer.array() + buffer.size()),
+        static_cast<Algorithm>(typeAlgo & 0x0F),
+        Code {
+            static_cast<Type>(typeAlgo & 0xF0),
+        }
+    };
 }
 
 const ByteBuffer kOathId { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 };
@@ -42,20 +51,20 @@ Session::Session(const CcidConnection& connection)
         std::to_underlying(properties.algorithm), properties.challenge);
 }
 
-Session::Properties Session::initProperties(Response&& response) const
+Session::Properties Session::initProperties(Response&& response)
 {
     auto parseVersion = [](ByteBuffer&& buffer) -> Version {
         if (buffer.size() > 2) {
-            return Version(buffer.get<uint8_t>(0), buffer.get<uint8_t>(1), buffer.get<uint8_t>(2));
+            return { buffer.get<uint8_t>(0), buffer.get<uint8_t>(1), buffer.get<uint8_t>(2) };
         }
-        return Version(0, 0, 0);
+        return { 0, 0, 0 };
     };
 
     auto parseAlgorithm = [](ByteBuffer&& buffer) -> Algorithm {
         if (buffer.size() == 0) {
             return Algorithm::HMAC_SHA1;
         }
-        auto type = buffer.get<uint8_t>(0);
+        std::integral auto type = buffer.get<uint8_t>(0);
 
         if (type == 0x02) {
             return Algorithm::HMAC_SHA256;
@@ -94,6 +103,44 @@ Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, c
     };
     return credential;
 }
+
+Code Code::fromByteBuffer(uint8_t type, const ByteBuffer& byteBuffer)
+{
+    Type t;
+    uint8_t digits;
+    std::string val;
+    switch (type) {
+    case 0x77:
+        t = Type::HOTP;
+        break;
+    case 0x7c:
+        t = Type::TOTP;
+        break;
+    case 0x75: {
+        t = Type::TOTP;
+        // TODO
+        break;
+    }
+    case 0x76: {
+        t = Type::TOTP;
+        digits = byteBuffer.get<uint8_t>(0);
+        auto response = byteBuffer.get(1, byteBuffer.size() - 1);
+        std::integral auto codeValue = byteBuffer.get<uint16_t>(1);
+        std::stringstream ss;
+        ss << codeValue;
+        val = ss.str();
+        break;
+    }
+    default: {
+        // TODO
+        t = Type::TOTP;
+        digits = 0;
+        val = "";
+    }
+    }
+    return { t, digits, val };
+}
+
 
 Credential Session::calculateOne(long timeStep, std::string_view name) const
 {
@@ -154,11 +201,11 @@ ByteBuffer Session::deriveAccessKey(std::string_view password) const
 
     if (PKCS5_PBKDF2_HMAC_SHA1(
             password.data(),
-            password.size(),
+            static_cast<int>(password.size()),
             properties.salt.array(),
-            properties.salt.size(),
+            static_cast<int>(properties.salt.size()),
             1000,
-            accessKeyLength * 8,
+            static_cast<int>(accessKeyLength) * 8,
             derivedKey.array())
         == 1) {
         derivedKey.setSize(accessKeyLength);
@@ -176,7 +223,7 @@ void Session::unlock(std::string_view password)
             unsigned int size;
             auto* result = HMAC(EVP_sha1(),
                 derivedKey.array(),
-                derivedKey.size(),
+                static_cast<int>(derivedKey.size()),
                 challenge.array(),
                 challenge.size(),
                 hmac_sha1.array(),
@@ -191,13 +238,13 @@ void Session::unlock(std::string_view password)
     }
 }
 
-bool Session::validate(AccessKeyValidator validator) const
+bool Session::validate(const AccessKeyValidator& validator) const
 {
     ByteBuffer clientChallenge(8);
     if (RAND_bytes(clientChallenge.array(), 8) != 1) {
         log.e("Failed to generate random challenge");
         return false;
-    };
+    }
 
     auto challengeResponse = validator(properties.challenge);
 
@@ -217,7 +264,7 @@ bool Session::validate(AccessKeyValidator validator) const
     return response.tag(0) == 0x75 && validator(clientChallenge) == response[0];
 }
 
-const Version& Session::getVersion() const
+[[maybe_unused]] const Version& Session::getVersion() const
 {
     return properties.version;
 }
