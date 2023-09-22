@@ -10,6 +10,7 @@
 namespace authpp {
 
 UsbManager::UsbManager()
+    : context()
 {
     libusb_init(&context);
 }
@@ -25,10 +26,10 @@ std::vector<UsbDevice> UsbManager::poll(std::function<bool(libusb_device_descrip
     std::vector<UsbDevice> result;
     std::size_t usbDeviceCount = libusb_get_device_list(context, &usbDevices);
 
-#if __cpp_lib_ranges > 202110L
+#if __cpp_lib_ranges >= 202106L
     auto deviceSpan = std::span { usbDevices, usbDevices + usbDeviceCount };
     auto matchingDevices = deviceSpan | std::views::filter([&p](auto&& d) {
-        libusb_device_descriptor desc;
+        libusb_device_descriptor desc {};
         libusb_get_device_descriptor(d, &desc);
         return p(desc);
     }) | std::views::transform([](const auto& d) { return UsbDevice(d); });
@@ -36,7 +37,7 @@ std::vector<UsbDevice> UsbManager::poll(std::function<bool(libusb_device_descrip
 #else
     auto deviceSpan = std::span { usbDevices, usbDevices + usbDeviceCount };
     for (auto&& usbDevice : deviceSpan) {
-        libusb_device_descriptor desc;
+        libusb_device_descriptor desc {};
         libusb_get_device_descriptor(usbDevice, &desc);
         if (p(desc)) {
             result.emplace_back(usbDevice);

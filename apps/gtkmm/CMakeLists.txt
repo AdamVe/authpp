@@ -1,4 +1,4 @@
-pkg_check_modules(GTKMM gtkmm-4.10)
+pkg_check_modules(GTKMM gtkmm-4.0)
 
 set(SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"

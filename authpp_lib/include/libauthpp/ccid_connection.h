@@ -54,5 +54,3 @@ private:
 };
 
 } // namespace authpp
-
-#pragma clang diagnostic pop
