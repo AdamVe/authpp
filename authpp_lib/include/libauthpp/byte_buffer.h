@@ -32,7 +32,12 @@ public:
     ByteBuffer& put(const std::integral auto& value)
     {
         assert(pointer < data.size() - sizeof(value) + 1);
-        std::memcpy(data.data() + pointer, &value, sizeof(value));
+        if (std::endian::native == byteOrder) {
+            std::memcpy(data.data() + pointer, &value, sizeof(value));
+        } else {
+            static auto swapped = std::byteswap(value);
+            std::memcpy(data.data() + pointer, &swapped, sizeof(swapped));
+        }
         pointer += sizeof(value);
         return *this;
     }
@@ -43,6 +48,9 @@ public:
         assert(i < data.size() - sizeof(T) + 1);
         T value;
         std::memcpy(&value, data.data() + i, sizeof(T));
+        if (std::endian::native != byteOrder) {
+            value = std::byteswap(value);
+        }
         return value;
     }
 
@@ -55,7 +63,7 @@ public:
     static void setDebugLog(bool);
 
 private:
-    std::endian byteOrder { std::endian::big };
+    std::endian byteOrder { std::endian::little };
     std::size_t pointer = 0;
     std::vector<uint8_t> data;
 

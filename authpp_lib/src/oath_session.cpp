@@ -94,7 +94,8 @@ std::vector<Credential> Session::listCredentials() const
     return credentials;
 }
 
-Credential fromAllDataResponse(const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
+Credential fromAllDataResponse(
+    const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
 {
     Credential credential {
         std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size()),
@@ -125,10 +126,15 @@ Code Code::fromByteBuffer(uint8_t type, const ByteBuffer& byteBuffer)
         t = Type::TOTP;
         digits = byteBuffer.get<uint8_t>(0);
         auto response = byteBuffer.get(1, byteBuffer.size() - 1);
-        std::integral auto codeValue = byteBuffer.get<uint16_t>(1);
-        std::stringstream ss;
-        ss << codeValue;
-        val = ss.str();
+        std::integral auto code = response.setByteOrder(std::endian::big).get<uint32_t>(0);
+        val = std::to_string(code);
+        auto diff = static_cast<int32_t>(val.size()) - digits;
+        if (diff > 0) {
+            val.erase(0, diff);
+        } else if (diff < 0) {
+            val = val.insert(0, std::string(-diff, '0'));
+        }
+
         break;
     }
     default: {
@@ -140,7 +146,6 @@ Code Code::fromByteBuffer(uint8_t type, const ByteBuffer& byteBuffer)
     }
     return { t, digits, val };
 }
-
 
 Credential Session::calculateOne(long timeStep, std::string_view name) const
 {
@@ -175,7 +180,7 @@ std::vector<Credential> Session::calculateAll(long timeStep) const
     std::vector<Credential> credentials;
 
     ByteBuffer challenge(8);
-    challenge.put<uint64_t>(timeStep);
+    challenge.setByteOrder(std::endian::big).put<uint64_t>(timeStep);
 
     auto challengeSize = static_cast<uint8_t>(challenge.size());
     ByteBuffer calculateData(2 + challengeSize);
@@ -248,7 +253,8 @@ bool Session::validate(const AccessKeyValidator& validator) const
 
     auto challengeResponse = validator(properties.challenge);
 
-    auto validateDataSize = static_cast<uint8_t>(2 + challengeResponse.size() + 2 + clientChallenge.size());
+    auto validateDataSize
+        = static_cast<uint8_t>(2 + challengeResponse.size() + 2 + clientChallenge.size());
     ByteBuffer validateData(validateDataSize);
     validateData
         .put<uint8_t>(0x75)

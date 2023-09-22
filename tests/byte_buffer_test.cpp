@@ -65,6 +65,42 @@ TEST(BytesTest, PutGetLong)
     ASSERT_EQ(4756927171371729432ULL, b.get<uint64_t>(2));
 }
 
+TEST(BytesTest, PutGetBEByte)
+{
+    ByteBuffer b(10);
+    b.setByteOrder(std::endian::big);
+    b.pointTo(5);
+    b.put((uint8_t)128);
+    ASSERT_EQ(128, b.get<uint8_t>(5));
+}
+
+TEST(BytesTest, PutGetBEShort)
+{
+    ByteBuffer b(10);
+    b.setByteOrder(std::endian::big);
+    b.pointTo(7);
+    b.put((uint16_t)10400);
+    ASSERT_EQ(10400, b.get<uint16_t>(7));
+}
+
+TEST(BytesTest, PutGetBEInt)
+{
+    ByteBuffer b(10);
+    b.setByteOrder(std::endian::big);
+    b.pointTo(2);
+    b.put((uint32_t)256000);
+    ASSERT_EQ(256000, b.get<uint32_t>(2));
+}
+
+TEST(BytesTest, PutGetBELong)
+{
+    ByteBuffer b(10);
+    b.setByteOrder(std::endian::big);
+    b.pointTo(2);
+    b.put((uint64_t)4756927171371729432ULL);
+    ASSERT_EQ(4756927171371729432ULL, b.get<uint64_t>(2));
+}
+
 TEST(BytesTest, PutGetBytes)
 {
     ByteBuffer b({ 10, 9, 8, 7 });
