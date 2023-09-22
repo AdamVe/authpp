@@ -12,6 +12,55 @@ namespace {
     Logger log("byte_buffer");
 }
 
+template<>
+uint8_t byteswap(uint8_t b)
+{
+    return b;
+}
+
+template<>
+uint16_t byteswap(uint16_t b)
+{
+#if __cpp_lib_byteswap >= 202110L
+    return std::byteswap(b);
+#else
+    return (b & 0x00ff) << 8 | (b & 0xff00) >> 8;
+#endif
+}
+
+template<>
+uint32_t byteswap(uint32_t b)
+{
+#if __cpp_lib_byteswap >= 202110L
+    return std::byteswap(b);
+#else
+    return
+        (b & 0x000000ff) << 24 |
+        (b & 0x0000ff00) << 8 |
+        (b & 0x00ff0000) >> 8 |
+        (b & 0xff000000) >> 24;
+#endif
+}
+
+template<>
+uint64_t byteswap(uint64_t b)
+{
+#if __cpp_lib_byteswap >= 202110L
+    return std::byteswap(b);
+#else
+    return
+        (b & 0x00000000000000ff) << 56 |
+        (b & 0x000000000000ff00) << 40 |
+        (b & 0x0000000000ff0000) << 24 |
+        (b & 0x00000000ff000000) << 8 |
+        (b & 0x000000ff00000000) >> 8 |
+        (b & 0x0000ff0000000000) >> 24 |
+        (b & 0x00ff000000000000) >> 40 |
+        (b & 0xff00000000000000) >> 56;
+#endif
+}
+
+
 ByteBuffer::ByteBuffer() = default;
 
 ByteBuffer::ByteBuffer(std::size_t size)

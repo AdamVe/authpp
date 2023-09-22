@@ -11,6 +11,9 @@
 
 namespace authpp {
 
+template<std::integral T>
+T byteswap(T b);
+
 class ByteBuffer {
 public:
     ByteBuffer();
@@ -35,7 +38,7 @@ public:
         if (std::endian::native == byteOrder) {
             std::memcpy(data.data() + pointer, &value, sizeof(value));
         } else {
-            static auto swapped = std::byteswap(value);
+            static auto swapped = byteswap(value);
             std::memcpy(data.data() + pointer, &swapped, sizeof(swapped));
         }
         pointer += sizeof(value);
@@ -49,7 +52,7 @@ public:
         T value;
         std::memcpy(&value, data.data() + i, sizeof(T));
         if (std::endian::native != byteOrder) {
-            value = std::byteswap(value);
+            value = byteswap(value);
         }
         return value;
     }
