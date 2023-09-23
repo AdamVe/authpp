@@ -2,14 +2,17 @@ pkg_check_modules(GTKMM gtkmm-4.0)
 
 set(SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/gtk_app.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/resources.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/account_holder.cpp")
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/account_holder.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/application.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/app_window.cpp")
 
 set(HEADER_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/include/account_holder.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/gtk_app.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/resources.h")
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/resources.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/application.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/app_window.h"
+)
 
 add_executable(
         authppgtk

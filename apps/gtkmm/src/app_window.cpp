@@ -1,20 +1,18 @@
-#include "gtk_app.h"
+#include "app_window.h"
+#include "resources.h"
 
-#include <vector>
-
-#include <giomm/liststore.h>
+#include <gtkmm.h>
+#include <gtkmm/builder.h>
 
 #include <libauthpp/oath_session.h>
 #include <libauthpp/oath_session_helper.h>
 #include <libauthpp/usb_manager.h>
 
-#include "resources.h"
-
 using namespace authpp;
-
 namespace authppgtk {
 
 namespace {
+
     std::vector<oath::Credential> getAccounts()
     {
         using namespace oath;
@@ -35,21 +33,12 @@ namespace {
     }
 } // namespace
 
-GtkApp::GtkApp()
-    : accountHolder()
+AppWindow::AppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder)
+    : Gtk::ApplicationWindow(cobject)
+    , refBuilder(refBuilder)
+    , accountHolder()
     , accountModel(Gio::ListStore<AccountHolder>::create())
-    , appWindow()
 {
-
-    // load css
-    auto provider = Gtk::CssProvider::create();
-    provider->load_from_path(Resources::get_ui_path() / "authppgtk.css");
-    Gtk::StyleContext::add_provider_for_display(Gdk::Display::get_default(), provider,
-        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-    auto refBuilder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "authppgtk.ui");
-
-    appWindow = refBuilder->get_widget<Gtk::Window>("win_app");
     auto refreshButton = refBuilder->get_widget<Gtk::Button>("btn_refresh");
     auto accountListView = refBuilder->get_widget<Gtk::ListView>("listview_accounts");
 
@@ -62,7 +51,8 @@ GtkApp::GtkApp()
     accountListView->set_factory(factory);
 
     factory->signal_setup().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
-        const auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
+        const auto builder
+            = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
         auto* const accountWidget = builder->get_widget<Gtk::Box>("account");
 
         list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
@@ -93,13 +83,23 @@ GtkApp::GtkApp()
         code->set_text(holder->account.code.value);
     });
 
-    refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &GtkApp::onButtonRefresh));
+    refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::onButtonRefresh));
     onButtonRefresh();
 }
 
-GtkApp::~GtkApp() = default;
+// static
+AppWindow* AppWindow::create()
+{
+    auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "authppgtk.ui");
+    auto window = Gtk::Builder::get_widget_derived<AppWindow>(builder, "win_app");
+    if (!window) {
+        throw std::runtime_error("No \"win_app\" object in window.ui");
+    }
 
-void GtkApp::onButtonRefresh()
+    return window;
+}
+
+void AppWindow::onButtonRefresh()
 {
     auto accountList = getAccounts();
     std::vector<Glib::RefPtr<AccountHolder>> credentials;
