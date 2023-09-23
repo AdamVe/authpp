@@ -85,9 +85,9 @@ Session::Properties Session::initProperties(Response&& response)
 
 std::vector<Credential> Session::listCredentials() const
 {
-    std::vector<Credential> credentials;
     Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
     auto response = connection.send(list_apdu);
+    std::vector<Credential> credentials(response.size());
     for (int i = 0; i < response.size(); ++i) {
         credentials.push_back(Credential::fromByteBuffer(response[i]));
     }
@@ -108,7 +108,7 @@ Credential fromAllDataResponse(
 Code Code::fromByteBuffer(uint8_t type, const ByteBuffer& byteBuffer)
 {
     Type t;
-    uint8_t digits;
+    uint8_t digits { 0 };
     std::string val;
     switch (type) {
     case 0x77:
@@ -177,8 +177,6 @@ Credential Session::calculateOne(long timeStep, std::string_view name) const
 
 std::vector<Credential> Session::calculateAll(long timeStep) const
 {
-    std::vector<Credential> credentials;
-
     ByteBuffer challenge(8);
     challenge.setByteOrder(std::endian::big).put<uint64_t>(timeStep);
 
@@ -191,6 +189,7 @@ std::vector<Credential> Session::calculateAll(long timeStep) const
 
     Apdu apdu(0x00, 0xa4, 0x00, 0x01, calculateData);
     auto response = connection.send(apdu);
+    std::vector<Credential> credentials;
     for (int i = 0; i < response.size(); i += 2) {
         auto credential = fromAllDataResponse(response[i], response.tag(i + 1), response[i + 1]);
         credentials.push_back(credential);

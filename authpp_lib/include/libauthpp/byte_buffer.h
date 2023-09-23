@@ -38,7 +38,7 @@ public:
         if (std::endian::native == byteOrder) {
             std::memcpy(data.data() + pointer, &value, sizeof(value));
         } else {
-            static auto swapped = byteswap(value);
+            auto swapped = byteswap(value);
             std::memcpy(data.data() + pointer, &swapped, sizeof(swapped));
         }
         pointer += sizeof(value);
