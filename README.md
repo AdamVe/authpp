@@ -1,3 +1,3 @@
 # authpp
 
-Hobby project for reading OATH data from compatible USB keys.
+Utility for managing OATH accounts on compatible devices.
