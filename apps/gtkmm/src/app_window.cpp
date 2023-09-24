@@ -5,41 +5,23 @@
 #include <gtkmm/builder.h>
 
 #include <libauthpp/oath_session.h>
-#include <libauthpp/oath_session_helper.h>
-#include <libauthpp/usb_manager.h>
+
+#include <iostream>
 
 using namespace authpp;
 namespace authppgtk {
 
-namespace {
-
-    std::vector<oath::Credential> getAccounts()
-    {
-        using namespace oath;
-        UsbManager usbManager;
-
-        auto matchVendorYubico = [](auto&& descriptor) {
-            const auto VENDOR_YUBICO = 0x1050;
-            return descriptor.idVendor == VENDOR_YUBICO;
-        };
-
-        std::vector<Credential> accounts;
-        auto keys = usbManager.pollUsbDevices(matchVendorYubico, 100);
-        if (!keys.empty()) {
-            auto calculated = calculateAll(keys[0]);
-            accounts.insert(accounts.end(), calculated.begin(), calculated.end());
-        }
-        return accounts;
-    }
-} // namespace
-
 AppWindow::AppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder)
     : Gtk::ApplicationWindow(cobject)
     , refBuilder(refBuilder)
+    , refreshButton(refBuilder->get_widget<Gtk::Button>("btn_refresh"))
+    , refreshButtonWithSpinner(refBuilder->get_widget<Gtk::Button>("btn_refresh_with_spinner"))
     , accountHolder()
     , accountModel(Gio::ListStore<AccountHolder>::create())
+    , dispatcher()
+    , worker()
+    , workerThread(nullptr)
 {
-    auto refreshButton = refBuilder->get_widget<Gtk::Button>("btn_refresh");
     auto accountListView = refBuilder->get_widget<Gtk::ListView>("listview_accounts");
 
     auto gtkSingleSelection = Gtk::SingleSelection::create(accountModel);
@@ -84,6 +66,9 @@ AppWindow::AppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& 
     });
 
     refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::onButtonRefresh));
+
+    dispatcher.connect(sigc::mem_fun(*this, &AppWindow::onWorkerNotify));
+
     onButtonRefresh();
 }
 
@@ -99,14 +84,37 @@ AppWindow* AppWindow::create()
     return window;
 }
 
+void AppWindow::notify() { dispatcher.emit(); }
+
 void AppWindow::onButtonRefresh()
 {
-    auto accountList = getAccounts();
+    if (!workerThread) {
+        workerThread = new std::thread([this] { worker.requestAccounts(this); });
+        refreshButton->set_visible(false);
+        refreshButtonWithSpinner->set_visible(true);
+    }
+}
+
+void AppWindow::onWorkerNotify()
+{
+    if (workerThread) {
+        if (workerThread->joinable()) {
+            workerThread->join();
+        }
+        delete workerThread;
+        workerThread = nullptr;
+    }
+
+    auto accountList = std::vector<authpp::oath::Credential>();
+    worker.getAccounts(accountList);
     std::vector<Glib::RefPtr<AccountHolder>> credentials;
     for (auto&& account : accountList) {
         credentials.push_back(AccountHolder::create(account));
     }
     accountModel->splice(0, accountModel->get_n_items(), credentials);
+
+    refreshButton->set_visible(true);
+    refreshButtonWithSpinner->set_visible(false);
 }
 
 } // namespace authppgtk
