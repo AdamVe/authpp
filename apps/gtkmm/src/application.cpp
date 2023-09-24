@@ -1,12 +1,13 @@
 #include "application.h"
 #include "app_window.h"
 #include "resources.h"
+#include "version.h"
 
+#include <gtkmm/aboutdialog.h>
 #include <gtkmm/cssprovider.h>
 #include <iostream>
 
 namespace authppgtk {
-
 Application::Application()
     : Gtk::Application("org.adamve.authppgtk")
 {
@@ -58,7 +59,43 @@ void Application::on_startup()
     add_action("quit", sigc::mem_fun(*this, &Application::on_action_quit));
     set_accel_for_action("app.quit", "<Ctrl>Q");
 }
-void Application::on_action_about() { }
+void Application::on_action_about()
+{
+    Gtk::Window* win = get_active_window();
+    if (!win) {
+        return;
+    }
+
+    auto aboutDialog = new Gtk::AboutDialog();
+    Glib::RefPtr<Gdk::Texture> logo
+        = Gdk::Texture::create_from_filename(Resources::get_ui_path() / "org.adamve.authppgtk.svg");
+    aboutDialog->set_logo(logo);
+
+    aboutDialog->set_version(VERSION);
+    aboutDialog->set_authors({ "Adam Velebil" });
+    aboutDialog->set_copyright("Copyright © 2023 - Adam Velebil");
+    aboutDialog->set_comments("Utility for managing OATH accounts on compatible devices.");
+    aboutDialog->set_website_label("GitHub repository");
+    aboutDialog->set_website("https://github.com/AdamVe/authpp");
+    aboutDialog->set_license_type(Gtk::License::MIT_X11);
+    aboutDialog->set_program_name("Authpp Gtk");
+    aboutDialog->set_hide_on_close();
+
+    aboutDialog->signal_hide().connect(
+        [aboutDialog, logo]() mutable {
+            if (logo) {
+                logo->unreference();
+                logo = nullptr;
+            }
+            delete aboutDialog;
+            aboutDialog = nullptr;
+        },
+        false);
+
+    aboutDialog->set_modal();
+    aboutDialog->set_transient_for(*win);
+    aboutDialog->present();
+}
 
 void Application::on_action_quit()
 {
