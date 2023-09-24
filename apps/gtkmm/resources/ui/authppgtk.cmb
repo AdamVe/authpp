@@ -5,6 +5,11 @@
 	(1,None,"authppgtk.ui","authppgtk.ui",None,None,None,None,None,None,None),
 	(2,None,None,"account_widget.ui",None,None,None,None,None,None,None)
   </ui>
+  <ui_library>
+	(1,"gio","2.32",None),
+	(1,"gtk","4.6",None),
+	(2,"gtk","4.6",None)
+  </ui_library>
   <css>
 	(1,"authppgtk.css",None,None)
   </css>
@@ -45,7 +50,7 @@
 	(1,3,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
 	(1,4,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
 	(1,8,"GtkMenuButton","icon-name","open-menu-symbolic",None,None,None,None,None,None,None,None,None),
-	(1,8,"GtkMenuButton","menu-model","20",None,None,None,None,None,None,None,None,None),
+	(1,8,"GtkMenuButton","menu-model","10",None,None,None,None,None,None,None,None,None),
 	(1,14,"(item)","action","app.about",None,None,None,None,None,None,None,None,None),
 	(1,14,"(item)","label","_About",None,None,None,None,None,None,None,None,None),
 	(1,17,"(item)","action","app.quit",None,None,None,None,None,None,None,None,None),

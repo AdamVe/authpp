@@ -17,16 +17,23 @@ class Button;
 namespace authppgtk {
 class AppWindow : public Gtk::ApplicationWindow {
 public:
-    AppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder);
+    AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Builder>& refBuilder);
+    ~AppWindow() override;
 
     static AppWindow* create();
 
-    void notify();
+    void notify_device_change() const;
+    void notify_accounts_change() const;
 
 private:
-    void onButtonRefresh();
+    void requestAccounts();
 
-    void onWorkerNotify();
+    void onDeviceChange();
+    void onAccountsChange();
+
+    void onShow();
+    void onHide();
+    bool onCloseRequest();
 
     Glib::RefPtr<Gtk::Builder> refBuilder;
     Gtk::Button* refreshButton;
@@ -34,7 +41,8 @@ private:
     Glib::RefPtr<AccountHolder> accountHolder;
     Glib::RefPtr<Gio::ListStore<AccountHolder>> accountModel;
 
-    Glib::Dispatcher dispatcher;
+    Glib::Dispatcher signal_devices_change;
+    Glib::Dispatcher signal_accounts_change;
     Worker worker;
     std::thread* workerThread;
 };

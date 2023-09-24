@@ -11,16 +11,21 @@
 using namespace authpp;
 namespace authppgtk {
 
-AppWindow::AppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder)
-    : Gtk::ApplicationWindow(cobject)
+namespace {
+    authpp::Logger log("AppWindow");
+}
+
+AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Builder>& refBuilder)
+    : Gtk::ApplicationWindow(baseObjectType)
     , refBuilder(refBuilder)
     , refreshButton(refBuilder->get_widget<Gtk::Button>("btn_refresh"))
     , refreshButtonWithSpinner(refBuilder->get_widget<Gtk::Button>("btn_refresh_with_spinner"))
     , accountHolder()
     , accountModel(Gio::ListStore<AccountHolder>::create())
-    , dispatcher()
+    , signal_devices_change()
+    , signal_accounts_change()
     , worker()
-    , workerThread(nullptr)
+    , workerThread()
 {
     auto accountListView = refBuilder->get_widget<Gtk::ListView>("listview_accounts");
 
@@ -65,12 +70,17 @@ AppWindow::AppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& 
         code->set_text(holder->account.code.value);
     });
 
-    refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::onButtonRefresh));
+    refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::requestAccounts));
 
-    dispatcher.connect(sigc::mem_fun(*this, &AppWindow::onWorkerNotify));
+    signal_devices_change.connect(sigc::mem_fun(*this, &AppWindow::onDeviceChange));
+    signal_accounts_change.connect(sigc::mem_fun(*this, &AppWindow::onAccountsChange));
 
-    onButtonRefresh();
+    this->signal_show().connect(sigc::mem_fun(*this, &AppWindow::onShow));
+    this->signal_hide().connect(sigc::mem_fun(*this, &AppWindow::onHide));
+    this->signal_close_request().connect(sigc::mem_fun(*this, &AppWindow::onCloseRequest), false);
 }
+
+AppWindow::~AppWindow() = default;
 
 // static
 AppWindow* AppWindow::create()
@@ -84,29 +94,28 @@ AppWindow* AppWindow::create()
     return window;
 }
 
-void AppWindow::notify() { dispatcher.emit(); }
+void AppWindow::notify_device_change() const { signal_devices_change(); }
 
-void AppWindow::onButtonRefresh()
+void AppWindow::notify_accounts_change() const { signal_accounts_change(); }
+
+void AppWindow::onDeviceChange()
 {
-    if (!workerThread) {
-        workerThread = new std::thread([this] { worker.requestAccounts(this); });
-        refreshButton->set_visible(false);
-        refreshButtonWithSpinner->set_visible(true);
-    }
+    const auto& devices = worker.getDevices();
+    log.d("Device count: {}", devices.size());
+    worker.requestAccounts();
 }
 
-void AppWindow::onWorkerNotify()
+void AppWindow::requestAccounts()
 {
-    if (workerThread) {
-        if (workerThread->joinable()) {
-            workerThread->join();
-        }
-        delete workerThread;
-        workerThread = nullptr;
-    }
+    refreshButton->set_visible(false);
+    refreshButtonWithSpinner->set_visible(true);
+    worker.requestAccounts();
+}
 
-    auto accountList = std::vector<authpp::oath::Credential>();
-    worker.getAccounts(accountList);
+void AppWindow::onAccountsChange()
+{
+    const auto& accountList = worker.getAccounts();
+
     std::vector<Glib::RefPtr<AccountHolder>> credentials;
     for (auto&& account : accountList) {
         credentials.push_back(AccountHolder::create(account));
@@ -115,6 +124,33 @@ void AppWindow::onWorkerNotify()
 
     refreshButton->set_visible(true);
     refreshButtonWithSpinner->set_visible(false);
+}
+
+void AppWindow::onShow()
+{
+    log.d("Window onShow");
+    workerThread = new std::thread([this] { worker.run(this); });
+}
+
+void AppWindow::onHide()
+{
+    log.d("Window onHide");
+    worker.stop();
+    if (workerThread) {
+        if (workerThread->joinable()) {
+            workerThread->join();
+        }
+        delete workerThread;
+        workerThread = nullptr;
+    }
+}
+
+bool AppWindow::onCloseRequest()
+{
+    log.d("Window onCloseRequest");
+    onHide();
+
+    return false;
 }
 
 } // namespace authppgtk
