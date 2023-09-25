@@ -1,5 +1,4 @@
 #include "app_window.h"
-#include "resources.h"
 
 #include <gtkmm.h>
 #include <gtkmm/builder.h>
@@ -38,8 +37,8 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
     accountListView->set_factory(factory);
 
     factory->signal_setup().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
-        const auto builder
-            = Gtk::Builder::create_from_file(Resources::get_ui_path() / "account_widget.ui");
+        auto builder
+            = Gtk::Builder::create_from_resource("/org/adamve/authppgtk/ui/account_widget.ui");
         auto* const accountWidget = builder->get_widget<Gtk::Box>("account");
 
         list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
@@ -85,7 +84,7 @@ AppWindow::~AppWindow() = default;
 // static
 AppWindow* AppWindow::create()
 {
-    auto builder = Gtk::Builder::create_from_file(Resources::get_ui_path() / "authppgtk.ui");
+    auto builder = Gtk::Builder::create_from_resource("/org/adamve/authppgtk/ui/authppgtk.ui");
     auto window = Gtk::Builder::get_widget_derived<AppWindow>(builder, "win_app");
     if (!window) {
         throw std::runtime_error("No \"win_app\" object in window.ui");

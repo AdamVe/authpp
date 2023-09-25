@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+StartupWMClass=authppgtk
+Exec=authppgtk %F
+Name=authppgtk
+GenericName=Authpp Gtk
+Comment=Manage OATH accounts
+Terminal=false
+Icon=org.adamve.authppgtk
+Categories=Utility;
+Keywords=otp;oath;one time password;
