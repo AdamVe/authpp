@@ -11,6 +11,7 @@ namespace authppgtk {
 Application::Application()
     : Gtk::Application("org.adamve.authppgtk")
 {
+    authpp::Logger::setLevel(authpp::Logger::Level::kDebug);
 }
 
 Glib::RefPtr<Application> Application::create()

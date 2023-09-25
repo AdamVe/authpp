@@ -7,7 +7,9 @@ set(SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/src/resources.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/account_holder.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/application.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/app_window.cpp")
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/app_window.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/worker.cpp"
+)
 
 set(HEADER_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/include/account_holder.h"
@@ -15,6 +17,7 @@ set(HEADER_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/include/application.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/app_window.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/version.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/worker.h"
 )
 
 configure_file(
