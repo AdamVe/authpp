@@ -1,6 +1,5 @@
 #include "application.h"
 #include "app_window.h"
-#include "resources.h"
 #include "version.h"
 
 #include <gtkmm/aboutdialog.h>
@@ -25,9 +24,9 @@ void Application::on_activate()
         auto appwindow = create_appwindow();
         appwindow->present();
     } catch (const Glib::Error& ex) {
-        std::cerr << "ExampleApplication::on_activate(): " << ex.what() << std::endl;
+        std::cerr << "Application::on_activate(): " << ex.what() << std::endl;
     } catch (const std::exception& ex) {
-        std::cerr << "ExampleApplication::on_activate(): " << ex.what() << std::endl;
+        std::cerr << "Application::on_activate(): " << ex.what() << std::endl;
     }
 }
 
@@ -40,7 +39,7 @@ AppWindow* Application::create_appwindow()
         sigc::bind(sigc::mem_fun(*this, &Application::on_hide_window), appWindow));
 
     auto provider = Gtk::CssProvider::create();
-    provider->load_from_path(Resources::get_ui_path() / "authppgtk.css");
+    provider->load_from_resource("/org/adamve/authppgtk/css/style.css");
     Gtk::StyleContext::add_provider_for_display(
         Gdk::Display::get_default(), provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
@@ -69,7 +68,7 @@ void Application::on_action_about()
 
     auto aboutDialog = new Gtk::AboutDialog();
     Glib::RefPtr<Gdk::Texture> logo
-        = Gdk::Texture::create_from_filename(Resources::get_ui_path() / "org.adamve.authppgtk.svg");
+        = Gdk::Texture::create_from_resource("/org/adamve/authppgtk/icons/org.adamve.authppgtk.svg");
     aboutDialog->set_logo(logo);
 
     aboutDialog->set_version(VERSION);

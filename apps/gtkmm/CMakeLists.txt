@@ -1,19 +1,43 @@
 project(authppgtk VERSION 1.0.0)
-
 set(VERSION_PRE_RELEASE_LABEL "SNAPSHOT")
+
+pkg_check_modules(GTKMM gtkmm-4.0)
+find_program(GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED)
+
+set(GRESOURCE_C org.adamve.authppgtk.gresource.c)
+set(GRESOURCE_XML org.adamve.authppgtk.gresource.xml)
+
+add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data
+        COMMAND ${GLIB_COMPILE_RESOURCES}
+        ARGS
+        ${GRESOURCE_XML}
+        --target=${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}
+        --generate-source
+        VERBATIM
+        MAIN_DEPENDENCY data/${GRESOURCE_XML}
+        DEPENDS
+        data/ui/authppgtk.ui
+        data/ui/account_widget.ui
+)
+
+add_custom_target(
+        gtk-custom-resources
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}
+)
 
 set(SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/resources.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/account_holder.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/application.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/app_window.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/worker.cpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}"
 )
 
 set(HEADER_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/include/account_holder.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include/resources.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/application.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/app_window.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/version.h"
@@ -27,7 +51,13 @@ configure_file(
 add_executable(
         authppgtk
         ${SOURCE_LIST}
-        ${HEADER_LIST})
+        ${HEADER_LIST}
+)
+
+set_source_files_properties(
+        ${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}
+        PROPERTIES GENERATED TRUE
+)
 
 target_include_directories(authppgtk
         PUBLIC
@@ -51,14 +81,5 @@ target_link_libraries(authppgtk
         fmt::fmt
         OpenSSL::SSL)
 
-add_custom_target(copy-resources ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:authppgtk>/data/ui/
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/authppgtk.ui" $<TARGET_FILE_DIR:authppgtk>/data/ui/authppgtk.ui
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/account_widget.ui" $<TARGET_FILE_DIR:authppgtk>/data/ui/account_widget.ui
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/authppgtk.css" $<TARGET_FILE_DIR:authppgtk>/data/ui/authppgtk.css
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/resources/ui/org.adamve.authppgtk.svg" $<TARGET_FILE_DIR:authppgtk>/data/ui/org.adamve.authppgtk.svg
-)
-
-pkg_check_modules(GTKMM gtkmm-4.0)
-add_dependencies(authppgtk copy-resources)
+add_dependencies(authppgtk gtk-custom-resources)
 
