@@ -20,6 +20,11 @@ jobs:
     - name: Install deps
       run: |
         apt-get update && apt-get -y install \
+        cmake \
+        build-essential \
+        g++ \
+        gcc \
+        libgtkmm-4.0-dev \
         libusb-1.0-0-dev \
         libssl-dev \
 
