@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "experiment/build_gtk_on_gh" ]
   pull_request:
     branches: [ "main" ]
 
