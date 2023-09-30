@@ -12,6 +12,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: ci/ubuntu-23.04/Dockerfile
 
     steps:
     - uses: actions/checkout@v3
@@ -25,6 +26,9 @@ jobs:
 
     - name: Build cli
       run: cmake --build ${{github.workspace}}/build --config=${{env.BUILD_TYPE}} --target authpp
+
+    - name: Build gtk
+      run: cmake --build ${{github.workspace}}/build --config=${{env.BUILD_TYPE}} --target authppgtk
 
     - name: Build tests
       run: cmake --build ${{github.workspace}}/build --config=${{env.BUILD_TYPE}} --target authpp_test
