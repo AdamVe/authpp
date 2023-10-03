@@ -30,9 +30,14 @@ struct Code {
 };
 
 struct Credential {
+
+    inline static const int DEFAULT_TIME_STEP { 30 };
+
     std::string name;
+    std::string issuer;
     Algorithm algorithm;
     Code code;
+    int timeStep { DEFAULT_TIME_STEP };
 
     static Credential fromByteBuffer(const ByteBuffer& buffer);
 

@@ -55,14 +55,8 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
 
         std::string issuerValue;
         std::string nameValue;
-        auto index = holder->account.name.find(':');
-        if (index == std::string::npos) {
-            // no issuer
-            nameValue = holder->account.name;
-        } else {
-            issuerValue = holder->account.name.substr(0, index);
-            nameValue = holder->account.name.substr(index + 1);
-        }
+        nameValue = holder->account.name;
+        issuerValue = holder->account.issuer;
 
         name->set_text(nameValue);
         issuer->set_text(issuerValue);
@@ -101,7 +95,7 @@ void AppWindow::onDeviceChange()
 {
     const auto& devices = worker.getDevices();
     log.d("Device count: {}", devices.size());
-    worker.requestAccounts();
+    requestAccounts();
 }
 
 void AppWindow::requestAccounts()

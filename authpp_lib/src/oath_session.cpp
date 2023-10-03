@@ -10,6 +10,7 @@
 #include "fmt/fmt_oath.h"
 #include "logger.h"
 #include "message.h"
+#include "oath_name_parser.h"
 #include "util.h"
 
 namespace authpp::oath {
@@ -21,13 +22,13 @@ namespace {
 Credential Credential::fromByteBuffer(const ByteBuffer& buffer)
 {
     std::integral auto typeAlgo = buffer.get<uint8_t>(0);
-    return Credential {
-        std::string(buffer.array() + 1, buffer.array() + buffer.size()),
-        static_cast<Algorithm>(typeAlgo & 0x0F),
+    auto [name, issuer, timeStep] = OathNameParser::parseTotpName(
+        std::string(buffer.array() + 1, buffer.array() + buffer.size()));
+    return Credential { name, issuer, static_cast<Algorithm>(typeAlgo & 0x0F),
         Code {
             static_cast<Type>(typeAlgo & 0xF0),
-        }
-    };
+        },
+        timeStep };
 }
 
 const ByteBuffer kOathId { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 };
@@ -38,7 +39,7 @@ Response select(const CcidConnection& connection, const ByteBuffer& app_id)
     auto tags = connection.send(select_oath);
 
     if (tags.size() < 0) {
-        log.e("Invalid data: parse failed");
+        log.e("Invalid data: parseTotpName failed");
     }
     return tags;
 }
@@ -97,10 +98,14 @@ std::vector<Credential> Session::listCredentials() const
 Credential fromAllDataResponse(
     const ByteBuffer& nameBuffer, uint8_t codeType, const ByteBuffer& response)
 {
+    auto [name, issuer, timeStep] = OathNameParser::parseTotpName(
+        std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size()));
     Credential credential {
-        std::string(nameBuffer.array(), nameBuffer.array() + nameBuffer.size()),
+        name,
+        issuer,
         Algorithm::HMAC_SHA1,
-        Code::fromByteBuffer(codeType, response)
+        Code::fromByteBuffer(codeType, response),
+        timeStep
     };
     return credential;
 }
@@ -167,10 +172,16 @@ Credential Session::calculateOne(long timeStep, std::string_view name) const
 
     Apdu apdu(0x00, 0xa2, 0x00, 0x01, calculateData);
     auto response = connection.send(apdu);
+
+    auto [credNname, credIssuer, credTimeStep] = OathNameParser::parseTotpName(
+        std::string(name));
+
     Credential credential {
-        std::string(name),
+        credNname,
+        credIssuer,
         Algorithm::HMAC_SHA1,
-        Code::fromByteBuffer(response.tag(0), response[0])
+        Code::fromByteBuffer(response.tag(0), response[0]),
+        credTimeStep
     };
     return credential;
 }
