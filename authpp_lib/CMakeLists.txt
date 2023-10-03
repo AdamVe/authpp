@@ -1,15 +1,15 @@
 
 set(SOURCE_LIST
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/apdu.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/byte_buffer.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/ccid_connection.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/message.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/oath_session.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/oath_session_helper.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/time_util.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/usb_device.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/usb_manager.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/util.cpp"
+        "src/apdu.cpp"
+        "src/byte_buffer.cpp"
+        "src/ccid_connection.cpp"
+        "src/message.cpp"
+        "src/oath_session.cpp"
+        "src/oath_session_helper.cpp"
+        "src/time_util.cpp"
+        "src/usb_device.cpp"
+        "src/usb_manager.cpp"
+        "src/util.cpp"
 )
 
 set(HEADER_LIST
@@ -24,6 +24,8 @@ set(HEADER_LIST
         "include/libauthpp/usb_device.h"
         "include/libauthpp/usb_manager.h"
         "include/libauthpp/util.h"
+        "include/libauthpp/oath_name_parser.h"
+        "include/libauthpp/oath_name_parser.tpp"
         "include/libauthpp/fmt/fmt_byte_buffer.h"
         "include/libauthpp/fmt/fmt_logger.h"
         "include/libauthpp/fmt/fmt_message.h"
@@ -50,3 +52,7 @@ source_group(
         TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"
         PREFIX "Header files"
         FILES ${HEADER_LIST})
+
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif ()
