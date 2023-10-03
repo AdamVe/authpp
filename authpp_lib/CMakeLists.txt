@@ -52,3 +52,7 @@ source_group(
         TREE "${CMAKE_CURRENT_SOURCE_DIR}/include"
         PREFIX "Header files"
         FILES ${HEADER_LIST})
+
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif ()

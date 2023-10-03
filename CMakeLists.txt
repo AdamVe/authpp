@@ -33,7 +33,3 @@ find_package(OpenSSL REQUIRED)
 add_subdirectory(common)
 add_subdirectory(authpp_lib)
 add_subdirectory(apps)
-
-if ((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_TESTING)
-    add_subdirectory(tests)
-endif ()
