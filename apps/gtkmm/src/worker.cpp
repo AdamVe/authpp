@@ -3,6 +3,7 @@
 
 #include <libauthpp/oath_session.h>
 #include <libauthpp/oath_session_helper.h>
+#include <libauthpp/time_util.h>
 #include <libauthpp/usb_manager.h>
 
 namespace authppgtk {
@@ -49,12 +50,13 @@ void Worker::run(authppgtk::AppWindow* appWindow)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             if (m_accounts_request) {
-                log.d("Worker thread: accounts request");
                 m_accounts_request = false;
+                auto currentSeconds = TimeUtil::getCurrentSeconds();
+                log.d("Worker thread: accounts request at time {}s", currentSeconds);
 
                 std::vector<Credential> accounts;
                 for (auto&& device : m_devices) {
-                    auto calculated = calculateAll(device);
+                    auto calculated = calculateAll(device, currentSeconds);
                     accounts.insert(accounts.end(), calculated.begin(), calculated.end());
                 }
                 m_accounts = accounts;

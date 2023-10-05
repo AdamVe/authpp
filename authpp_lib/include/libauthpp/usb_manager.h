@@ -13,7 +13,8 @@ class UsbManager {
 public:
     UsbManager();
     ~UsbManager();
-    std::vector<UsbDevice> pollUsbDevices(std::function<bool(libusb_device_descriptor)> p, long timeout = 5000);
+    std::vector<UsbDevice> pollUsbDevices(
+        const std::function<bool(libusb_device_descriptor)>& p, long timeoutMs = 5000);
 
 private:
     libusb_context* context;

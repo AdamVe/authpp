@@ -2,6 +2,7 @@
 
 #include <libauthpp/logger.h>
 #include <libauthpp/oath_session_helper.h>
+#include <libauthpp/time_util.h>
 #include <libauthpp/usb_manager.h>
 
 using namespace authpp;
@@ -21,6 +22,8 @@ int main(int argc, char** argv)
         return descriptor.idVendor == VENDOR_YUBICO;
     };
 
+    auto timeStep = TimeUtil::getTotpTimeStep(TimeUtil::getCurrentSeconds());
+
     auto keys = usbManager.pollUsbDevices(matchVendorYubico);
     if (!keys.empty()) {
         if (argParser.hasParam("-p")) {
@@ -28,7 +31,7 @@ int main(int argc, char** argv)
         }
 
         if (argParser.hasParam("all")) {
-            auto credentials = authpp::oath::calculateAll(keys[0]);
+            auto credentials = authpp::oath::calculateAll(keys[0], timeStep);
             for (auto&& c : credentials) {
                 fmt::print("{} {}\n", c.name, c.code.value);
             }
@@ -44,7 +47,7 @@ int main(int argc, char** argv)
         if (argParser.hasParam("get")) {
             auto name = argParser.getParamValue("get");
             if (!name.empty()) {
-                auto c = authpp::oath::calculate(keys[0], name);
+                auto c = authpp::oath::calculate(keys[0], timeStep, name);
                 fmt::print("{}\n", c.code.value);
             } else {
                 fmt::print("get needs a value\n");

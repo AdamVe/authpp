@@ -3,16 +3,18 @@
 #include <chrono>
 
 namespace authpp {
-long TimeUtil::getTimeStep()
+long TimeUtil::getTotpTimeStep(long seconds, int intervalLenSec)
 {
-    auto now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-    long timeStep = seconds / 30;
+    long timeStep = seconds / intervalLenSec;
     return timeStep;
 }
 
-long TimeUtil::getTime()
+long TimeUtil::getCurrentSeconds()
+{
+    return getCurrentMilliSeconds() / 1000;
+}
+
+long TimeUtil::getCurrentMilliSeconds()
 {
     auto now = std::chrono::system_clock::now();
     auto duration = now.time_since_epoch();

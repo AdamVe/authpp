@@ -3,7 +3,6 @@
 
 #include "ccid_connection.h"
 #include "oath_session.h"
-#include "time_util.h"
 #include "usb_device.h"
 #include "usb_manager.h"
 
@@ -23,10 +22,10 @@ T useOathSession(const UsbDevice& key, std::function<T(oath::Session&)> f)
     return f(oath_session);
 }
 
-std::vector<Credential> calculateAll(const UsbDevice& key);
+std::vector<Credential> calculateAll(const UsbDevice& key, long secondsSinceEpoch);
 
 std::vector<Credential> listCredentials(const UsbDevice& key);
 
-Credential calculate(const UsbDevice& key, std::string_view name);
+Credential calculate(const UsbDevice& key, long secondsSinceEpoch, std::string_view name);
 
 } // namespace authpp::oath
