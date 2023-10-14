@@ -32,4 +32,4 @@ auto OathNameParser::parseTotpName(const std::string& data)
     return std::make_tuple<>(name, issuer, timeStep);
 }
 
-} // namespace authpp::oath
+} // authpp::oath

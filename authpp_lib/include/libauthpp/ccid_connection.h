@@ -45,7 +45,7 @@ private:
     ByteBuffer transcieve(const Message& message, int* transferred = nullptr) const;
 
     const UsbDevice::Connection& handle;
-    UsbDevice::Interface usb_interface;
+    UsbDevice::Interface usbInterface;
 
     std::byte slot { 1 };
     std::byte sequence { 1 };
@@ -53,4 +53,4 @@ private:
     const int USB_CLASS_CSCID { 0x0b };
 };
 
-} // namespace authpp
+} // authpp

@@ -73,4 +73,4 @@ private:
     static inline bool debugLog { false };
 };
 
-} // namespace authpp
+} // authpp

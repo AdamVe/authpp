@@ -22,4 +22,4 @@ private:
     std::vector<UsbDevice> poll(std::function<bool(libusb_device_descriptor)>);
 };
 
-}
+} // authpp

@@ -14,4 +14,4 @@ private:
     ByteBuffer buffer;
 };
 
-} // namespace authpp
+} // authpp

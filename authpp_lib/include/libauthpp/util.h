@@ -10,4 +10,4 @@ std::string bytesToString(const ByteBuffer& buffer);
 
 std::string bytesToAsciiString(const ByteBuffer& buffer);
 
-} // namespace authpp::util
+} // authpp::util

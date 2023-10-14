@@ -142,4 +142,4 @@ void ByteBuffer::setDebugLog(bool enabled)
     ByteBuffer::debugLog = enabled;
 }
 
-} // namespace authpp
+} // authpp

@@ -10,7 +10,7 @@ namespace authppgtk {
 Application::Application()
     : Gtk::Application("org.adamve.authppgtk")
 {
-    authpp::Logger::setLevel(authpp::Logger::Level::kDebug);
+    authpp::Logger::setLevel(authpp::Logger::Level::DEBUG);
 }
 
 Glib::RefPtr<Application> Application::create()
@@ -21,7 +21,7 @@ Glib::RefPtr<Application> Application::create()
 void Application::on_activate()
 {
     try {
-        auto appwindow = create_appwindow();
+        auto appwindow = createAppwindow();
         appwindow->present();
     } catch (const Glib::Error& ex) {
         std::cerr << "Application::on_activate(): " << ex.what() << std::endl;
@@ -30,13 +30,13 @@ void Application::on_activate()
     }
 }
 
-AppWindow* Application::create_appwindow()
+AppWindow* Application::createAppwindow()
 {
     auto appWindow = AppWindow::create();
     add_window(*appWindow);
 
     appWindow->signal_hide().connect(
-        sigc::bind(sigc::mem_fun(*this, &Application::on_hide_window), appWindow));
+        sigc::bind(sigc::mem_fun(*this, &Application::onHideWindow), appWindow));
 
     auto provider = Gtk::CssProvider::create();
     provider->load_from_resource("/org/adamve/authppgtk/css/style.css");
@@ -46,7 +46,7 @@ AppWindow* Application::create_appwindow()
     return appWindow;
 }
 
-void Application::on_hide_window(Gtk::Window* window) // NOLINT(*-convert-member-functions-to-static)
+void Application::onHideWindow(Gtk::Window* window) // NOLINT(*-convert-member-functions-to-static)
 {
     delete window;
 }
@@ -55,11 +55,11 @@ void Application::on_startup()
 {
     Gtk::Application::on_startup();
 
-    add_action("about", sigc::mem_fun(*this, &Application::on_action_about));
-    add_action("quit", sigc::mem_fun(*this, &Application::on_action_quit));
+    add_action("about", sigc::mem_fun(*this, &Application::onActionAbout));
+    add_action("quit", sigc::mem_fun(*this, &Application::onActionQuit));
     set_accel_for_action("app.quit", "<Ctrl>Q");
 }
-void Application::on_action_about()
+void Application::onActionAbout()
 {
     Gtk::Window* win = get_active_window();
     if (!win) {
@@ -97,7 +97,7 @@ void Application::on_action_about()
     aboutDialog->present();
 }
 
-void Application::on_action_quit()
+void Application::onActionQuit()
 {
     auto windows = get_windows();
     for (auto window : windows) {

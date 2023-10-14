@@ -26,14 +26,14 @@ long TimeUtil::getCurrentMilliSeconds()
     return chrono::duration_cast<chrono::milliseconds>(duration).count();
 }
 
-std::string TimeUtil::toString(long millis, std::string format) {
+std::string TimeUtil::toString(long millis, const std::string& format) {
     chrono::milliseconds dur(millis);
     chrono::time_point<chrono::system_clock> dt(dur);
-    auto in_time_t = chrono::system_clock::to_time_t(dt);
+    auto timeT = chrono::system_clock::to_time_t(dt);
 
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&in_time_t), format.c_str());
+    ss << std::put_time(std::localtime(&timeT), format.c_str());
     return ss.str();
 }
 
-} // namespace authpp
+} // authpp

@@ -39,4 +39,4 @@ ArgParser::args_t ArgParser::buildArgs(int argc, char** argv) const
     }
     return retval;
 }
-} // namespace authpp::common
+} // authpp::common

@@ -33,10 +33,10 @@ Credential Credential::fromByteBuffer(const ByteBuffer& buffer)
 
 const ByteBuffer kOathId { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01 };
 
-Response select(const CcidConnection& connection, const ByteBuffer& app_id)
+Response select(const CcidConnection& connection, const ByteBuffer& appId)
 {
-    Apdu select_oath(0x00, 0xa4, 0x04, 0x00, app_id);
-    auto tags = connection.send(select_oath);
+    Apdu selectOath(0x00, 0xa4, 0x04, 0x00, appId);
+    auto tags = connection.send(selectOath);
 
     if (tags.size() < 0) {
         log.e("Invalid data: parseTotpName failed");
@@ -86,8 +86,8 @@ Session::Properties Session::initProperties(Response&& response)
 
 std::vector<Credential> Session::listCredentials() const
 {
-    Apdu list_apdu(0x00, 0xa1, 0x00, 0x00);
-    auto response = connection.send(list_apdu);
+    Apdu listApdu(0x00, 0xa1, 0x00, 0x00);
+    auto response = connection.send(listApdu);
     std::vector<Credential> credentials(response.size());
     for (int i = 0; i < response.size(); ++i) {
         credentials.push_back(Credential::fromByteBuffer(response[i]));
@@ -173,12 +173,9 @@ Credential Session::calculateOne(long timeStep, std::string_view name) const
     Apdu apdu(0x00, 0xa2, 0x00, 0x01, calculateData);
     auto response = connection.send(apdu);
 
-    auto [credNname, credIssuer, credTimeStep] = OathNameParser::parseTotpName(
-        std::string(name));
+    auto [credName, credIssuer, credTimeStep] = OathNameParser::parseTotpName(std::string(name));
 
-    Credential credential {
-        credNname,
-        credIssuer,
+    Credential credential { credName, credIssuer,
         Algorithm::HMAC_SHA1,
         Code::fromByteBuffer(response.tag(0), response[0]),
         credTimeStep
@@ -234,18 +231,17 @@ void Session::unlock(std::string_view password)
 {
     auto derivedKey = deriveAccessKey(password);
     if (validate([&derivedKey](const ByteBuffer& challenge) -> ByteBuffer {
-            ByteBuffer hmac_sha1(20 * 8);
+            ByteBuffer hmacSha1(20 * 8);
             unsigned int size;
             auto* result = HMAC(EVP_sha1(),
                 derivedKey.array(),
                 static_cast<int>(derivedKey.size()),
                 challenge.array(),
-                challenge.size(),
-                hmac_sha1.array(),
+                challenge.size(), hmacSha1.array(),
                 &size);
             if (result != nullptr) {
-                hmac_sha1.setSize(static_cast<std::size_t>(size));
-                return hmac_sha1;
+                hmacSha1.setSize(static_cast<std::size_t>(size));
+                return hmacSha1;
             }
             return {};
         })) {
@@ -285,4 +281,4 @@ bool Session::validate(const AccessKeyValidator& validator) const
     return properties.version;
 }
 
-} // namespace authpp
+} // authpp

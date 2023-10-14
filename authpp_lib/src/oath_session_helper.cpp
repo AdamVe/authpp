@@ -42,4 +42,4 @@ Credential calculate(const UsbDevice& key, long secondsSinceEpoch, std::string_v
         return c;
     });
 }
-} // namespace authpp::oath
+} // authpp::oath

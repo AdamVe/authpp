@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     common::ArgParser argParser(argc, argv);
 
     if (argParser.hasParam("-D")) {
-        Logger::setLevel(Logger::Level::kDebug);
+        Logger::setLevel(Logger::Level::DEBUG);
     }
 
     UsbManager usbManager;

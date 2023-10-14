@@ -12,26 +12,26 @@ namespace {
 }
 
 Timer::Timer(std::function<bool()>&& callback)
-    : m_callback(std::move(callback))
-    , m_timeout()
+    : callback(std::move(callback))
+    , connection()
 {
 }
 
-void Timer::start(long delay)
+void Timer::schedule(long delay)
 {
-    if (m_timeout.connected()) {
-        stop();
+    if (connection.connected()) {
+        cancel();
     }
     auto currentMs = authpp::TimeUtil::getCurrentMilliSeconds();
     log.d("Next update in {} ({})", delay, TimeUtil::toString(currentMs + delay));
-    m_timeout = Glib::signal_timeout().connect(sigc::bind(m_callback), delay);
+    connection = Glib::signal_timeout().connect(sigc::bind(callback), delay);
 }
 
-void Timer::stop()
+void Timer::cancel()
 {
     auto currentMs = TimeUtil::getCurrentMilliSeconds();
     log.d("Stopped at {}", TimeUtil::toString(currentMs));
-    m_timeout.disconnect();
+    connection.disconnect();
 }
 
-} // namespace authppgtk
+} // authppgtk

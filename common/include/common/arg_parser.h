@@ -14,4 +14,4 @@ private:
     args_t buildArgs(int argc, char** argv) const;
     const args_t args;
 };
-} // namespace authpp::common
+} // authpp::common

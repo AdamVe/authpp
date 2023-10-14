@@ -42,10 +42,10 @@ private:
     Glib::RefPtr<AccountHolder> accountHolder;
     Glib::RefPtr<Gio::ListStore<AccountHolder>> accountModel;
 
-    Glib::Dispatcher signal_devices_change;
-    Glib::Dispatcher signal_accounts_change;
+    Glib::Dispatcher signalDevicesChange;
+    Glib::Dispatcher signalAccountsChange;
     Worker worker;
     std::thread* workerThread;
 };
 
-} // namespace authppgtk
+} // authppgtk

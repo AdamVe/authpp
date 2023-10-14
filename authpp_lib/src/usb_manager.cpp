@@ -66,4 +66,4 @@ std::vector<UsbDevice> UsbManager::pollUsbDevices(
     return usbDevices;
 }
 
-} // namespace authpp
+} // authpp

@@ -14,20 +14,20 @@ public:
 
     void run(AppWindow*);
     void requestAccounts();
-    void stop();
+    void requestStop();
 
     const std::vector<authpp::UsbDevice>& getDevices() const;
     const std::vector<authpp::oath::Credential>& getAccounts() const;
 
 private:
-    mutable std::mutex m_mutex;
+    mutable std::mutex mutex;
 
-    std::vector<authpp::UsbDevice> m_devices;
-    std::vector<authpp::oath::Credential> m_accounts;
-    Timer m_refresh_timer;
-    bool m_stopped { false };
-    bool m_stop_request { false };
-    bool m_accounts_request { false };
+    std::vector<authpp::UsbDevice> devices;
+    std::vector<authpp::oath::Credential> accounts;
+    Timer refreshTimer;
+    bool isStopped { false };
+    bool stopRequested { false };
+    bool accountsRequested { false };
 };
 
-} // namespace authppgtk
+} // authppgtk

@@ -14,14 +14,14 @@ namespace {
 }
 
 Worker::Worker()
-    : m_mutex()
-    , m_devices()
-    , m_accounts()
-    , m_refresh_timer([this]() {
-        std::lock_guard<std::mutex> lock(m_mutex);
+    : mutex()
+    , devices()
+    , accounts()
+    , refreshTimer([this]() {
+        std::lock_guard<std::mutex> lock(mutex);
         auto currentMs = TimeUtil::getCurrentMilliSeconds();
         log.d("Passed refresh time (current: {})", TimeUtil::toString(currentMs));
-        m_accounts_request = true;
+        accountsRequested = true;
         return false;
     })
 {
@@ -29,64 +29,63 @@ Worker::Worker()
 
 void Worker::run(authppgtk::AppWindow* appWindow)
 {
-
     using namespace authpp::oath;
     using namespace std::chrono_literals;
 
     log.d("Worker thread started");
 
     UsbManager usbManager;
-
     auto matchVendorYubico = [](auto&& descriptor) {
         const auto VENDOR_YUBICO = 0x1050;
         return descriptor.idVendor == VENDOR_YUBICO;
     };
 
-    while (!m_stopped) {
+    while (!isStopped) {
 
         std::this_thread::sleep_for(300ms);
 
-        auto devices = usbManager.pollUsbDevices(matchVendorYubico, 0);
+        auto polledDevices = usbManager.pollUsbDevices(matchVendorYubico, 0);
         {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            if (devices.size() != m_devices.size()) {
-                m_devices = std::move(devices);
-                log.d("Device count: {}", m_devices.size());
+            std::lock_guard<std::mutex> lock(mutex);
+            if (polledDevices.size() != devices.size()) {
+                devices = std::move(polledDevices);
+                log.d("Device count: {}", devices.size());
                 appWindow->notify_device_change();
-                m_refresh_timer.stop();
+                refreshTimer.cancel();
             }
         }
 
         {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            if (m_accounts_request) {
-                m_accounts_request = false;
-                m_refresh_timer.stop();
+            std::lock_guard<std::mutex> lock(mutex);
+            if (accountsRequested) {
+                accountsRequested = false;
+                refreshTimer.cancel();
                 auto currentMillis = TimeUtil::getCurrentMilliSeconds();
                 log.d("Worker thread: accounts request at time {}",
                     TimeUtil::toString(currentMillis));
 
-                std::vector<Credential> accounts;
-                for (auto&& device : m_devices) {
+                std::vector<Credential> retrievedAccounts;
+                for (auto&& device : devices) {
                     auto calculated = calculateAll(device, currentMillis / 1000);
-                    accounts.insert(accounts.end(), calculated.begin(), calculated.end());
+                    retrievedAccounts.insert(
+                        retrievedAccounts.end(), calculated.begin(), calculated.end());
                 }
-                m_accounts = accounts;
+                accounts = retrievedAccounts;
 
                 appWindow->notify_accounts_change();
 
                 int nextRefresh = 30000;
-                m_refresh_timer.start(nextRefresh);
+                refreshTimer.schedule(nextRefresh);
             }
         }
 
         {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            if (m_stop_request) {
-                log.d("Worker thread: stop request");
-                m_refresh_timer.stop();
-                m_stopped = true;
-                m_stop_request = false;
+            std::lock_guard<std::mutex> lock(mutex);
+            if (stopRequested) {
+                log.d("Worker thread: cancel request");
+                refreshTimer.cancel();
+                isStopped = true;
+                stopRequested = false;
             }
         }
     }
@@ -96,26 +95,26 @@ void Worker::run(authppgtk::AppWindow* appWindow)
 
 void Worker::requestAccounts()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_accounts_request = true;
+    std::lock_guard<std::mutex> lock(mutex);
+    accountsRequested = true;
 }
 
-void Worker::stop()
+void Worker::requestStop()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_stop_request = true;
+    std::lock_guard<std::mutex> lock(mutex);
+    stopRequested = true;
 }
 
 const std::vector<authpp::oath::Credential>& Worker::getAccounts() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return m_accounts;
+    std::lock_guard<std::mutex> lock(mutex);
+    return accounts;
 }
 
 const std::vector<authpp::UsbDevice>& Worker::getDevices() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return m_devices;
+    std::lock_guard<std::mutex> lock(mutex);
+    return devices;
 }
 
-} // namespace authppgtk
+} // authppgtk

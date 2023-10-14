@@ -92,4 +92,4 @@ private:
     ByteBuffer accessKey;
 };
 
-} // namespace authpp::oath
+} // authpp::oath

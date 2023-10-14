@@ -11,16 +11,16 @@ class UsbDevice {
 public:
     struct Interface {
         int number { -1 };
-        int altsetting {};
-        unsigned char endpoint_in {};
-        unsigned char endpoint_out {};
-        uint16_t max_packet_size_in {};
-        uint16_t max_packet_size_out {};
+        int altSetting {};
+        unsigned char endPointIn {};
+        unsigned char endPointOut {};
+        uint16_t maxPacketSizeIn {};
+        uint16_t maxPacketSizeOut {};
     };
 
     class Connection {
     public:
-        explicit Connection(const UsbDevice& usb_device);
+        explicit Connection(const UsbDevice& usbDevice);
         ~Connection();
 
         libusb_device_handle* operator*() const;
@@ -28,7 +28,7 @@ public:
         [[nodiscard]] Interface claimInterface(int usbClass, int usbSubclass) const;
 
     private:
-        const UsbDevice& usb_device;
+        const UsbDevice& usbDevice;
         libusb_device_handle* handle;
     };
     explicit UsbDevice(libusb_device* device);
@@ -53,16 +53,16 @@ private:
 
     libusb_device* device;
 
-    libusb_device_descriptor device_descriptor;
+    libusb_device_descriptor deviceDescriptor;
 
     mutable std::string manufacturer;
-    mutable bool read_manufacturer { false };
+    mutable bool readManufacturer { false };
 
     mutable std::string product;
-    mutable bool read_product { false };
+    mutable bool readProduct { false };
 
-    mutable std::string serial_number;
-    mutable bool read_serial_number { false };
+    mutable std::string serialNumber;
+    mutable bool readSerialNumber { false };
 };
 
-} // namespace authpp
+} // authpp
