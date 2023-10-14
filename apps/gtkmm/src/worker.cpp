@@ -61,21 +61,27 @@ void Worker::run(authppgtk::AppWindow* appWindow)
                 accountsRequested = false;
                 refreshTimer.cancel();
                 auto currentMillis = TimeUtil::getCurrentMilliSeconds();
+                auto currentSeconds = currentMillis / 1000;
                 log.d("Worker thread: accounts request at time {}",
                     TimeUtil::toString(currentMillis));
 
                 std::vector<Credential> retrievedAccounts;
+                long delay = authpp::TimeUtil::DEFAULT_TOTP_INTERVAL;
                 for (auto&& device : devices) {
-                    auto calculated = calculateAll(device, currentMillis / 1000);
-                    retrievedAccounts.insert(
-                        retrievedAccounts.end(), calculated.begin(), calculated.end());
+                    auto calculated = calculateAll(device, currentSeconds);
+
+                    for (auto&& account : calculated) {
+                        auto timeStep = TimeUtil::getTotpTimeStep(currentSeconds, account.timeStep);
+                        auto accountDelay = (timeStep + 1) * account.timeStep - currentSeconds;
+                        delay = std::min(delay, accountDelay);
+                        retrievedAccounts.push_back(account);
+                    }
                 }
                 accounts = retrievedAccounts;
 
-                appWindow->notify_accounts_change();
+                refreshTimer.schedule(delay * 1000);
 
-                int nextRefresh = 30000;
-                refreshTimer.schedule(nextRefresh);
+                appWindow->notify_accounts_change();
             }
         }
 
