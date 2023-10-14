@@ -1,5 +1,6 @@
 #include "worker.h"
 #include "app_window.h"
+#include "timer.h"
 
 #include <libauthpp/oath_session.h>
 #include <libauthpp/oath_session_helper.h>
@@ -11,10 +12,11 @@ namespace {
     authpp::Logger log("Worker");
 }
 
-Worker::Worker()
+Worker::Worker(Timer& timer)
     : m_mutex()
     , m_devices()
     , m_accounts()
+    , m_refresh_timer(timer)
 {
 }
 
@@ -44,19 +46,7 @@ void Worker::run(authppgtk::AppWindow* appWindow)
                 m_devices = std::move(devices);
                 log.d("Device count: {}", m_devices.size());
                 appWindow->notify_device_change();
-                m_refresh_time = 0;
-            }
-        }
-
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            if (m_refresh_time > 0) {
-                auto currentMs = TimeUtil::getCurrentMilliSeconds();
-                if (currentMs > m_refresh_time) {
-                    log.d("Passed refresh time (current: {}s)", currentMs / 1000);
-                    m_refresh_time = 0L;
-                    m_accounts_request = true;
-                }
+                m_refresh_timer.stop();
             }
         }
 
@@ -64,20 +54,29 @@ void Worker::run(authppgtk::AppWindow* appWindow)
             std::lock_guard<std::mutex> lock(m_mutex);
             if (m_accounts_request) {
                 m_accounts_request = false;
-                auto currentSeconds = TimeUtil::getCurrentSeconds();
-                log.d("Worker thread: accounts request at time {}s", currentSeconds);
+                m_refresh_timer.stop();
+                auto currentMillis = TimeUtil::getCurrentMilliSeconds();
+                log.d("Worker thread: accounts request at time {}",
+                    TimeUtil::toString(currentMillis));
 
                 std::vector<Credential> accounts;
                 for (auto&& device : m_devices) {
-                    auto calculated = calculateAll(device, currentSeconds);
+                    auto calculated = calculateAll(device, currentMillis / 1000);
                     accounts.insert(accounts.end(), calculated.begin(), calculated.end());
                 }
                 m_accounts = accounts;
 
                 appWindow->notify_accounts_change();
 
-                m_refresh_time = TimeUtil::getCurrentMilliSeconds() + 30000;
-                log.d("Set next refresh to {}s", m_refresh_time / 1000);
+                int nextRefresh = 30000;
+                m_refresh_timer.start(nextRefresh, [this]() {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+
+                    auto currentMs = TimeUtil::getCurrentMilliSeconds();
+                    log.d("Passed refresh time (current: {})", TimeUtil::toString(currentMs));
+                    m_accounts_request = true;
+                    return false;
+                });
             }
         }
 
@@ -85,6 +84,7 @@ void Worker::run(authppgtk::AppWindow* appWindow)
             std::lock_guard<std::mutex> lock(m_mutex);
             if (m_stop_request) {
                 log.d("Worker thread: stop request");
+                m_refresh_timer.stop();
                 m_stopped = true;
                 m_stop_request = false;
             }

@@ -23,7 +23,8 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
     , accountModel(Gio::ListStore<AccountHolder>::create())
     , signal_devices_change()
     , signal_accounts_change()
-    , worker()
+    , timer()
+    , worker(timer)
     , workerThread()
 {
     auto accountListView = refBuilder->get_widget<Gtk::ListView>("listview_accounts");

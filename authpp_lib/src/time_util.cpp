@@ -2,7 +2,12 @@
 
 #include <chrono>
 
+#include <iomanip>
+#include <sstream>
+
 namespace authpp {
+namespace chrono = std::chrono;
+
 long TimeUtil::getTotpTimeStep(long seconds, int intervalLenSec)
 {
     long timeStep = seconds / intervalLenSec;
@@ -16,9 +21,19 @@ long TimeUtil::getCurrentSeconds()
 
 long TimeUtil::getCurrentMilliSeconds()
 {
-    auto now = std::chrono::system_clock::now();
+    auto now = chrono::system_clock::now();
     auto duration = now.time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    return chrono::duration_cast<chrono::milliseconds>(duration).count();
+}
+
+std::string TimeUtil::toString(long millis, std::string format) {
+    chrono::milliseconds dur(millis);
+    chrono::time_point<chrono::system_clock> dt(dur);
+    auto in_time_t = chrono::system_clock::to_time_t(dt);
+
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&in_time_t), format.c_str());
+    return ss.str();
 }
 
 } // namespace authpp

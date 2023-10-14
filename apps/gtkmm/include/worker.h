@@ -6,9 +6,10 @@
 
 namespace authppgtk {
 class AppWindow;
+class Timer;
 class Worker {
 public:
-    Worker();
+    explicit Worker(Timer&);
 
     void run(AppWindow*);
     void requestAccounts();
@@ -22,7 +23,7 @@ private:
 
     std::vector<authpp::UsbDevice> m_devices;
     std::vector<authpp::oath::Credential> m_accounts;
-    long m_refresh_time { 0L };
+    Timer& m_refresh_timer;
     bool m_stopped { false };
     bool m_stop_request { false };
     bool m_accounts_request { false };

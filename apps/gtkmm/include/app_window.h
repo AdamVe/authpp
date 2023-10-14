@@ -1,6 +1,7 @@
 #pragma once
 
 #include "account_holder.h"
+#include "timer.h"
 #include "worker.h"
 
 #include <giomm/liststore.h>
@@ -43,6 +44,7 @@ private:
 
     Glib::Dispatcher signal_devices_change;
     Glib::Dispatcher signal_accounts_change;
+    Timer timer;
     Worker worker;
     std::thread* workerThread;
 };
