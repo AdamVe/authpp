@@ -8,21 +8,28 @@
 #include <libauthpp/usb_manager.h>
 
 namespace authppgtk {
+using namespace authpp;
 namespace {
     authpp::Logger log("Worker");
 }
 
-Worker::Worker(Timer& timer)
+Worker::Worker()
     : m_mutex()
     , m_devices()
     , m_accounts()
-    , m_refresh_timer(timer)
+    , m_refresh_timer([this]() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto currentMs = TimeUtil::getCurrentMilliSeconds();
+        log.d("Passed refresh time (current: {})", TimeUtil::toString(currentMs));
+        m_accounts_request = true;
+        return false;
+    })
 {
 }
 
 void Worker::run(authppgtk::AppWindow* appWindow)
 {
-    using namespace authpp;
+
     using namespace authpp::oath;
     using namespace std::chrono_literals;
 
@@ -69,14 +76,7 @@ void Worker::run(authppgtk::AppWindow* appWindow)
                 appWindow->notify_accounts_change();
 
                 int nextRefresh = 30000;
-                m_refresh_timer.start(nextRefresh, [this]() {
-                    std::lock_guard<std::mutex> lock(m_mutex);
-
-                    auto currentMs = TimeUtil::getCurrentMilliSeconds();
-                    log.d("Passed refresh time (current: {})", TimeUtil::toString(currentMs));
-                    m_accounts_request = true;
-                    return false;
-                });
+                m_refresh_timer.start(nextRefresh);
             }
         }
 

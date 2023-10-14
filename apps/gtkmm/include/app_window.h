@@ -44,7 +44,6 @@ private:
 
     Glib::Dispatcher signal_devices_change;
     Glib::Dispatcher signal_accounts_change;
-    Timer timer;
     Worker worker;
     std::thread* workerThread;
 };

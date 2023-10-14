@@ -8,11 +8,12 @@ namespace authppgtk {
 
 class Timer {
 public:
-    Timer();
-    void start(long delay, const std::function<bool()>& callback);
+    explicit Timer(std::function<bool()>&& callback);
+    void start(long delay);
     void stop();
 
 private:
+    std::function<bool()> m_callback;
     sigc::connection m_timeout;
 };
 

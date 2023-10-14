@@ -11,19 +11,20 @@ namespace {
     authpp::Logger log("Timer");
 }
 
-Timer::Timer()
-    : m_timeout()
+Timer::Timer(std::function<bool()>&& callback)
+    : m_callback(std::move(callback))
+    , m_timeout()
 {
 }
 
-void Timer::start(long delay, const std::function<bool()>& callback)
+void Timer::start(long delay)
 {
     if (m_timeout.connected()) {
         stop();
     }
     auto currentMs = authpp::TimeUtil::getCurrentMilliSeconds();
     log.d("Next update in {} ({})", delay, TimeUtil::toString(currentMs + delay));
-    m_timeout = Glib::signal_timeout().connect(sigc::bind(callback), delay);
+    m_timeout = Glib::signal_timeout().connect(sigc::bind(m_callback), delay);
 }
 
 void Timer::stop()

@@ -2,14 +2,15 @@
 
 #include <libauthpp/oath_session.h>
 
+#include "timer.h"
+
 #include <vector>
 
 namespace authppgtk {
 class AppWindow;
-class Timer;
 class Worker {
 public:
-    explicit Worker(Timer&);
+    Worker();
 
     void run(AppWindow*);
     void requestAccounts();
@@ -23,7 +24,7 @@ private:
 
     std::vector<authpp::UsbDevice> m_devices;
     std::vector<authpp::oath::Credential> m_accounts;
-    Timer& m_refresh_timer;
+    Timer m_refresh_timer;
     bool m_stopped { false };
     bool m_stop_request { false };
     bool m_accounts_request { false };
