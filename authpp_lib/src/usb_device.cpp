@@ -14,9 +14,9 @@ namespace {
 
 UsbDevice::UsbDevice(libusb_device* device)
     : device(libusb_ref_device(device))
-    , device_descriptor()
+    , deviceDescriptor()
 {
-    if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
+    if (0 != libusb_get_device_descriptor(device, &deviceDescriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
     }
 }
@@ -28,9 +28,9 @@ UsbDevice::~UsbDevice()
 
 UsbDevice::UsbDevice(UsbDevice&& other) noexcept
     : device(other.device)
-    , device_descriptor()
+    , deviceDescriptor()
 {
-    if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
+    if (0 != libusb_get_device_descriptor(device, &deviceDescriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
     }
     other.device = nullptr;
@@ -38,23 +38,23 @@ UsbDevice::UsbDevice(UsbDevice&& other) noexcept
 
 UsbDevice::UsbDevice(const UsbDevice& other)
     : device(libusb_ref_device(other.device))
-    , device_descriptor()
+    , deviceDescriptor()
 {
-    if (0 != libusb_get_device_descriptor(device, &device_descriptor)) {
+    if (0 != libusb_get_device_descriptor(device, &deviceDescriptor)) {
         throw std::runtime_error("Failed to acquire device descriptor");
     }
 }
 
 std::string UsbDevice::getManufacturer() const
 {
-    if (!read_manufacturer) {
+    if (!readManufacturer) {
         try {
-            manufacturer = getStringDescriptor(device_descriptor.iManufacturer);
+            manufacturer = getStringDescriptor(deviceDescriptor.iManufacturer);
         } catch (const std::runtime_error& error) {
             log.e("Failed to get manufacturer: {}", error.what());
         }
 
-        read_manufacturer = true;
+        readManufacturer = true;
     }
 
     return manufacturer;
@@ -62,13 +62,13 @@ std::string UsbDevice::getManufacturer() const
 
 std::string UsbDevice::getProduct() const
 {
-    if (!read_product) {
+    if (!readProduct) {
         try {
-            product = getStringDescriptor(device_descriptor.iProduct);
+            product = getStringDescriptor(deviceDescriptor.iProduct);
         } catch (const std::runtime_error& error) {
             log.e("Failed to get product: {}", error.what());
         }
-        read_product = true;
+        readProduct = true;
     }
 
     return product;
@@ -76,17 +76,17 @@ std::string UsbDevice::getProduct() const
 
 std::string UsbDevice::getSerialNumber() const
 {
-    if (!read_serial_number) {
+    if (!readSerialNumber) {
         Connection deviceHandle(*this);
         try {
-            serial_number = getStringDescriptor(device_descriptor.iSerialNumber);
+            serialNumber = getStringDescriptor(deviceDescriptor.iSerialNumber);
         } catch (const std::runtime_error& error) {
             log.e("Failed to get serial number: {}", error.what());
         }
-        read_serial_number = true;
+        readSerialNumber = true;
     }
 
-    return serial_number;
+    return serialNumber;
 }
 
 std::string UsbDevice::toString() const
@@ -99,14 +99,12 @@ std::string UsbDevice::toString() const
         "idVendor={:04x},idProduct={:04x},bcdDevice={},iManufacturer={}({}),"
         "iProduct={}({}),"
         "iSerialNumber={}({}),bNumConfigurations={}",
-        device_descriptor.bLength, device_descriptor.bDescriptorType,
-        device_descriptor.bcdUSB, device_descriptor.bDeviceClass,
-        device_descriptor.bDeviceSubClass, device_descriptor.bDeviceProtocol,
-        device_descriptor.bMaxPacketSize0, device_descriptor.idVendor,
-        device_descriptor.idProduct, device_descriptor.bcdDevice,
-        device_descriptor.iManufacturer, getManufacturer(),
-        device_descriptor.iProduct, getProduct(), device_descriptor.iSerialNumber,
-        getSerialNumber(), device_descriptor.bNumConfigurations);
+        deviceDescriptor.bLength, deviceDescriptor.bDescriptorType, deviceDescriptor.bcdUSB,
+        deviceDescriptor.bDeviceClass, deviceDescriptor.bDeviceSubClass,
+        deviceDescriptor.bDeviceProtocol, deviceDescriptor.bMaxPacketSize0,
+        deviceDescriptor.idVendor, deviceDescriptor.idProduct, deviceDescriptor.bcdDevice,
+        deviceDescriptor.iManufacturer, getManufacturer(), deviceDescriptor.iProduct, getProduct(),
+        deviceDescriptor.iSerialNumber, getSerialNumber(), deviceDescriptor.bNumConfigurations);
 }
 
 std::string UsbDevice::getStringDescriptor(std::size_t index) const
@@ -118,10 +116,10 @@ std::string UsbDevice::getStringDescriptor(std::size_t index) const
     Connection deviceHandle(*this);
 
     constexpr std::size_t length { 128 };
-    unsigned char string_descriptor[length];
+    unsigned char stringDescriptor[length];
 
-    if (auto err = libusb_get_string_descriptor_ascii(*deviceHandle, index,
-            string_descriptor, length);
+    if (auto err
+        = libusb_get_string_descriptor_ascii(*deviceHandle, index, stringDescriptor, length);
         err < 0) {
         throw std::runtime_error(
             fmt::format("Error getting string resource on index {}: {}({})", index,
@@ -129,9 +127,9 @@ std::string UsbDevice::getStringDescriptor(std::size_t index) const
     }
 
     log.v("Read string descriptor from index {} with content {}", index,
-        (const char*)string_descriptor);
+        (const char*)stringDescriptor);
 
-    return { ((char*)string_descriptor) };
+    return { ((char*)stringDescriptor) };
 }
 
 void UsbDevice::openConnection(libusb_device_handle** handle) const
@@ -146,17 +144,14 @@ void UsbDevice::closeConnection(libusb_device_handle** handle) const // NOLINT(*
     libusb_close(*handle);
 }
 
-UsbDevice::Connection::Connection(const UsbDevice& usb_device)
-    : usb_device(usb_device)
+UsbDevice::Connection::Connection(const UsbDevice& usbDevice)
+    : usbDevice(usbDevice)
     , handle()
 {
-    usb_device.openConnection(&handle);
+    usbDevice.openConnection(&handle);
 }
 
-UsbDevice::Connection::~Connection()
-{
-    usb_device.closeConnection(&handle);
-}
+UsbDevice::Connection::~Connection() { usbDevice.closeConnection(&handle); }
 
 libusb_device_handle* UsbDevice::Connection::operator*() const
 {
@@ -167,9 +162,10 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
     int usbClass, int usbSubClass) const
 {
     log.v("Searching config for {:02x}:{:02x}", usbClass, usbSubClass);
-    for (uint8_t config_index = 0; config_index < usb_device.device_descriptor.bNumConfigurations; ++config_index) {
+    for (uint8_t configIndex = 0; configIndex < usbDevice.deviceDescriptor.bNumConfigurations;
+         ++configIndex) {
         libusb_config_descriptor* config;
-        if (0 != libusb_get_config_descriptor(usb_device.device, config_index, &config)) {
+        if (0 != libusb_get_config_descriptor(usbDevice.device, configIndex, &config)) {
             libusb_free_config_descriptor(config);
             continue;
         }
@@ -189,8 +185,8 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
                 if (iClass == usbClass && iSubClass == usbSubClass) {
                     unsigned char ein = 0;
                     unsigned char eout = 0;
-                    uint16_t max_in = 0;
-                    uint16_t max_out = 0;
+                    uint16_t maxIn = 0;
+                    uint16_t maxOut = 0;
 
                     for (int endpointNum = 0; endpointNum < altsetting.bNumEndpoints;
                          ++endpointNum) {
@@ -209,11 +205,11 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
                             if ((endpoint.bEndpointAddress & 0x80) == libusb_endpoint_direction::LIBUSB_ENDPOINT_OUT) {
                                 log.v("          found LIBUSB_ENDPOINT_OUT");
                                 eout = endpoint.bEndpointAddress;
-                                max_out = endpoint.wMaxPacketSize;
+                                maxOut = endpoint.wMaxPacketSize;
                             } else {
                                 log.v("          found LIBUSB_ENDPOINT_IN");
                                 ein = endpoint.bEndpointAddress;
-                                max_in = endpoint.wMaxPacketSize;
+                                maxIn = endpoint.wMaxPacketSize;
                             }
                         }
                     }
@@ -222,13 +218,11 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
                         "Found {:02x}:{:02x} with on interface {} with "
                         "altsetting {} "
                         "and endpoints IN={:02x}({}) OUT={:02x}({})",
-                        iClass, iSubClass, interfaceNum, altsettingNum, ein, max_in,
-                        eout, max_out);
+                        iClass, iSubClass, interfaceNum, altsettingNum, ein, maxIn, eout, maxOut);
                     libusb_free_config_descriptor(config);
                     return UsbDevice::Interface {
                         interfaceNum, altsettingNum, (unsigned char)ein,
-                        (unsigned char)eout, max_in, max_out
-                    };
+                        (unsigned char)eout, maxIn, maxOut };
                 }
             }
         }
@@ -239,4 +233,4 @@ UsbDevice::Interface UsbDevice::Connection::claimInterface(
     return {};
 }
 
-} // namespace authpp
+} // authpp

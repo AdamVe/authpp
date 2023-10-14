@@ -11,7 +11,6 @@ namespace {
 Message::Message(uint8_t type, const ByteBuffer& data)
     : buffer(kHeaderSize + data.size())
 {
-    ;
     buffer
         .setByteOrder(std::endian::little)
         .put<uint8_t>(type)
@@ -24,4 +23,4 @@ Message::~Message() = default;
 
 const ByteBuffer& Message::get() const { return buffer; }
 
-} // namespace authpp
+} // authpp

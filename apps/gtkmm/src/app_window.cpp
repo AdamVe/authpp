@@ -21,8 +21,8 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
     , refreshButtonWithSpinner(refBuilder->get_widget<Gtk::Button>("btn_refresh_with_spinner"))
     , accountHolder()
     , accountModel(Gio::ListStore<AccountHolder>::create())
-    , signal_devices_change()
-    , signal_accounts_change()
+    , signalDevicesChange()
+    , signalAccountsChange()
     , worker()
     , workerThread()
 {
@@ -65,8 +65,8 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
 
     refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::requestAccounts));
 
-    signal_devices_change.connect(sigc::mem_fun(*this, &AppWindow::onDeviceChange));
-    signal_accounts_change.connect(sigc::mem_fun(*this, &AppWindow::onAccountsChange));
+    signalDevicesChange.connect(sigc::mem_fun(*this, &AppWindow::onDeviceChange));
+    signalAccountsChange.connect(sigc::mem_fun(*this, &AppWindow::onAccountsChange));
 
     this->signal_show().connect(sigc::mem_fun(*this, &AppWindow::onShow));
     this->signal_hide().connect(sigc::mem_fun(*this, &AppWindow::onHide));
@@ -87,9 +87,9 @@ AppWindow* AppWindow::create()
     return window;
 }
 
-void AppWindow::notify_device_change() const { signal_devices_change(); }
+void AppWindow::notify_device_change() const { signalDevicesChange(); }
 
-void AppWindow::notify_accounts_change() const { signal_accounts_change(); }
+void AppWindow::notify_accounts_change() const { signalAccountsChange(); }
 
 void AppWindow::onDeviceChange()
 {
@@ -128,7 +128,7 @@ void AppWindow::onShow()
 void AppWindow::onHide()
 {
     log.d("Window onHide");
-    worker.stop();
+    worker.requestStop();
     if (workerThread) {
         if (workerThread->joinable()) {
             workerThread->join();
@@ -146,4 +146,4 @@ bool AppWindow::onCloseRequest()
     return false;
 }
 
-} // namespace authppgtk
+} // authppgtk

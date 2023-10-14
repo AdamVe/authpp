@@ -2,7 +2,7 @@
 
 #include "fmt/format.h"
 
-#include "logger.h"
+#include "../logger.h"
 
 template <>
 struct fmt::formatter<authpp::Logger::Level> {

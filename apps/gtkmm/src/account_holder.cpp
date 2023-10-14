@@ -13,4 +13,4 @@ AccountHolder::AccountHolder(Account account)
     , account(std::move(account))
 {
 }
-} // namespace authppgtk
+} // authppgtk

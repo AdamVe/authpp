@@ -18,11 +18,11 @@ protected:
     void on_startup() override;
 
 private:
-    AppWindow* create_appwindow();
-    void on_hide_window(Gtk::Window* window);
+    AppWindow* createAppwindow();
+    void onHideWindow(Gtk::Window* window);
 
-    void on_action_about();
-    void on_action_quit();
+    void onActionAbout();
+    void onActionQuit();
 };
 
-} // namespace authppgtk
+} // authppgtk

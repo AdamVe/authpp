@@ -10,6 +10,6 @@ public:
     static auto parseTotpName(const std::string& data);
 };
 
-} // namespace authppgtk::oath
+} // authppgtk::oath
 
 #include "oath_name_parser.tpp"

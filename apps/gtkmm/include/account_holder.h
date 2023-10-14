@@ -17,4 +17,4 @@ public:
 protected:
     explicit AccountHolder(Account account);
 };
-} // namespace authppgtk
+} // authppgtk

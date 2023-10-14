@@ -22,7 +22,7 @@ namespace {
 
 CcidConnection::CcidConnection(const UsbDevice::Connection& handle)
     : handle(handle)
-    , usb_interface()
+    , usbInterface()
 {
     log.v("CCID connection opened");
     setup();
@@ -68,8 +68,8 @@ sw_t getSw(const ByteBuffer& buffer)
         return 0x0000;
     }
 
-    std::size_t last_index = buffer.size() - 1;
-    return buffer.get<uint8_t>(last_index - 1) << 8 | buffer.get<uint8_t>(last_index);
+    std::size_t lastIndex = buffer.size() - 1;
+    return buffer.get<uint8_t>(lastIndex - 1) << 8 | buffer.get<uint8_t>(lastIndex);
 }
 
 bool isSuccess(uint16_t sw)
@@ -93,8 +93,8 @@ Response CcidConnection::parse(const ByteBuffer& buffer) const
     Response response;
     int32_t i = 0;
     while (i < static_cast<int32_t>(buffer.size()) - 2) {
-        auto tag = buffer.get<uint8_t>(i);
-        auto length = buffer.get<uint8_t>(i + 1);
+        std::integral auto tag = buffer.get<uint8_t>(i);
+        std::integral auto length = buffer.get<uint8_t>(i + 1);
         ByteBuffer data = buffer.get(i + 2, length);
         response.put(tag, data);
 
@@ -107,8 +107,8 @@ Response CcidConnection::parse(const ByteBuffer& buffer) const
 
 Response CcidConnection::send(const Apdu& instruction) const
 {
-    Message ccid_message(0x6f, instruction.get());
-    auto buffer = transcieve(ccid_message);
+    Message ccidMessage(0x6f, instruction.get());
+    auto buffer = transcieve(ccidMessage);
 
     auto sw { getSw(buffer) };
     if (isSuccess(sw)) {
@@ -135,83 +135,80 @@ Response CcidConnection::send(const Apdu& instruction) const
 ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) const
 {
     int really_written = 0;
-    if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_out,
-            message.get().array(),
+    if (int err = libusb_bulk_transfer(*handle, usbInterface.endPointOut, message.get().array(),
             message.get().size(), &really_written, TIMEOUT);
         err != 0) {
-        throw new std::runtime_error(
+        throw std::runtime_error(
             fmt::format("Failed to send data: {} {}", libusb_error_name(err), err));
     };
     log.v("send {}", message);
 
     // receive
-    int really_recieved = 0;
-    std::size_t array_len = usb_interface.max_packet_size_in;
-    ByteBuffer buffer(array_len);
+    int reallyReceived = 0;
+    std::size_t arrayLen = usbInterface.maxPacketSizeIn;
+    ByteBuffer buffer(arrayLen);
     buffer.setByteOrder(std::endian::little);
 
-    bool needMoreTime = false;
+    bool needMoreTime;
     do {
         needMoreTime = false;
-        if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-                buffer.array(),
-                array_len, &really_recieved, TIMEOUT);
+        if (int err = libusb_bulk_transfer(*handle, usbInterface.endPointIn, buffer.array(),
+                arrayLen, &reallyReceived, TIMEOUT);
             err != 0) {
-            throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
-                libusb_error_name(err), err));
+            throw std::runtime_error(
+                fmt::format("Failed to receive data: {} {}", libusb_error_name(err), err));
         };
         needMoreTime = buffer.get<uint8_t>(7) && 0x80 == 0x80;
     } while (needMoreTime);
 
-    buffer.setSize(really_recieved);
+    buffer.setSize(reallyReceived);
 
     // size of data
-    uint32_t expected_data_size = buffer.get<uint16_t>(1);
-    int currentLength = really_recieved - 10;
+    uint32_t expectedDataSize = buffer.get<uint16_t>(1);
+    int currentLength = reallyReceived - 10;
 
-    ByteBuffer response_buffer = buffer.get(10, currentLength);
-    response_buffer.setByteOrder(std::endian::little).setSize(expected_data_size);
-    while (currentLength < expected_data_size) {
+    ByteBuffer responseBuffer = buffer.get(10, currentLength);
+    responseBuffer.setByteOrder(std::endian::little).setSize(expectedDataSize);
+    while (currentLength < expectedDataSize) {
         // receive again
-        if (int err = libusb_bulk_transfer(*handle, usb_interface.endpoint_in,
-                buffer.array(),
-                array_len, &really_recieved, TIMEOUT);
+        if (int err = libusb_bulk_transfer(*handle, usbInterface.endPointIn, buffer.array(),
+                arrayLen, &reallyReceived, TIMEOUT);
             err != 0) {
-            throw new std::runtime_error(fmt::format("Failed to receive data: {} {}",
-                libusb_error_name(err), err));
+            throw std::runtime_error(
+                fmt::format("Failed to receive data: {} {}", libusb_error_name(err), err));
         }
 
-        buffer.setSize(really_recieved);
-        response_buffer.pointTo(currentLength);
-        response_buffer.put(buffer);
-        currentLength += really_recieved;
+        buffer.setSize(reallyReceived);
+        responseBuffer.pointTo(currentLength);
+        responseBuffer.put(buffer);
+        currentLength += reallyReceived;
     }
 
     if (transferred != nullptr) {
-        *transferred = really_recieved;
+        *transferred = reallyReceived;
     }
 
-    log.v("recv {}", response_buffer);
-    return response_buffer;
+    log.v("recv {}", responseBuffer);
+    return responseBuffer;
 }
 
 void CcidConnection::setup()
 {
-    usb_interface = handle.claimInterface(USB_CLASS_CSCID, 0);
-    if (usb_interface.number == -1) {
-        throw new std::runtime_error("Failure finding correct CCID interface");
+    usbInterface = handle.claimInterface(USB_CLASS_CSCID, 0);
+    if (usbInterface.number == -1) {
+        throw std::runtime_error("Failure finding correct CCID interface");
     }
 
-    if (libusb_kernel_driver_active(*handle, usb_interface.number) == 1) {
-        if (libusb_detach_kernel_driver(*handle, usb_interface.number) == 0) {
+    if (libusb_kernel_driver_active(*handle, usbInterface.number) == 1) {
+        if (libusb_detach_kernel_driver(*handle, usbInterface.number) == 0) {
             log.v("detached kernel driver");
         }
     }
 
-    if (auto error = libusb_claim_interface(*handle, usb_interface.number); error != 0) {
+    if (auto error = libusb_claim_interface(*handle, usbInterface.number); error != 0) {
         log.e("Failure claiming CCID interface: {}({})", libusb_error_name(error), error);
-        throw new std::runtime_error("Failure claiming CCID interface");
+        throw std::runtime_error("Failure claiming CCID interface");
     }
 }
 
-} // namespace authpp
+} // authpp

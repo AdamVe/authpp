@@ -2,21 +2,38 @@
 
 #include <chrono>
 
+#include <iomanip>
+#include <sstream>
+
 namespace authpp {
-long TimeUtil::getTimeStep()
+namespace chrono = std::chrono;
+
+long TimeUtil::getTotpTimeStep(long seconds, int intervalLenSec)
 {
-    auto now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-    long timeStep = seconds / 30;
+    long timeStep = seconds / intervalLenSec;
     return timeStep;
 }
 
-long TimeUtil::getTime()
+long TimeUtil::getCurrentSeconds()
 {
-    auto now = std::chrono::system_clock::now();
-    auto duration = now.time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    return getCurrentMilliSeconds() / 1000;
 }
 
-} // namespace authpp
+long TimeUtil::getCurrentMilliSeconds()
+{
+    auto now = chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    return chrono::duration_cast<chrono::milliseconds>(duration).count();
+}
+
+std::string TimeUtil::toString(long millis, const std::string& format) {
+    chrono::milliseconds dur(millis);
+    chrono::time_point<chrono::system_clock> dt(dur);
+    auto timeT = chrono::system_clock::to_time_t(dt);
+
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&timeT), format.c_str());
+    return ss.str();
+}
+
+} // authpp

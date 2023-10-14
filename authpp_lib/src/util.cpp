@@ -2,8 +2,6 @@
 
 #include <fmt/format.h>
 
-#include <cstddef>
-
 namespace authpp::util {
 
 std::string bytesToString(const ByteBuffer& buffer)
@@ -21,7 +19,7 @@ std::string bytesToAsciiString(const ByteBuffer& buffer)
 {
     std::string retval = "[";
     for (std::size_t i = 0; i < buffer.size(); ++i) {
-        auto b = buffer.get<uint8_t>(i);
+        std::integral auto b = buffer.get<uint8_t>(i);
         if (b >= 32 && b < 127) {
             retval += b;
         } else {
@@ -33,4 +31,4 @@ std::string bytesToAsciiString(const ByteBuffer& buffer)
     return retval;
 }
 
-} // namespace authpp::util
+} // authpp::util

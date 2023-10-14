@@ -5,9 +5,14 @@
 #include <span>
 #include <vector>
 
+#include "logger.h"
 #include "time_util.h"
 
 namespace authpp {
+
+namespace {
+    Logger log("UsbManager");
+}
 
 UsbManager::UsbManager()
     : context()
@@ -49,14 +54,16 @@ std::vector<UsbDevice> UsbManager::poll(std::function<bool(libusb_device_descrip
     return result;
 }
 
-std::vector<UsbDevice> UsbManager::pollUsbDevices(std::function<bool(libusb_device_descriptor)> p, long timeout)
+std::vector<UsbDevice> UsbManager::pollUsbDevices(
+    const std::function<bool(libusb_device_descriptor)>& p, long timeoutMs)
 {
     std::vector<UsbDevice> usbDevices;
-    auto s = TimeUtil::getTime();
+    auto ms = TimeUtil::getCurrentMilliSeconds();
     do {
+        log.v("Polling USB devices (time: {}ms)", ms);
         usbDevices = poll(p);
-    } while (usbDevices.empty() && (s + timeout > TimeUtil::getTime()));
+    } while (usbDevices.empty() && (ms + timeoutMs > TimeUtil::getCurrentMilliSeconds()));
     return usbDevices;
 }
 
-} // namespace authpp
+} // authpp
