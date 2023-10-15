@@ -1,14 +1,21 @@
 label.account_code {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: bold;
     font-family: monospace;
 }
 
 label.account_issuer {
-    font-size: 10px;
+    font-size: 12px;
 }
 
 label.account_name {
     font-size: 14px;
     font-weight: bold;
+}
+
+.account {
+    border-radius: 12px;
+    padding: 8px;
+    background-color: rgba(208, 208, 208, 0.5);
+    color: black;
 }
