@@ -158,7 +158,7 @@ ByteBuffer CcidConnection::transcieve(const Message& message, int* transferred) 
             throw std::runtime_error(
                 fmt::format("Failed to receive data: {} {}", libusb_error_name(err), err));
         };
-        needMoreTime = buffer.get<uint8_t>(7) && 0x80 == 0x80;
+        needMoreTime = (buffer.get<uint8_t>(7) & 0x80) == 0x80;
     } while (needMoreTime);
 
     buffer.setSize(reallyReceived);
