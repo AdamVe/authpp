@@ -44,13 +44,16 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
         list_item->set_data("name", builder->get_widget<Gtk::Label>("name"));
         list_item->set_data("issuer", builder->get_widget<Gtk::Label>("issuer"));
         list_item->set_data("code", builder->get_widget<Gtk::Label>("code"));
-        builder->get_widget<Gtk::Box>("toprow")->append(*Gtk::make_managed<TimerWidget>());
+        auto timer = Gtk::make_managed<TimerWidget>();
+        builder->get_widget<Gtk::Box>("toprow")->append(*timer);
+        list_item->set_data("timer", timer);
         list_item->set_child(*accountWidget);
     });
     factory->signal_bind().connect([](const Glib::RefPtr<Gtk::ListItem>& list_item) {
         auto* const name = static_cast<Gtk::Label*>(list_item->get_data("name"));
         auto* const issuer = static_cast<Gtk::Label*>(list_item->get_data("issuer"));
         auto* const code = static_cast<Gtk::Label*>(list_item->get_data("code"));
+
 
         auto holder = std::dynamic_pointer_cast<AccountHolder>(list_item->get_item());
 
@@ -62,6 +65,14 @@ AppWindow::AppWindow(BaseObjectType* baseObjectType, const Glib::RefPtr<Gtk::Bui
         name->set_text(nameValue);
         issuer->set_text(issuerValue);
         code->set_text(holder->account.code.value);
+
+        auto* const timer = static_cast<TimerWidget*>(list_item->get_data("timer"));
+        if (holder->account.code.type == authpp::oath::Type::TOTP) {
+            timer->setTimeStep(holder->account.timeStep);
+            timer->set_visible(true);
+        } else {
+            timer->set_visible(false);
+        }
     });
 
     refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::requestAccounts));
