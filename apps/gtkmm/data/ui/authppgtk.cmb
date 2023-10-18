@@ -35,7 +35,8 @@
 	(2,9,"GtkBox",None,7,None,None,None,1,None),
 	(2,11,"GtkLabel","code",9,None,None,None,1,None),
 	(2,13,"GtkLabel","issuer",9,None,None,None,None,None),
-	(2,14,"GtkLabel","name",7,None,None,None,None,None)
+	(2,15,"GtkBox","toprow",7,None,None,None,None,None),
+	(2,16,"GtkLabel","name",15,None,None,None,None,None)
   </object>
   <object_property>
 	(1,1,"GtkWindow","default-height","600",None,None,None,None,None,None,None,None,None),
@@ -96,21 +97,22 @@
 	(2,13,"GtkWidget","valign","baseline",None,None,None,None,None,None,None,None,None),
 	(2,13,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
 	(2,13,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","ellipsize","end",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","label","my_account@issuer.online.com",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","natural-wrap-mode","none",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkWidget","css-classes","account_name",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
-	(2,14,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None)
+	(2,16,"GtkLabel","ellipsize","end",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkLabel","label","my_account@issuer.online.com",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkLabel","natural-wrap-mode","none",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkLabel","single-line-mode","True",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkLabel","yalign","0.0",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkWidget","css-classes","account_name",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(2,16,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None)
   </object_property>
   <object_data>
 	(2,13,"GtkWidget",1,1,None,None,None,None,None,None),
-	(2,14,"GtkWidget",1,1,None,None,None,None,None,None)
+	(2,16,"GtkWidget",1,1,None,None,None,None,None,None)
   </object_data>
 </cambalache-project>

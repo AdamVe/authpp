@@ -33,6 +33,7 @@ set(SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/src/application.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/app_window.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/timer.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/timer_widget.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/worker.cpp"
         "${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}"
 )
@@ -42,6 +43,7 @@ set(HEADER_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/include/application.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/app_window.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/timer.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/timer_widget.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/version.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/worker.h"
 )

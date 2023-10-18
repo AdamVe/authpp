@@ -2,6 +2,7 @@
 
 #include "account_holder.h"
 #include "timer.h"
+#include "timer_widget.h"
 #include "worker.h"
 
 #include <giomm/liststore.h>
@@ -46,6 +47,7 @@ private:
     Glib::Dispatcher signalAccountsChange;
     Worker worker;
     std::thread* workerThread;
+    TimerWidget timerWidget;
 };
 
 } // authppgtk

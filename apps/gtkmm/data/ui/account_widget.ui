@@ -13,20 +13,25 @@
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkLabel" id="name">
-            <property name="css-classes">account_name</property>
-            <property name="ellipsize">end</property>
-            <property name="halign">start</property>
-            <property name="hexpand-set">True</property>
-            <property name="justify">fill</property>
-            <property name="label">my_account@issuer.online.com</property>
-            <property name="natural-wrap-mode">none</property>
-            <property name="single-line-mode">True</property>
-            <property name="vexpand">True</property>
-            <property name="vexpand-set">True</property>
-            <property name="xalign">0.0</property>
-            <property name="yalign">0.0</property>
-            <style/>
+          <object class="GtkBox" id="toprow">
+            <child>
+              <object class="GtkLabel" id="name">
+                <property name="css-classes">account_name</property>
+                <property name="ellipsize">end</property>
+                <property name="halign">start</property>
+                <property name="hexpand">True</property>
+                <property name="hexpand-set">True</property>
+                <property name="justify">fill</property>
+                <property name="label">my_account@issuer.online.com</property>
+                <property name="natural-wrap-mode">none</property>
+                <property name="single-line-mode">True</property>
+                <property name="vexpand">True</property>
+                <property name="vexpand-set">True</property>
+                <property name="xalign">0.0</property>
+                <property name="yalign">0.0</property>
+                <style/>
+              </object>
+            </child>
           </object>
         </child>
         <child>
